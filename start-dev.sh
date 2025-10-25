@@ -46,7 +46,7 @@ echo -e "${YELLOW}Starting servers...${NC}"
 echo ""
 
 # Start Backend in background
-echo -e "${GREEN}🔧 Starting Backend Server on ${import.meta.env.VITE_API_URL}${NC}"
+echo -e "${GREEN}🔧 Starting Backend Server on http://localhost:5000${NC}"
 cd Backend
 npm start &
 BACKEND_PID=$!
@@ -66,7 +66,7 @@ echo ""
 echo -e "${GREEN}✅ Both servers are starting!${NC}"
 echo ""
 echo -e "${YELLOW}📍 Frontend: http://localhost:5173${NC}"
-echo -e "${YELLOW}📍 Backend: ${import.meta.env.VITE_API_URL}${NC}"
+echo -e "${YELLOW}📍 Backend: http://localhost:5000${NC}"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop both servers${NC}"
 echo ""

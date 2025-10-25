@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     const fetchAndUpdateCurrentUser = async () => {
         try {
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.get('${import.meta.env.VITE_API_URL}/api/user/single',
+            const res = await axios.get('${import.meta.env.VITE_API_URL}api/user/single',
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     // SIGNUP FUNCTION
     const signup = async (data, reset, setIsLoginActive) => {
         try {
-            const res = await axios.post("${import.meta.env.VITE_API_URL}/api/auth/registerr", data);
+            const res = await axios.post("${import.meta.env.VITE_API_URL}api/auth/registerr", data);
             toast.success(res.data.msg);
             reset();
             setIsLoginActive(true); // Switch to login form after successful signup
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     // LOGIN FUNCTION
     const login = async (data, reset) => {
         try {
-            const res = await axios.post("${import.meta.env.VITE_API_URL}/api/auth/login", data);
+            const res = await axios.post("${import.meta.env.VITE_API_URL}api/auth/login", data);
             toast.success(res.data.msg);
             localStorage.setItem("jwtToken", res.data.token);
             setCurrentUser(res.data.user);

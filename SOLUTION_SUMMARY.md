@@ -22,14 +22,14 @@ Your ShopVerse application had **3 main issues**, all of which have been **ident
 
 **Error Messages:**
 ```
-GET ${import.meta.env.VITE_API_URL}/api/user/single net::ERR_CONNECTION_REFUSED
-GET ${import.meta.env.VITE_API_URL}/api/cart/get net::ERR_CONNECTION_REFUSED
-GET ${import.meta.env.VITE_API_URL}/api/products/get-products net::ERR_CONNECTION_REFUSED
-POST ${import.meta.env.VITE_API_URL}/api/auth/login net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}api/user/single net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}api/cart/get net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}api/products/get-products net::ERR_CONNECTION_REFUSED
+POST ${import.meta.env.VITE_API_URL}api/auth/login net::ERR_CONNECTION_REFUSED
 ```
 
 **Root Cause:**
-The backend Express server (server.js) was never started. Frontend was trying to connect to `${import.meta.env.VITE_API_URL}` but nothing was listening.
+The backend Express server (server.js) was never started. Frontend was trying to connect to `http://localhost:5000` but nothing was listening.
 
 **Solution:**
 ```bash
@@ -143,7 +143,7 @@ http://localhost:5173
 
 After starting both servers, verify:
 
-- [ ] Backend running: `Server is running on ${import.meta.env.VITE_API_URL}`
+- [ ] Backend running: `Server is running on http://localhost:5000`
 - [ ] Frontend running: `VITE v6.3.5 ready in XXX ms`
 - [ ] Browser shows: http://localhost:5173
 - [ ] Products visible on home page
@@ -221,7 +221,7 @@ error.response?.data?.msg
 ```
 Browser (http://localhost:5173)
     ↓ HTTP Requests
-Express Backend (${import.meta.env.VITE_API_URL})
+Express Backend (http://localhost:5000)
     ↓ Database Queries
 MongoDB Atlas (Cloud)
 ```
@@ -405,7 +405,7 @@ http://localhost:5173
 ```
 
 ### Check Status
-- Backend: ${import.meta.env.VITE_API_URL}
+- Backend: http://localhost:5000
 - Frontend: http://localhost:5173
 - MongoDB: Cloud (configured)
 

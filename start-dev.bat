@@ -42,7 +42,7 @@ echo Starting servers...
 echo.
 
 REM Start Backend in new window
-echo 🔧 Starting Backend Server on ${import.meta.env.VITE_API_URL}
+echo 🔧 Starting Backend Server on http://localhost:5000
 start "ShopVerse Backend" cmd /k "cd Backend && npm start"
 
 REM Wait a moment for backend to start
@@ -56,7 +56,7 @@ echo.
 echo ✅ Both servers are starting!
 echo.
 echo 📍 Frontend: http://localhost:5173
-echo 📍 Backend: ${import.meta.env.VITE_API_URL}
+echo 📍 Backend: http://localhost:5000
 echo.
 echo Close the command windows to stop the servers
 echo.

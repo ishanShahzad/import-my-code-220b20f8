@@ -18,7 +18,7 @@
 ```javascript
 // Clear cart after successful order
 try {
-  await axios.delete('${import.meta.env.VITE_API_URL}/api/cart/clear', {
+  await axios.delete('${import.meta.env.VITE_API_URL}api/cart/clear', {
     headers: { Authorization: `Bearer ${token}` }
   });
   fetchCart(); // Refresh cart state

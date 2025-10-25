@@ -114,7 +114,7 @@ function ProductDetailPage() {
         try {
             const token = localStorage.getItem('jwtToken');
             const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/products/add-review/${product._id}`,
+                `${import.meta.env.VITE_API_URL}api/products/add-review/${product._id}`,
                 { rating, comment: commentRef.current.value },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -131,7 +131,7 @@ function ProductDetailPage() {
         setLoading(true);
         try {
             const res = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/products/get-single-product/${id}`
+                `${import.meta.env.VITE_API_URL}api/products/get-single-product/${id}`
             );
             setProduct(res.data.product);
             setMainImg(() => {

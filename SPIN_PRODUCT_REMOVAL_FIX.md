@@ -19,7 +19,7 @@ const handleRemoveCartItem = async (id) => {
   try {
     setQtyUpdateId(id)
     const token = localStorage.getItem('jwtToken')
-    const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/cart/remove/${id}`, {
+    const res = await axios.delete(`${import.meta.env.VITE_API_URL}api/cart/remove/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     setCartItems((prev) => ({ ...prev, cart: res.data.cart, totalCartPrice: res.data.totalCartPrice }))
@@ -38,7 +38,7 @@ const handleRemoveCartItem = async (id) => {
   try {
     setQtyUpdateId(id)
     const token = localStorage.getItem('jwtToken')
-    const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/cart/remove/${id}`, {
+    const res = await axios.delete(`${import.meta.env.VITE_API_URL}api/cart/remove/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     

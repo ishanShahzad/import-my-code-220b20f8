@@ -237,7 +237,7 @@
 
 After reading the documentation and starting the app:
 
-- [ ] Backend running on ${import.meta.env.VITE_API_URL}
+- [ ] Backend running on http://localhost:5000
 - [ ] Frontend running on http://localhost:5173
 - [ ] Can access http://localhost:5173 in browser
 - [ ] Products visible on home page

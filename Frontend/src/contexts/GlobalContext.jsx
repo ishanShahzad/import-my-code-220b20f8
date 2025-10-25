@@ -42,7 +42,7 @@ export const GlobalProvider = ({ children }) => {
 
         try {
             let token = localStorage.getItem('jwtToken')
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/get-wishlist`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/products/get-wishlist`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -64,7 +64,7 @@ export const GlobalProvider = ({ children }) => {
             }
             const token = localStorage.getItem('jwtToken');
             const res = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/products/add-to-wishlist/${id}`,
+                `${import.meta.env.VITE_API_URL}api/products/add-to-wishlist/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success(res.data.msg);
@@ -82,7 +82,7 @@ export const GlobalProvider = ({ children }) => {
             }
             const token = localStorage.getItem('jwtToken');
             const res = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/products/delete-from-wishlist/${id}`,
+                `${import.meta.env.VITE_API_URL}api/products/delete-from-wishlist/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.info(res.data.msg);
@@ -137,7 +137,7 @@ export const GlobalProvider = ({ children }) => {
             }
             
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/add/${id}`, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}api/cart/add/${id}`, {
             },
                 {
                     headers: {
@@ -170,7 +170,7 @@ export const GlobalProvider = ({ children }) => {
         try {
             setIsCartLoading(true)
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/cart/get`,
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/cart/get`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -205,7 +205,7 @@ export const GlobalProvider = ({ children }) => {
             /* Old code - keeping for reference
             setQtyUpdateId(id)
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/cart/qty-inc/${id}`,
+            const res = await axios.patch(`${import.meta.env.VITE_API_URL}api/cart/qty-inc/${id}`,
                 {},
                 {
                     headers: {
@@ -231,7 +231,7 @@ export const GlobalProvider = ({ children }) => {
             setQtyUpdateId(id)
 
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/cart/qty-dec/${id}`,
+            const res = await axios.patch(`${import.meta.env.VITE_API_URL}api/cart/qty-dec/${id}`,
                 {},
                 {
                     headers: {
@@ -254,7 +254,7 @@ export const GlobalProvider = ({ children }) => {
         try {
             setQtyUpdateId(id)
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/cart/remove/${id}`,
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}api/cart/remove/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

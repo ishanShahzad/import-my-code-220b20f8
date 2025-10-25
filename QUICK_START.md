@@ -101,7 +101,7 @@ npm install
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:5173 |
-| Backend | ${import.meta.env.VITE_API_URL} |
+| Backend | http://localhost:5000 |
 | MongoDB | Cloud (configured in .env) |
 
 ---

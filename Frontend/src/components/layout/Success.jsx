@@ -24,7 +24,7 @@ export default function Success() {
 
     const fetchSession = async (sessionId) => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/session/${sessionId}`);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/session/${sessionId}`);
             setSession(res.data?.session);
         } catch (error) {
             console.error(error);

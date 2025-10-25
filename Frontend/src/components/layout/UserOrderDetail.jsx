@@ -62,7 +62,7 @@ const OrderDetail = () => {
         const token = localStorage.getItem("jwtToken");
         try {
             const res = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/order/detail/${id}`,
+                `${import.meta.env.VITE_API_URL}api/order/detail/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -92,7 +92,7 @@ const OrderDetail = () => {
         try {
             const token = localStorage.getItem("jwtToken");
             const res = await axios.patch(
-                `${import.meta.env.VITE_API_URL}/api/order/update-status/${order?._id}`,
+                `${import.meta.env.VITE_API_URL}api/order/update-status/${order?._id}`,
                 {
                     newStatus: newStatus,
                 },
@@ -119,7 +119,7 @@ const OrderDetail = () => {
         try {
             const token = localStorage.getItem("jwtToken");
             const res = await axios.patch(
-                `${import.meta.env.VITE_API_URL}/api/order/cancel/${id}`,
+                `${import.meta.env.VITE_API_URL}api/order/cancel/${id}`,
                 {},
                 {
                     headers: {

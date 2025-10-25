@@ -23,7 +23,7 @@ const OrderManagement = () => {
             const query = serializeFilters()
             console.log(query);
 
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order/get?${query}`,
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/order/get?${query}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

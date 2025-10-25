@@ -10,6 +10,9 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 4173,
-    allowedHosts: ['genz-winners.up.railway.app'], // ✅ Railway domain allowed
+    allowedHosts: [
+      'genz-winners.up.railway.app',
+      '*.up.railway.app'
+    ],
   }
 })

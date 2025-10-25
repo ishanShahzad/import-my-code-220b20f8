@@ -15,8 +15,16 @@ export const AuthProvider = ({ children }) => {
 
     const [currentUser, setCurrentUser] = useState(() => {
         let user = localStorage.getItem('currentUser')
-        if (user) return JSON.parse(user)
-        else return null
+        if (user && user !== 'undefined' && user !== 'null') {
+            try {
+                return JSON.parse(user)
+            } catch (error) {
+                console.error('Error parsing currentUser:', error);
+                localStorage.removeItem('currentUser');
+                return null;
+            }
+        }
+        return null;
     });
 
     const navigate = useNavigate()
@@ -24,6 +32,10 @@ export const AuthProvider = ({ children }) => {
     const fetchAndUpdateCurrentUser = async () => {
         try {
             const token = localStorage.getItem('jwtToken')
+            if (!token) {
+                // No token, user not logged in - this is normal
+                return;
+            }
             const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/single`,
                 {
                     headers: {
@@ -33,7 +45,10 @@ export const AuthProvider = ({ children }) => {
             )
             setCurrentUser(res.data?.user)
         } catch (error) {
-            console.error(error);
+            // Only log error if it's not a 403 (unauthorized)
+            if (error.response?.status !== 403) {
+                console.error(error);
+            }
         }
     }
 

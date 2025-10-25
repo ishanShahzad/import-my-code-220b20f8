@@ -170,6 +170,11 @@ export const GlobalProvider = ({ children }) => {
         try {
             setIsCartLoading(true)
             const token = localStorage.getItem('jwtToken')
+            if (!token) {
+                // No token, user not logged in - this is normal
+                setIsCartLoading(false)
+                return;
+            }
             const res = await axios.get(`${import.meta.env.VITE_API_URL}api/cart/get`,
                 {
                     headers: {
@@ -180,8 +185,11 @@ export const GlobalProvider = ({ children }) => {
             // toast.success(res.data.msg)
             setCartItems((prev) => ({ ...prev, cart: res.data.cart, totalCartPrice: res.data.totalCartPrice }))
         } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.msg || 'Failed to fetch cart')
+            // Only log error if it's not a 403 (unauthorized)
+            if (error.response?.status !== 403) {
+                console.error(error);
+                toast.error(error.response?.data?.msg || 'Failed to fetch cart')
+            }
         }
         finally {
             setIsCartLoading(false)

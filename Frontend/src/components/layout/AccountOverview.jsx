@@ -67,7 +67,7 @@ const AccountOverview = () => {
     const fetchUser = async () => {
         try {
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.get('http://localhost:5000/api/user/single',
+            const res = await axios.get('${import.meta.env.VITE_API_URL}/api/user/single',
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -108,7 +108,7 @@ const AccountOverview = () => {
             // const query = serializeFilters()
             // console.log(query);
 
-            const res = await axios.get(`http://localhost:5000/api/order/user-orders`,
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order/user-orders`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

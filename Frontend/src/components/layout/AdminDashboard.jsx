@@ -73,7 +73,7 @@ const AdminDashboard = () => {
 
     const fetchFilters = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/products/get-filters')
+            const res = await axios.get('${import.meta.env.VITE_API_URL}/api/products/get-filters')
             setCategories(res.data.categories)
         } catch (error) {
             console.error(error)
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
             const query = serializeFilters()
             // const query = ''
             // navigate(`${location.pathname}?${query}`)
-            const res = await axios.get(`http://localhost:5000/api/products/get-products?${query}`)
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/get-products?${query}`)
             setProducts(res.data.products)
         } catch (err) {
             console.log(err)
@@ -147,7 +147,7 @@ const AdminDashboard = () => {
             // Update existing product
             try {
                 const token = localStorage.getItem('jwtToken')
-                const res = await axios.put(`http://localhost:5000/api/products/edit/${editingProduct._id}`,
+                const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/products/edit/${editingProduct._id}`,
                     {
                         product: editingProduct
                     },
@@ -168,7 +168,7 @@ const AdminDashboard = () => {
         } else {
             try {
                 const token = localStorage.getItem('jwtToken')
-                const res = await axios.post(`http://localhost:5000/api/products/add`,
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/products/add`,
                     {
                         product: editingProduct
                     },
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
 
         try {
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.delete(`http://localhost:5000/api/products/delete/${id}`,
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/products/delete/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -220,7 +220,7 @@ const AdminDashboard = () => {
             const query = serializeFilters()
             // console.log(query);
 
-            const res = await axios.get(`http://localhost:5000/api/order/get?${query}`,
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order/get?${query}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

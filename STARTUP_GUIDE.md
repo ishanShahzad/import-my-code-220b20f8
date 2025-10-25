@@ -31,7 +31,7 @@ npm start
 
 **Expected Output:**
 ```
-Server is running on http://localhost:5000
+Server is running on ${import.meta.env.VITE_API_URL}
 ```
 
 ⚠️ **IMPORTANT**: Keep this terminal running. The backend must be active for the frontend to work.
@@ -64,7 +64,7 @@ http://localhost:5173
 
 ### Issue: "Cannot GET /api/..." or "ERR_CONNECTION_REFUSED"
 
-**Solution:** Make sure the backend server is running in Terminal 1. Check that you see "Server is running on http://localhost:5000"
+**Solution:** Make sure the backend server is running in Terminal 1. Check that you see "Server is running on ${import.meta.env.VITE_API_URL}"
 
 ### Issue: Frontend shows blank page or errors
 
@@ -218,14 +218,14 @@ Use tools like:
 
 Example:
 ```bash
-curl -X GET http://localhost:5000/api/products/get-products
+curl -X GET ${import.meta.env.VITE_API_URL}/api/products/get-products
 ```
 
 ## ✅ Verification Checklist
 
 After starting both servers, verify:
 
-- [ ] Backend running on http://localhost:5000
+- [ ] Backend running on ${import.meta.env.VITE_API_URL}
 - [ ] Frontend running on http://localhost:5173
 - [ ] Can access home page without errors
 - [ ] Can see products loading

@@ -10,7 +10,7 @@
 ## Test 1: Apply 20% Discount to Multiple Products
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -31,7 +31,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ## Test 2: Apply $10 Fixed Discount
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -52,7 +52,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ## Test 3: Increase Prices by 15%
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-price-update \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-price-update \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -73,7 +73,7 @@ curl -X POST http://localhost:5000/api/products/bulk-price-update \
 ## Test 4: Decrease Prices by 10%
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-price-update \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-price-update \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -86,7 +86,7 @@ curl -X POST http://localhost:5000/api/products/bulk-price-update \
 ## Test 5: Add $5 to All Prices
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-price-update \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-price-update \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -99,7 +99,7 @@ curl -X POST http://localhost:5000/api/products/bulk-price-update \
 ## Test 6: Subtract $3 from All Prices
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-price-update \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-price-update \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -112,7 +112,7 @@ curl -X POST http://localhost:5000/api/products/bulk-price-update \
 ## Test 7: Set All Products to $99.99
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-price-update \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-price-update \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -125,7 +125,7 @@ curl -X POST http://localhost:5000/api/products/bulk-price-update \
 ## Test 8: Remove All Discounts
 
 ```bash
-curl -X POST http://localhost:5000/api/products/remove-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/remove-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -146,7 +146,7 @@ curl -X POST http://localhost:5000/api/products/remove-discount \
 ### Test 9: Missing JWT Token (401 Unauthorized)
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -d '{
     "productIds": ["product_id_1"],
@@ -165,7 +165,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ### Test 10: Non-Admin User (403 Forbidden)
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer USER_JWT_TOKEN" \
   -d '{
@@ -185,7 +185,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ### Test 11: Invalid Discount Type
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -205,7 +205,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ### Test 12: Empty Product IDs
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -225,7 +225,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ### Test 13: Negative Discount Value
 
 ```bash
-curl -X POST http://localhost:5000/api/products/bulk-discount \
+curl -X POST ${import.meta.env.VITE_API_URL}/api/products/bulk-discount \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -247,7 +247,7 @@ curl -X POST http://localhost:5000/api/products/bulk-discount \
 ### Setup:
 1. Create a new collection called "Bulk Operations"
 2. Add environment variables:
-   - `baseUrl`: `http://localhost:5000`
+   - `baseUrl`: `${import.meta.env.VITE_API_URL}`
    - `adminToken`: Your admin JWT token
 
 ### Request 1: Bulk Discount

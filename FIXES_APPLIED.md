@@ -12,10 +12,10 @@ All issues have been identified and fixed. The main problem was that the **backe
 
 **Error Messages:**
 ```
-GET http://localhost:5000/api/user/single net::ERR_CONNECTION_REFUSED
-GET http://localhost:5000/api/cart/get net::ERR_CONNECTION_REFUSED
-GET http://localhost:5000/api/products/get-products net::ERR_CONNECTION_REFUSED
-POST http://localhost:5000/api/auth/login net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/user/single net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/cart/get net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/products/get-products net::ERR_CONNECTION_REFUSED
+POST ${import.meta.env.VITE_API_URL}/api/auth/login net::ERR_CONNECTION_REFUSED
 ```
 
 **Root Cause:** Backend server (server.js) was not started
@@ -139,7 +139,7 @@ cd /Volumes/Data\ 1/Shopp/Backend
 npm start
 
 # Expected output:
-# Server is running on http://localhost:5000
+# Server is running on ${import.meta.env.VITE_API_URL}
 ```
 
 ### Verify Frontend is Running

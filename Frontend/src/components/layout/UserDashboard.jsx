@@ -109,7 +109,7 @@ const UserDashboard = () => {
     //     try {
     //         const query = serializeFilters()
     //         // console.log(query);
-    //         const res = await axios.get(`http://localhost:5000/api/order/get?${query}`,
+    //         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order/get?${query}`,
     //             {
     //                 headers: {
     //                     Authorization: `Bearer ${token}`

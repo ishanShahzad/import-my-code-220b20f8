@@ -15,7 +15,7 @@ npm start
 
 Expected output:
 ```
-Server is running on http://localhost:5000
+Server is running on ${import.meta.env.VITE_API_URL}
 ```
 
 ---
@@ -24,7 +24,7 @@ Server is running on http://localhost:5000
 
 ### 1. Network Errors
 
-#### Error: `GET http://localhost:5000/api/user/single net::ERR_CONNECTION_REFUSED`
+#### Error: `GET ${import.meta.env.VITE_API_URL}/api/user/single net::ERR_CONNECTION_REFUSED`
 
 **What it means:** Frontend cannot connect to backend
 
@@ -83,7 +83,7 @@ localStorage.getItem('jwtToken')
 
 ---
 
-#### Error: `POST http://localhost:5000/api/auth/login net::ERR_CONNECTION_REFUSED`
+#### Error: `POST ${import.meta.env.VITE_API_URL}/api/auth/login net::ERR_CONNECTION_REFUSED`
 
 **What it means:** Backend not running when trying to login
 
@@ -93,7 +93,7 @@ localStorage.getItem('jwtToken')
 
 ### 3. Product Loading Errors
 
-#### Error: `GET http://localhost:5000/api/products/get-products net::ERR_CONNECTION_REFUSED`
+#### Error: `GET ${import.meta.env.VITE_API_URL}/api/products/get-products net::ERR_CONNECTION_REFUSED`
 
 **What it means:** Backend not running when loading products
 
@@ -120,7 +120,7 @@ localStorage.getItem('jwtToken')
 # Should see: "Connected to MongoDB"
 
 # Test API directly
-curl http://localhost:5000/api/products/get-products
+curl ${import.meta.env.VITE_API_URL}/api/products/get-products
 ```
 
 ---
@@ -334,21 +334,21 @@ Look for these messages in Terminal 1:
 
 ```
 ✅ Connected to MongoDB
-Server is running on http://localhost:5000
+Server is running on ${import.meta.env.VITE_API_URL}
 ```
 
 ### Test API Endpoints
 
 ```bash
 # Get all products
-curl http://localhost:5000/api/products/get-products
+curl ${import.meta.env.VITE_API_URL}/api/products/get-products
 
 # Get filters
-curl http://localhost:5000/api/products/get-filters
+curl ${import.meta.env.VITE_API_URL}/api/products/get-filters
 
 # Get user (requires token)
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  http://localhost:5000/api/user/single
+  ${import.meta.env.VITE_API_URL}/api/user/single
 ```
 
 ---
@@ -449,7 +449,7 @@ netstat -ano | findstr :5173
 ## Still Stuck?
 
 1. **Verify both servers are running**
-   - Backend: `Server is running on http://localhost:5000`
+   - Backend: `Server is running on ${import.meta.env.VITE_API_URL}`
    - Frontend: `Local: http://localhost:5173/`
 
 2. **Check browser console** (F12)

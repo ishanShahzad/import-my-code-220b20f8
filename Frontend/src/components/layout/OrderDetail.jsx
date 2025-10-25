@@ -55,7 +55,7 @@ const OrderDetail = () => {
 
         const token = localStorage.getItem('jwtToken')
         try {
-            const res = await axios.get(`http://localhost:5000/api/order/detail/${id}`,
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order/detail/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -82,7 +82,7 @@ const OrderDetail = () => {
     const handleStatusUpdate = async () => {
         try {
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.patch(`http://localhost:5000/api/order/update-status/${order?._id}`,
+            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/order/update-status/${order?._id}`,
                 {
                     newStatus: newStatus
                 },
@@ -106,7 +106,7 @@ const OrderDetail = () => {
     const handleCancelOrder = async () => {
         try {
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.patch(`http://localhost:5000/api/order/cancel/${id}`,
+            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/order/cancel/${id}`,
                 {
 
                 },

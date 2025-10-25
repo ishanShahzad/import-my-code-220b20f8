@@ -61,7 +61,7 @@ const UserManagement = () => {
       setLoading(true)
       const token = localStorage.getItem('jwtToken')
       const query = serializeFilters()
-      const res = await axios.get(`http://localhost:5000/api/user/get?${query}`,
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/get?${query}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -82,7 +82,7 @@ const UserManagement = () => {
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('jwtToken')
-      const res = await axios.get(`http://localhost:5000/api/user/get`,
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/get`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -126,7 +126,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem('jwtToken')
-      const res = await axios.patch(`http://localhost:5000/api/user/block-toggle/${selectedUser._id}`,
+      const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/user/block-toggle/${selectedUser._id}`,
         {
 
         },
@@ -154,7 +154,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem('jwtToken')
-      const res = await axios.delete(`http://localhost:5000/api/user/delete/${selectedUser._id}`,
+      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/user/delete/${selectedUser._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -177,7 +177,7 @@ const UserManagement = () => {
   const confirmChangeRole = async () => {
     try {
       const token = localStorage.getItem('jwtToken')
-      const res = await axios.patch(`http://localhost:5000/api/user/admin-toggle/${selectedUser._id}`,
+      const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/user/admin-toggle/${selectedUser._id}`,
         {
 
         },

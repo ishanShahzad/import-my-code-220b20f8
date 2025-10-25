@@ -4,19 +4,19 @@
 
 ### 1. **Login Page Errors**
 ```
-GET http://localhost:5000/api/user/single net::ERR_CONNECTION_REFUSED
-POST http://localhost:5000/api/auth/login net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/user/single net::ERR_CONNECTION_REFUSED
+POST ${import.meta.env.VITE_API_URL}/api/auth/login net::ERR_CONNECTION_REFUSED
 ```
 
 ### 2. **Home Page Not Loading**
 ```
-GET http://localhost:5000/api/cart/get net::ERR_CONNECTION_REFUSED
-GET http://localhost:5000/api/products/get-products net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/cart/get net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/products/get-products net::ERR_CONNECTION_REFUSED
 ```
 
 ### 3. **Products Not Fetching**
 ```
-GET http://localhost:5000/api/products/get-filters net::ERR_CONNECTION_REFUSED
+GET ${import.meta.env.VITE_API_URL}/api/products/get-filters net::ERR_CONNECTION_REFUSED
 ```
 
 ### 4. **Crash When Fetching Cart**
@@ -31,7 +31,7 @@ at fetchCart (GlobalContext.jsx:158:40)
 
 **The backend server was not running!**
 
-All these errors are because the frontend was trying to connect to `http://localhost:5000` but the backend wasn't listening.
+All these errors are because the frontend was trying to connect to `${import.meta.env.VITE_API_URL}` but the backend wasn't listening.
 
 ---
 
@@ -83,7 +83,7 @@ npm start
 
 Expected output:
 ```
-Server is running on http://localhost:5000
+Server is running on ${import.meta.env.VITE_API_URL}
 ```
 
 **Terminal 2 - Frontend:**
@@ -211,7 +211,7 @@ http://localhost:5173
                      ↓
 ┌──────────────────────────────────────────────��──────┐
 │                  Backend Server                     │
-│              http://localhost:5000                  │
+│              ${import.meta.env.VITE_API_URL}                  │
 │              (Express + Node.js)                    │
 └────────────────────┬────────────────────────────────┘
                      │ Database Queries

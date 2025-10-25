@@ -107,7 +107,7 @@ Backend:
   Status: ✅ Ready to start
   Port: 5000
   Framework: Express.js
-  URL: http://localhost:5000
+  URL: ${import.meta.env.VITE_API_URL}
 
 Database:
   Status: ✅ Connected
@@ -121,7 +121,7 @@ Database:
 
 After starting both servers, verify:
 
-☐ Backend running: "Server is running on http://localhost:5000"
+☐ Backend running: "Server is running on ${import.meta.env.VITE_API_URL}"
 ☐ Frontend running: "VITE v6.3.5 ready in XXX ms"
 ☐ Browser shows: http://localhost:5173
 ☐ Products visible on home page

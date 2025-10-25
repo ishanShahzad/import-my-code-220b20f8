@@ -55,7 +55,7 @@ function Products() {
     try {
       const query = serializeFilters()
       navigate(`${location.pathname}?${query}`)
-      const res = await axios.get(`http://localhost:5000/api/products/get-products?${query}`)
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/get-products?${query}`)
       setProducts(res.data.products)
     } catch (err) {
       console.log(err)
@@ -166,7 +166,7 @@ function Products() {
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/products/get-filters')
+        const res = await axios.get('${import.meta.env.VITE_API_URL}/api/products/get-filters')
         setCategories(res.data.categories)
         setBrands(res.data.brands)
       } catch (error) {

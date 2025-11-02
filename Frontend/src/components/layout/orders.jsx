@@ -153,32 +153,32 @@ const OrderList = ({
             className="w-full bg-white rounded-lg shadow"
         >
             {/* Header */}
-            <div className="p-6 border-b border-gray-200">
-                <h1 className="text-2xl font-bold text-gray-800">Order Management</h1>
-                <p className="text-gray-600">View and manage all customer orders</p>
+            <div className="p-4 sm:p-6 border-b border-gray-200">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Order Management</h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">View and manage all customer orders</p>
             </div>
 
             {/* Filters */}
-            <div className="p-6 border-b border-gray-200 bg-gray-50">
-                <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+            <div className="p-4 sm:p-6 border-b border-gray-200 bg-gray-50">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {/* Search */}
-                    <div className="relative flex-1 min-w-[200px]">
+                    <div className="relative sm:col-span-2 lg:col-span-1">
                         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             type="text"
                             placeholder="Search by ID or name"
                             value={searchTerm}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="pr-9 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="pr-9 py-2 px-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         />
                     </div>
 
                     {/* Status Filter */}
-                    <div className="flex-1 min-w-[150px]">
+                    <div>
                         <select
                             value={statusFilter}
                             onChange={(e) => onStatusFilterChange(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
                             <option value="all">All Statuses</option>
                             <option value="pending">Pending</option>
@@ -190,33 +190,17 @@ const OrderList = ({
                     </div>
 
                     {/* Payment Filter */}
-                    <div className="flex-1 min-w-[150px]">
+                    <div>
                         <select
                             value={paymentFilter}
                             onChange={(e) => onPaymentFilterChange(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         >
                             <option value="all">All Payments</option>
                             <option value="paid">Paid</option>
                             <option value="unpaid">Unpaid</option>
                         </select>
                     </div>
-
-                    {/* Date Range */}
-                    {/* <div className="flex flex-col sm:flex-row gap-2 flex-1">
-                        <input
-                            type="date"
-                            value={dateRange.start}
-                            onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <input
-                            type="date"
-                            value={dateRange.end}
-                            onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div> */}
                 </div>
             </div>
 
@@ -330,7 +314,7 @@ const OrderList = ({
                 }
 
                 {/* Mobile Card View */}
-                <div className="md:hidden space-y-4 p-4">
+                <div className="md:hidden space-y-3 p-3 sm:p-4">
                     {orders.map((order) => (
                         <motion.div
                             key={order._id}
@@ -338,19 +322,19 @@ const OrderList = ({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
-                            className="border rounded-lg p-4 bg-white shadow-sm"
+                            className="border rounded-lg p-3 sm:p-4 bg-white shadow-sm"
                         >
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h2 className="font-semibold text-gray-800">{order.orderId}</h2>
+                            <div className="flex justify-between items-start gap-2">
+                                <div className="min-w-0 flex-1">
+                                    <h2 className="font-semibold text-sm sm:text-base text-gray-800 truncate">{order.orderId}</h2>
                                     {order.spinDiscount?.applied && (
-                                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-[10px] font-semibold rounded-full border border-purple-200">
+                                        <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-[9px] sm:text-[10px] font-semibold rounded-full border border-purple-200">
                                             🎉 Spin Discount
                                         </span>
                                     )}
                                 </div>
                                 <span
-                                    className={`px-2 py-1 text-xs rounded-full ${order.isPaid
+                                    className={`px-2 py-1 text-[10px] sm:text-xs rounded-full whitespace-nowrap flex-shrink-0 ${order.isPaid
                                         ? "bg-green-100 text-green-800"
                                         : "bg-red-100 text-red-800"
                                         }`}
@@ -358,13 +342,13 @@ const OrderList = ({
                                     {order.isPaid ? "Paid" : "Unpaid"}
                                 </span>
                             </div>
-                            <p className="text-gray-600">{order.shippingInfo.fullName}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm sm:text-base text-gray-600 mt-2 truncate">{order.shippingInfo.fullName}</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                 {new Date(order.createdAt).toLocaleDateString()}
                             </p>
-                            <div className="flex justify-between items-center mt-2">
+                            <div className="flex justify-between items-center mt-3 gap-2">
                                 <span
-                                    className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 ${getStatusColor(
+                                    className={`px-2 py-1 text-[10px] sm:text-xs rounded-full flex items-center gap-1 ${getStatusColor(
                                         order.orderStatus
                                     )}`}
                                 >
@@ -374,16 +358,17 @@ const OrderList = ({
                                             order.orderStatus.slice(1)}
                                     </span>
                                 </span>
-                                <span className="text-sm font-medium text-gray-700">
+                                <span className="text-sm sm:text-base font-semibold text-gray-800">
                                     ${order.orderSummary.totalAmount.toLocaleString()}
                                 </span>
                             </div>
-                            <button
-                                onClick={() => onSelectOrder(order)}
-                                className="mt-3 w-full text-blue-600 hover:text-blue-900 text-sm"
-                            >
-                                View Details
-                            </button>
+                            <Link to={`/${currentUser?.role === 'seller' ? 'seller' : 'admin'}-dashboard/order/${order._id}`}>
+                                <button
+                                    className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-medium py-2 rounded-md transition-colors"
+                                >
+                                    View Details
+                                </button>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>

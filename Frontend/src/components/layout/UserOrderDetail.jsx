@@ -157,37 +157,37 @@ const OrderDetail = () => {
         >
             {/* Header */}
             <div className="p-6 mt-6 border-b border-gray-200 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-start gap-3 sm:gap-4 mb-4 mt-12 sm:mt-0">
                     <Link to={"/user-dashboard/orders"}>
-                        <button className="p-2 rounded-lg hover:bg-gray-100">
-                            <ArrowLeft className="w-5 h-5" />
+                        <button className="p-2 rounded-lg hover:bg-gray-100 flex-shrink-0 relative z-10">
+                            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                     </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-800">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">
                             Order {order?.orderId}
                         </h1>
-                        <p className="text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                             Placed on{" "}
                             {new Date(order?.createdAt).toLocaleDateString()}
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <span
-                        className={`px-3 py-1 text-sm rounded-full flex items-center space-x-1 ${getStatusColor(
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full flex items-center gap-1 ${getStatusColor(
                             order?.orderStatus
                         )}`}
                     >
                         {getStatusIcon(order?.orderStatus)}
-                        <span>
+                        <span className="hidden xs:inline">
                             {order?.orderStatus?.charAt(0).toUpperCase() +
                                 order?.orderStatus.slice(1)}
                         </span>
                     </span>
                     <span
-                        className={`px-3 py-1 text-sm rounded-full ${
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
                             order?.isPaid
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
@@ -196,41 +196,41 @@ const OrderDetail = () => {
                         {order?.isPaid ? "Paid" : "Unpaid"}
                     </span>
                     {order?.spinDiscount?.applied && (
-                        <span className="px-3 py-1 text-sm rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold flex items-center gap-1">
-                            🎉 Spin Discount: {order.spinDiscount.label}
+                        <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold flex items-center gap-1">
+                            🎉 <span className="hidden xs:inline">Spin Discount:</span> {order.spinDiscount.label}
                         </span>
                     )}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 p-4 sm:p-6">
                 {/* Customer Information */}
                 <div className="lg:col-span-1">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                        <h2 className="text-lg font-medium text-gray-800 mb-4">
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                        <h2 className="text-base sm:text-lg font-medium text-gray-800 mb-3 sm:mb-4">
                             Customer Information
                         </h2>
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                             <div>
-                                <p className="text-sm text-gray-500">Name</p>
-                                <p className="font-medium">
+                                <p className="text-xs sm:text-sm text-gray-500">Name</p>
+                                <p className="text-sm sm:text-base font-medium break-words">
                                     {order?.shippingInfo.fullName}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Email</p>
-                                <p className="font-medium">
+                                <p className="text-xs sm:text-sm text-gray-500">Email</p>
+                                <p className="text-sm sm:text-base font-medium break-all">
                                     {order?.shippingInfo.email}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">Phone</p>
-                                <p className="font-medium">
+                                <p className="text-xs sm:text-sm text-gray-500">Phone</p>
+                                <p className="text-sm sm:text-base font-medium">
                                     {order?.shippingInfo.phone}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-xs sm:text-sm text-gray-500">
                                     Address
                                 </p>
                                 <p className="font-medium">
@@ -266,7 +266,7 @@ const OrderDetail = () => {
                 {/* Order Items and Summary */}
                 <div className="lg:col-span-2">
                     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <h2 className="text-lg font-medium text-gray-800 p-4 border-b border-gray-200">
+                        <h2 className="text-base sm:text-lg font-medium text-gray-800 p-3 sm:p-4 border-b border-gray-200">
                             Order Items
                         </h2>
                         <div className="divide-y divide-gray-200">
@@ -276,9 +276,9 @@ const OrderDetail = () => {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="p-4 flex items-center"
+                                    className="p-3 sm:p-4 flex items-start gap-3 sm:gap-4"
                                 >
-                                    <div className="flex-shrink-0 h-16 w-16 bg-gray-200 rounded-md overflow-hidden">
+                                    <div className="flex-shrink-0 h-14 w-14 sm:h-16 sm:w-16 bg-gray-200 rounded-md overflow-hidden">
                                         {item.image ? (
                                             <img
                                                 src={item.image}
@@ -287,25 +287,38 @@ const OrderDetail = () => {
                                             />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center text-gray-400">
-                                                <Package className="h-8 w-8" />
+                                                <Package className="h-6 w-6 sm:h-8 sm:w-8" />
                                             </div>
                                         )}
                                     </div>
-                                    <div className="ml-4 flex-1">
-                                        <h3 className="text-md font-medium text-gray-800">
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-sm sm:text-base font-medium text-gray-800 break-words">
                                             {item.name}
                                         </h3>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                             Quantity: {item.quantity}
                                         </p>
                                         {item.hasSpinDiscount && (
-                                            <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs font-semibold rounded-full border border-purple-200">
-                                                🎉 Spin Discount Applied
+                                            <span className="inline-flex items-center gap-1 mt-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-[10px] sm:text-xs font-semibold rounded-full border border-purple-200">
+                                                🎉 Spin Discount
                                             </span>
                                         )}
+                                        <div className="mt-2 sm:hidden">
+                                            <p className="text-sm font-semibold text-gray-800">
+                                                ${item.price.toLocaleString()}
+                                            </p>
+                                            {item.hasSpinDiscount && item.originalPrice && (
+                                                <p className="text-xs text-gray-400 line-through">
+                                                    ${item.originalPrice.toLocaleString()}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Subtotal: ${(item.price * item.quantity).toLocaleString()}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-md font-medium text-gray-800">
+                                    <div className="text-right hidden sm:block flex-shrink-0">
+                                        <p className="text-sm sm:text-base font-medium text-gray-800">
                                             ${item.price.toLocaleString()}
                                         </p>
                                         {item.hasSpinDiscount && item.originalPrice && (
@@ -313,7 +326,7 @@ const OrderDetail = () => {
                                                 ${item.originalPrice.toLocaleString()}
                                             </p>
                                         )}
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                             Subtotal: $
                                             {(
                                                 item.price * item.quantity

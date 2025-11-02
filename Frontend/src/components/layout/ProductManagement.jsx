@@ -66,11 +66,11 @@ const ProductManagement = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className='p-6'
+            className='p-3 sm:p-4 lg:p-6'
         >
-            <div className="flex justify-between items-center mb-6 mt-6">
-                <h2 className="text-2xl font-bold text-gray-800">Product Management</h2>
-                <div className="flex items-center space-x-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Product Management</h2>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     {selectMode && selectedProducts.length > 0 && (
                         <motion.button
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -78,71 +78,73 @@ const ProductManagement = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setIsBulkModalOpen(true)}
-                            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg"
+                            className="flex items-center gap-1.5 sm:gap-2 bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base"
                         >
-                            <Tag size={20} />
-                            <span>Bulk Operations ({selectedProducts.length})</span>
+                            <Tag size={16} className="sm:w-5 sm:h-5" />
+                            <span className="hidden xs:inline">Bulk</span> ({selectedProducts.length})
                         </motion.button>
                     )}
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleToggleSelectMode}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+                        className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base ${
                             selectMode 
                                 ? 'bg-gray-600 text-white' 
                                 : 'bg-purple-600 text-white'
                         }`}
                     >
-                        {selectMode ? <Square size={20} /> : <CheckSquare size={20} />}
-                        <span>{selectMode ? 'Cancel Select' : 'Select Products'}</span>
+                        {selectMode ? <Square size={16} className="sm:w-5 sm:h-5" /> : <CheckSquare size={16} className="sm:w-5 sm:h-5" />}
+                        <span>{selectMode ? 'Cancel' : 'Select'}</span>
                     </motion.button>
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleCreateProduct}
-                        className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
+                        className="flex items-center gap-1.5 sm:gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base"
                     >
-                        <Plus size={20} />
-                        <span>Add Product</span>
+                        <Plus size={16} className="sm:w-5 sm:h-5" />
+                        <span>Add</span>
                     </motion.button>
                 </div>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-                <div className="flex flex-col md:flex-row gap-4">
+            <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 mb-4 sm:mb-6">
+                <div className="flex flex-col gap-3 sm:gap-4">
                     <div className="relative flex-1">
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                         <input
                             type="text"
                             placeholder="Search products..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full pr-10 py-2 px-3 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         />
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Filter size={20} className="text-gray-400" />
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {['all', ...categories].map(category => (
-                                <option key={category} value={category}>
-                                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                                </option>
-                            ))}
-                        </select>
+                    <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-3">
+                        <div className="flex items-center gap-2 flex-1">
+                            <Filter size={18} className="text-gray-400 flex-shrink-0" />
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            >
+                                {['all', ...categories].map(category => (
+                                    <option key={category} value={category}>
+                                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        {selectMode && products.length > 0 && (
+                            <button
+                                onClick={handleSelectAll}
+                                className="px-3 sm:px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm whitespace-nowrap"
+                            >
+                                {selectedProducts.length === products.length ? 'Deselect All' : 'Select All'}
+                            </button>
+                        )}
                     </div>
-                    {selectMode && products.length > 0 && (
-                        <button
-                            onClick={handleSelectAll}
-                            className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                        >
-                            {selectedProducts.length === products.length ? 'Deselect All' : 'Select All'}
-                        </button>
-                    )}
                 </div>
             </div>
 

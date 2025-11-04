@@ -179,9 +179,9 @@ const StorePage = () => {
                             </motion.div>
 
                             {/* Store Details */}
-                            <div className={`flex-1 ${store?.banner ? 'md:ml-40' : ''}`}>
+                            <div className={`flex-1 ${store?.banner ? 'mt-8 md:mt-0 md:ml-40' : ''}`}>
                                 <motion.h1 
-                                    className="text-3xl md:text-4xl font-bold text-gray-900 mb-3"
+                                    className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3"
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 0.4, delay: 0.3 }}

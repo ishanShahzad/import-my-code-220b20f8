@@ -180,13 +180,13 @@ const StoreSettings = () => {
     }
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="p-4 md:p-6 max-w-4xl mx-auto">
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <Store size={32} />
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                    <Store size={28} className="md:w-8 md:h-8" />
                     Store Settings
                 </h1>
-                <p className="text-gray-600 mt-2">
+                <p className="text-sm md:text-base text-gray-600 mt-2">
                     {hasStore ? 'Manage your store configuration' : 'Create your store to establish your brand'}
                 </p>
             </div>
@@ -210,8 +210,8 @@ const StoreSettings = () => {
             )}
 
             {/* Store Form */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+                <div className="space-y-4 md:space-y-6">
                     {/* Store Name */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -267,7 +267,7 @@ const StoreSettings = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Store Logo
                         </label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                             {storeData.logo && (
                                 <img
                                     src={storeData.logo}
@@ -275,36 +275,39 @@ const StoreSettings = () => {
                                     className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                                 />
                             )}
-                            <label className="cursor-pointer">
-                                <div className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-                                    {uploadingLogo ? (
-                                        <>
-                                            <Loader2 className="animate-spin" size={16} />
-                                            Uploading...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Upload size={16} />
-                                            Upload Logo
-                                        </>
-                                    )}
-                                </div>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleLogoUpload}
-                                    className="hidden"
-                                    disabled={uploadingLogo}
-                                />
-                            </label>
-                            {storeData.logo && (
-                                <button
-                                    onClick={() => setStoreData(prev => ({ ...prev, logo: '' }))}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                                >
-                                    <X size={20} />
-                                </button>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <label className="cursor-pointer">
+                                    <div className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2 text-sm">
+                                        {uploadingLogo ? (
+                                            <>
+                                                <Loader2 className="animate-spin" size={16} />
+                                                <span className="hidden sm:inline">Uploading...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Upload size={16} />
+                                                <span className="hidden sm:inline">Upload Logo</span>
+                                                <span className="sm:hidden">Upload</span>
+                                            </>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleLogoUpload}
+                                        className="hidden"
+                                        disabled={uploadingLogo}
+                                    />
+                                </label>
+                                {storeData.logo && (
+                                    <button
+                                        onClick={() => setStoreData(prev => ({ ...prev, logo: '' }))}
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">Max 5MB, square image recommended</p>
                     </div>
@@ -330,16 +333,17 @@ const StoreSettings = () => {
                             </div>
                         )}
                         <label className="cursor-pointer">
-                            <div className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2 w-fit">
+                            <div className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2 w-fit text-sm">
                                 {uploadingBanner ? (
                                     <>
                                         <Loader2 className="animate-spin" size={16} />
-                                        Uploading...
+                                        <span className="hidden sm:inline">Uploading...</span>
                                     </>
                                 ) : (
                                     <>
                                         <Upload size={16} />
-                                        Upload Banner
+                                        <span className="hidden sm:inline">Upload Banner</span>
+                                        <span className="sm:hidden">Upload</span>
                                     </>
                                 )}
                             </div>
@@ -355,13 +359,13 @@ const StoreSettings = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4 pt-4 border-t">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t">
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleSave}
                             disabled={saving || uploadingLogo || uploadingBanner}
-                            className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="flex-1 px-4 sm:px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
                         >
                             {saving ? (
                                 <>
@@ -377,20 +381,22 @@ const StoreSettings = () => {
                             <Link
                                 to={`/store/${storeData.storeSlug}`}
                                 target="_blank"
-                                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                                className="px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                                 <Eye size={20} />
-                                Preview Store
+                                <span className="hidden sm:inline">Preview Store</span>
+                                <span className="sm:hidden">Preview</span>
                             </Link>
                         )}
 
                         {hasStore && (
                             <button
                                 onClick={() => setShowDeleteConfirm(true)}
-                                className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                                className="px-4 sm:px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                                 <Trash2 size={20} />
-                                Delete
+                                <span className="hidden sm:inline">Delete</span>
+                                <span className="sm:hidden">Delete</span>
                             </button>
                         )}
                     </div>

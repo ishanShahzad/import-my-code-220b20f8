@@ -456,17 +456,17 @@ function Products() {
           <div className='flex items-center justify-center'>
             <StoreSearch />
           </div>
-          <div className='flex justify-between items-center'>
-            <div className='flex items-center gap-4'>
-              <h1 className='text-2xl lg:text-3xl font-bold'>Products</h1>
-              <Link to='/stores' className='text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1'>
+          <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4'>
+              <h1 className='text-xl sm:text-2xl lg:text-3xl font-bold'>Products</h1>
+              <Link to='/stores' className='text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1'>
                 <span>Browse Stores</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
             </div>
-            <div className='text-sm text-gray-500'>
+            <div className='text-xs sm:text-sm text-gray-500'>
               {products.length} {products.length === 1 ? 'product' : 'products'} found
             </div>
           </div>

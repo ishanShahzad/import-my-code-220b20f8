@@ -50,7 +50,7 @@ function MainLayoutPage() {
       </AnimatePresence>
       <Navbar />
       <CartDropdown />
-      <div className='mt-[80px]'>
+      <div className='mt-[70px] sm:mt-[80px]'>
         <Outlet />
       </div>
       

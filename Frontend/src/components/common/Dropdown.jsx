@@ -39,17 +39,17 @@ const NavDropdown = () => {
             {/* Trigger */}
             <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+                className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all text-xs sm:text-sm md:text-base"
             >
                 {currentUser?.role === "admin" ? (
-                    <Crown color="gold" />
+                    <Crown color="gold" size={16} className="sm:w-5 sm:h-5" />
                 ) : currentUser?.role === "seller" ? (
-                    <Crown color="#10b981" />
+                    <Crown color="#10b981" size={16} className="sm:w-5 sm:h-5" />
                 ) : (
-                    <User className="text-white" />
+                    <User className="text-white" size={16} className="sm:w-5 sm:h-5" />
                 )}
                 <span className="text-white font-semibold hidden sm:flex">{currentUser?.username}</span>
-                <ChevronDown className="text-white" size={18} />
+                <ChevronDown className="text-white" size={14} className="sm:w-[18px] sm:h-[18px]" />
             </button>
 
             {/* Dropdown Menu */}

@@ -36,46 +36,106 @@ exports.sendOTP = async (req, res) => {
         });
         await otpDoc.save();
 
-        // Send OTP email
+        // Send OTP email with improved deliverability
         const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
-        .content { padding: 40px 30px; }
-        .otp-box { background: #f8f9fa; border: 2px dashed #667eea; border-radius: 10px; padding: 20px; text-align: center; margin: 30px 0; }
-        .otp-code { font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 5px; }
-        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }
-        .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f4f4; 
+            margin: 0; 
+            padding: 0;
+            line-height: 1.6;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 20px auto; 
+            background: white; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center; 
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content { 
+            padding: 30px 20px; 
+            color: #333;
+        }
+        .otp-box { 
+            background: #f8f9fa; 
+            border: 2px solid #667eea; 
+            border-radius: 8px; 
+            padding: 20px; 
+            text-align: center; 
+            margin: 25px 0; 
+        }
+        .otp-code { 
+            font-size: 36px; 
+            font-weight: bold; 
+            color: #667eea; 
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        .footer { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            text-align: center; 
+            font-size: 12px; 
+            color: #666; 
+            border-top: 1px solid #e0e0e0;
+        }
+        .company-info {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Email Verification</h1>
-            <p>genZ Winners</p>
+            <h1>Verify Your Email Address</h1>
         </div>
         <div class="content">
-            <h2>Hello ${username}!</h2>
-            <p>Thank you for signing up with genZ Winners. To complete your registration, please verify your email address using the OTP below:</p>
+            <p>Hello <strong>${username}</strong>,</p>
+            
+            <p>Thank you for creating an account with genZ Winners. To complete your registration and verify your email address, please use the verification code below:</p>
             
             <div class="otp-box">
-                <p style="margin: 0; color: #666; font-size: 14px;">Your OTP Code</p>
+                <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; font-weight: 600;">VERIFICATION CODE</p>
                 <div class="otp-code">${otp}</div>
-                <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">Valid for 10 minutes</p>
+                <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">This code expires in 10 minutes</p>
             </div>
             
-            <p>If you didn't request this verification, please ignore this email.</p>
-            <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                <strong>Security Tip:</strong> Never share your OTP with anyone. genZ Winners will never ask for your OTP.
+            <p style="color: #666; font-size: 14px;">Enter this code on the verification page to activate your account.</p>
+            
+            <p style="color: #999; font-size: 13px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                <strong>Didn't request this?</strong> If you didn't create an account with genZ Winners, you can safely ignore this email.
+            </p>
+            
+            <p style="color: #999; font-size: 12px; margin-top: 15px;">
+                <strong>Security reminder:</strong> Never share this code with anyone. genZ Winners staff will never ask for your verification code.
             </p>
         </div>
         <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} genZ Winners. All rights reserved.</p>
-            <p>This is an automated email. Please do not reply.</p>
+            <p style="margin: 0 0 5px 0;">&copy; ${new Date().getFullYear()} genZ Winners. All rights reserved.</p>
+            <div class="company-info">
+                <p style="margin: 5px 0;">This is an automated message, please do not reply to this email.</p>
+            </div>
         </div>
     </div>
 </body>

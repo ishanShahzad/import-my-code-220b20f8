@@ -30,10 +30,20 @@ exports.sendEmail = async (data) => {
             
             const msg = {
                 to: to,
-                from: process.env.SENDGRID_FROM_EMAIL,
+                from: {
+                    email: process.env.SENDGRID_FROM_EMAIL,
+                    name: 'genZ Winners'
+                },
                 subject: subject,
                 text: text,
-                html: html
+                html: html,
+                // Add categories for tracking
+                categories: ['email-verification', 'otp'],
+                // Disable click tracking to avoid spam filters
+                trackingSettings: {
+                    clickTracking: { enable: false },
+                    openTracking: { enable: false }
+                }
             };
 
             const response = await mailConfig.services.sendgrid.send(msg);
@@ -48,16 +58,19 @@ exports.sendEmail = async (data) => {
         } 
         else if (serviceToUse === 'resend') {
             // Use Resend HTTP API
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
             console.log('📧 Sending email via Resend to:', to);
+            console.log('📧 Resend from email:', fromEmail);
             
             const response = await mailConfig.services.resend.emails.send({
-                from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+                from: `genZ Winners <${fromEmail}>`,
                 to: to,
                 subject: subject,
                 html: html
             });
             
             console.log('✅ Email sent successfully via Resend');
+            console.log('📧 Resend email ID:', response.id);
             
             return {
                 success: true,

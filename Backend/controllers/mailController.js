@@ -1,9 +1,9 @@
-// Import the configured email service (SendGrid API or Gmail SMTP)
+// Import the configured email services (SendGrid, Resend, Gmail)
 const mailConfig = require("../config/mail");
 
 /**
- * Send an email using SendGrid API or Gmail SMTP
- * Automatically uses SendGrid (production) or Gmail (local development)
+ * Send an email using available services (SendGrid, Resend, or Gmail)
+ * Automatically alternates between SendGrid and Resend for maximum free quota
  * 
  * Expected data:
  * {
@@ -16,10 +16,17 @@ const mailConfig = require("../config/mail");
 exports.sendEmail = async (data) => {
     const { to, subject, text, html } = data;
 
+    // Get the next service to use (round-robin between SendGrid and Resend)
+    const serviceToUse = mailConfig.getNextService();
+
+    if (!serviceToUse) {
+        throw new Error('No email service configured. Please set up SendGrid, Resend, or Gmail.');
+    }
+
     try {
-        if (mailConfig.useSendGrid) {
-            // Use SendGrid HTTP API (production)
-            console.log('Sending email via SendGrid API to:', to);
+        if (serviceToUse === 'sendgrid') {
+            // Use SendGrid HTTP API
+            console.log('📧 Sending email via SendGrid to:', to);
             
             const msg = {
                 to: to,
@@ -29,17 +36,38 @@ exports.sendEmail = async (data) => {
                 html: html
             };
 
-            const response = await mailConfig.sendgrid.send(msg);
+            const response = await mailConfig.services.sendgrid.send(msg);
             
-            console.log('✅ Email sent successfully via SendGrid to:', to);
+            console.log('✅ Email sent successfully via SendGrid');
             
             return {
                 success: true,
+                service: 'sendgrid',
                 messageId: response[0].headers['x-message-id']
             };
-        } else {
+        } 
+        else if (serviceToUse === 'resend') {
+            // Use Resend HTTP API
+            console.log('📧 Sending email via Resend to:', to);
+            
+            const response = await mailConfig.services.resend.emails.send({
+                from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+                to: to,
+                subject: subject,
+                html: html
+            });
+            
+            console.log('✅ Email sent successfully via Resend');
+            
+            return {
+                success: true,
+                service: 'resend',
+                messageId: response.id
+            };
+        } 
+        else if (serviceToUse === 'gmail') {
             // Use Gmail SMTP (local development)
-            console.log('Sending email via Gmail SMTP to:', to);
+            console.log('📧 Sending email via Gmail SMTP to:', to);
             
             const mailOptions = {
                 from: `"genZ Winners Support" <${process.env.EMAIL_USER}>`,
@@ -49,20 +77,54 @@ exports.sendEmail = async (data) => {
                 html: html
             };
 
-            const info = await mailConfig.transporter.sendMail(mailOptions);
+            const info = await mailConfig.services.gmail.sendMail(mailOptions);
             
-            console.log('✅ Email sent successfully via Gmail to:', to);
+            console.log('✅ Email sent successfully via Gmail');
             
             return {
                 success: true,
+                service: 'gmail',
                 messageId: info.messageId
             };
         }
     } catch (error) {
-        console.error("❌ Error sending email:", error);
+        console.error(`❌ Error sending email via ${serviceToUse}:`, error);
         console.error("Error details:", error.message);
         
-        // Throw the error so it can be caught by the calling function
+        // If one service fails, try the next available service
+        if (serviceToUse === 'sendgrid' && mailConfig.hasResend) {
+            console.log('⚠️  SendGrid failed, trying Resend...');
+            try {
+                const response = await mailConfig.services.resend.emails.send({
+                    from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+                    to: to,
+                    subject: subject,
+                    html: html
+                });
+                console.log('✅ Email sent successfully via Resend (fallback)');
+                return { success: true, service: 'resend', messageId: response.id };
+            } catch (fallbackError) {
+                console.error('❌ Resend fallback also failed:', fallbackError.message);
+            }
+        } else if (serviceToUse === 'resend' && mailConfig.hasSendGrid) {
+            console.log('⚠️  Resend failed, trying SendGrid...');
+            try {
+                const msg = {
+                    to: to,
+                    from: process.env.SENDGRID_FROM_EMAIL || 'salmaniqbal2008@gmail.com',
+                    subject: subject,
+                    text: text,
+                    html: html
+                };
+                const response = await mailConfig.services.sendgrid.send(msg);
+                console.log('✅ Email sent successfully via SendGrid (fallback)');
+                return { success: true, service: 'sendgrid', messageId: response[0].headers['x-message-id'] };
+            } catch (fallbackError) {
+                console.error('❌ SendGrid fallback also failed:', fallbackError.message);
+            }
+        }
+        
+        // If all services fail, throw error
         throw new Error(`Failed to send email: ${error.message}`);
     }
 };

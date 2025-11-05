@@ -1,22 +1,28 @@
 const nodemailer = require('nodemailer');
 const sgMail = require('@sendgrid/mail');
+const { Resend } = require('resend');
 require('dotenv').config();
 
-// Priority: SendGrid API > Gmail SMTP
-// SendGrid API uses HTTP (works on Railway), Gmail SMTP only works locally
-const useSendGrid = process.env.SENDGRID_API_KEY;
+// Check which email services are available
+const hasSendGrid = !!process.env.SENDGRID_API_KEY;
+const hasResend = !!process.env.RESEND_API_KEY;
+const hasGmail = !!process.env.EMAIL_USER && !!process.env.EMAIL_PASS;
 
-if (useSendGrid) {
-    // Use SendGrid HTTP API (works on Railway - no SMTP blocking)
-    console.log('✅ Using SendGrid HTTP API for email delivery');
-    
+// Initialize available services
+const services = {};
+
+if (hasSendGrid) {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    
-    module.exports = { sendgrid: sgMail, useSendGrid: true };
-} else {
-    // Use Gmail SMTP (for local development only)
-    console.log('⚠️  Using Gmail SMTP (local development only)');
-    
+    services.sendgrid = sgMail;
+    console.log('✅ SendGrid configured');
+}
+
+if (hasResend) {
+    services.resend = new Resend(process.env.RESEND_API_KEY);
+    console.log('✅ Resend configured');
+}
+
+if (hasGmail) {
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -33,7 +39,6 @@ if (useSendGrid) {
         socketTimeout: 30000
     });
     
-    // VERIFICATION OF SMTP CONNECTION
     transporter.verify((error, success) => {
         if (error) {
             console.log('❌ Gmail SMTP error:', error.message);
@@ -42,5 +47,30 @@ if (useSendGrid) {
         }
     });
     
-    module.exports = { transporter, useSendGrid: false };
+    services.gmail = transporter;
 }
+
+// Counter for round-robin (alternates between SendGrid and Resend)
+let emailCounter = 0;
+
+module.exports = { 
+    services, 
+    hasSendGrid, 
+    hasResend, 
+    hasGmail,
+    getNextService: () => {
+        // Priority: Alternate between SendGrid and Resend, fallback to Gmail
+        if (hasSendGrid && hasResend) {
+            // Round-robin between SendGrid and Resend
+            emailCounter++;
+            return emailCounter % 2 === 0 ? 'sendgrid' : 'resend';
+        } else if (hasSendGrid) {
+            return 'sendgrid';
+        } else if (hasResend) {
+            return 'resend';
+        } else if (hasGmail) {
+            return 'gmail';
+        }
+        return null;
+    }
+};

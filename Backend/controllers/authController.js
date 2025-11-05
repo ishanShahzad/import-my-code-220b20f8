@@ -30,7 +30,8 @@ exports.sendOTP = async (req, res) => {
                 username,
                 email,
                 password, // Will be hashed during user creation
-                role: 'user'
+                role: 'user',
+                isVerified: true // Will be set to true after OTP verification
             }
         });
         await otpDoc.save();

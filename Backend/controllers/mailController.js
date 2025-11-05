@@ -23,7 +23,7 @@ exports.sendEmail = async (data) => {
             
             const msg = {
                 to: to,
-                from: process.env.SENDGRID_FROM_EMAIL || 'salmaniqbal2008@gmail.com', // Use your verified sender
+                from: process.env.SENDGRID_FROM_EMAIL,
                 subject: subject,
                 text: text,
                 html: html

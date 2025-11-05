@@ -18,16 +18,9 @@ const User = require('../models/User');
 exports.sendEmail = async (data) => {
     const { to, subject, text, html } = data;
 
-    // Basic validation
-    // if (!to || !subject || (!text && !html)) {
-    //     return res.status(400).json({
-    //         msg: "Missing required email fields: to, subject, and text or html",
-    //     });
-    // } 
-
     try {
         const mailOptions = {
-            from: `"MyApp Support" <${process.env.EMAIL_USER}>`, // sender address
+            from: `"genZ Winners Support" <${process.env.EMAIL_USER}>`, // sender address
             to, // list of receivers
             subject, // Subject line
             text, // Plain text body (optional)
@@ -36,19 +29,20 @@ exports.sendEmail = async (data) => {
 
         // Send the email
         const info = await transporter.sendMail(mailOptions);
-
-        // return ({
-        //     msg: "Email sent successfully",
-        //     messageId: info.messageId,
-        //     response: info.response,
-        // });
+        
+        console.log('✅ Email sent successfully to:', to);
+        console.log('Message ID:', info.messageId);
+        
+        return {
+            success: true,
+            messageId: info.messageId
+        };
     } catch (error) {
         console.error("❌ Error sending email:", error);
-
-        // return res.status(500).json({
-        //     msg: "Failed to send email",
-        //     error: error.message || "Unknown error",
-        // });
+        console.error("Error details:", error.message);
+        
+        // Throw the error so it can be caught by the calling function
+        throw new Error(`Failed to send email: ${error.message}`);
     }
 };
 

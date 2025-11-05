@@ -81,6 +81,8 @@ exports.sendOTP = async (req, res) => {
 </html>
         `;
 
+        console.log('Attempting to send OTP email to:', email);
+        
         await sendEmail({
             to: email,
             subject: 'Verify Your Email - genZ Winners',
@@ -88,13 +90,23 @@ exports.sendOTP = async (req, res) => {
             html: html
         });
 
+        console.log('OTP email sent successfully');
+
         res.status(200).json({ 
             msg: 'OTP sent to your email. Please verify to complete registration.',
             email: email 
         });
     } catch (error) {
         console.error('Send OTP error:', error);
-        res.status(500).json({ msg: 'Failed to send OTP. Please try again.' });
+        console.error('Error stack:', error.stack);
+        
+        // Delete the OTP document if email fails
+        await OTP.deleteMany({ email });
+        
+        res.status(500).json({ 
+            msg: 'Failed to send OTP. Please check your email address and try again.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 

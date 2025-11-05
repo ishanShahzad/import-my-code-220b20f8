@@ -30,12 +30,24 @@ const GlassSignUpPage = () => {
     setLoading(true);
     
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/auth/send-otp`, form);
+      console.log('Sending OTP request...');
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/auth/send-otp`, form, {
+        timeout: 30000 // 30 second timeout
+      });
+      console.log('OTP response received:', res.data);
       toast.success(res.data.msg);
       setStep(2); // Move to OTP verification step
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.msg || 'Failed to send OTP. Please try again.');
+      console.error('OTP send error:', error);
+      if (error.code === 'ECONNABORTED') {
+        toast.error('Request timeout. Please check your internet connection and try again.');
+      } else if (error.response) {
+        toast.error(error.response?.data?.msg || 'Failed to send OTP. Please try again.');
+      } else if (error.request) {
+        toast.error('No response from server. Please check your internet connection.');
+      } else {
+        toast.error('Failed to send OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

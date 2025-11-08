@@ -113,7 +113,7 @@ export const GlobalProvider = ({ children }) => {
             setLoadingProductId(id)
             
             // Check if product is already in cart - if yes, remove it
-            const isInCart = cartItems.cart.some(item => item.product._id === id);
+            const isInCart = cartItems?.cart?.some(item => item?.product?._id === id) || false;
             
             if (isInCart) {
                 // Remove from cart

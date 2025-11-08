@@ -70,14 +70,26 @@ function Products() {
     fetchProducts()
     checkActiveSpin()
   }, [])
+  
+  // Re-check spin when user logs in
+  useEffect(() => {
+    if (currentUser) {
+      console.log('👤 User logged in, re-checking spin status');
+      // Clear session flag when user logs in to re-check their account status
+      sessionStorage.removeItem('spinnerShown');
+      checkActiveSpin()
+    }
+  }, [currentUser])
 
   useEffect(() => {
+    console.log('🎨 Applying spin discount. spinResult:', spinResult);
     applySpinDiscount()
   }, [products, spinResult])
 
   const checkActiveSpin = async () => {
     // If user is logged in, check database first
     if (currentUser) {
+      console.log('🔍 Checking spin for logged-in user:', currentUser.email);
       try {
         const token = localStorage.getItem('jwtToken');
         const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/spin/get`, {
@@ -85,23 +97,39 @@ function Products() {
         });
         
         const { spinResult: dbSpinResult, spinTimestamp: dbSpinTimestamp, spinSelectedProducts: dbSpinProducts } = res.data.spinData;
+        console.log('📊 Database spin data:', { dbSpinResult, dbSpinTimestamp, dbSpinProducts });
         
         if (dbSpinResult && dbSpinTimestamp) {
           const now = new Date().getTime();
           const hoursPassed = (now - dbSpinTimestamp) / (1000 * 60 * 60);
+          console.log(`⏰ Hours since last spin: ${hoursPassed.toFixed(2)}`);
           
           if (hoursPassed < 24) {
-            // Valid spin in database
+            // Valid spin in database (within 24 hours)
+            console.log('✅ Valid spin found in database');
             setSpinResult(dbSpinResult);
             // Sync to localStorage for consistency
             localStorage.setItem('spinResult', JSON.stringify(dbSpinResult));
             localStorage.setItem('spinTimestamp', dbSpinTimestamp.toString());
             localStorage.setItem('spinSelectedProducts', JSON.stringify(dbSpinProducts || []));
+            
+            // Don't show spinner - user already has an active spin (even if checked out)
+            // They must wait 24 hours from their last spin
             return;
+          } else {
+            console.log('⏰ Spin expired (>24 hours)');
           }
+        } else {
+          console.log('❌ No spin data in database');
         }
+        
+        // If we reach here, user has no active spin in DB (or it expired)
+        // Clear localStorage to be safe
+        localStorage.removeItem('spinResult');
+        localStorage.removeItem('spinTimestamp');
+        localStorage.removeItem('spinSelectedProducts');
       } catch (error) {
-        console.error('Error fetching spin data:', error);
+        console.error('❌ Error fetching spin data:', error);
       }
     }
     
@@ -183,6 +211,7 @@ function Products() {
 
   const handleSpinComplete = async (result) => {
     const timestamp = new Date().getTime();
+    console.log('🎰 Spin completed:', result);
     
     // Store in localStorage
     localStorage.setItem('spinResult', JSON.stringify(result));
@@ -191,18 +220,22 @@ function Products() {
     
     // If user is logged in, also save to database
     if (currentUser) {
+      console.log('💾 Saving spin to database for user:', currentUser.email);
       try {
         const token = localStorage.getItem('jwtToken');
-        await axios.post(`${import.meta.env.VITE_API_URL}api/user/spin/save`, {
+        const saveRes = await axios.post(`${import.meta.env.VITE_API_URL}api/user/spin/save`, {
           spinResult: result,
           spinTimestamp: timestamp,
           spinSelectedProducts: []
         }, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log('✅ Spin saved to database:', saveRes.data);
       } catch (error) {
-        console.error('Error saving spin to database:', error);
+        console.error('❌ Error saving spin to database:', error);
       }
+    } else {
+      console.log('👤 User not logged in, spin saved to localStorage only');
     }
     
     // Update state immediately for dynamic update

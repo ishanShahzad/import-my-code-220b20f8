@@ -7,9 +7,11 @@ import Loader from '../components/common/Loader';
 import StoreInfo from '../components/common/StoreInfo';
 import { toast } from 'react-toastify';
 import { useGlobal } from '../contexts/GlobalContext';
+import { useCurrency } from '../contexts/CurrencyContext';
 
 function ProductDetailPage() {
     const { id } = useParams();
+    const { getCurrencySymbol, convertPrice } = useCurrency();
     const {
         wishlistItems,
         handleAddToWishlist,
@@ -394,10 +396,10 @@ function ProductDetailPage() {
                                 {discountPercentage > 0 ? (
                                     <div className="flex items-center gap-3">
                                         <span className={`text-3xl font-bold ${hasSpinDiscount ? 'text-orange-600' : 'text-gray-900'}`}>
-                                            ${displayPrice?.toFixed(2)}
+                                            {getCurrencySymbol()}{convertPrice(displayPrice).toFixed(2)}
                                         </span>
                                         <span className="text-xl text-gray-500 line-through">
-                                            ${originalPrice?.toFixed(2)}
+                                            {getCurrencySymbol()}{convertPrice(originalPrice).toFixed(2)}
                                         </span>
                                         <span className={`px-2 py-1 text-sm font-semibold rounded ${hasSpinDiscount ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'}`}>
                                             Save {discountPercentage}%
@@ -405,7 +407,7 @@ function ProductDetailPage() {
                                     </div>
                                 ) : (
                                     <span className="text-3xl font-bold text-gray-900">
-                                        ${displayPrice?.toFixed(2)}
+                                        {getCurrencySymbol()}{convertPrice(displayPrice).toFixed(2)}
                                     </span>
                                 )}
                             </motion.div>

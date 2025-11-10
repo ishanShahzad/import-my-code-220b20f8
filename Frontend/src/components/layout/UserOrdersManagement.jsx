@@ -137,7 +137,7 @@ const UserOrdersManagement = () => {
     // Order List View
     return (
         <motion.div
-            className="max-w-6xl p-8"
+            className="max-w-6xl p-4 sm:p-6 md:p-8"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -154,27 +154,27 @@ const UserOrdersManagement = () => {
                     <p className="text-gray-600">View and manage your orders</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
+                <div className="flex flex-col gap-3 mt-4 md:mt-0">
                     {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <div className="relative w-full">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search orders..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
 
-                    <div className='flex items-center gap-2'>
-                        {/* Filter */}
-                        <Filter className="h-4 w-4 text-gray-400" />
-                        <div className="relative">
+                    <div className='flex flex-col sm:flex-row gap-2'>
+                        {/* Status Filter */}
+                        <div className='flex items-center gap-2 flex-1'>
+                            <Filter className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+                                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="all">All Statuses</option>
                                 {Object.keys(statusConfig).map(status => (
@@ -184,21 +184,18 @@ const UserOrdersManagement = () => {
                                 ))}
                             </select>
                         </div>
-                    </div>
 
-                    {/* PAYMENT STATUS FILTER */}
-                    <div className='flex items-center gap-2'>
-                        {/* Filter */}
-                        <Filter className="h-4 w-4 text-gray-400" />
-                        <div className="relative">
+                        {/* Payment Filter */}
+                        <div className='flex items-center gap-2 flex-1'>
+                            <Filter className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <select
                                 value={paymentFilter}
                                 onChange={(e) => setPaymentFilter(e.target.value)}
-                                className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
+                                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
-                                <option value="all">All</option>
+                                <option value="all">All Payments</option>
                                 <option value="paid">Paid</option>
-                                <option value="unpaid">UnPaid</option>
+                                <option value="unpaid">Unpaid</option>
                             </select>
                         </div>
                     </div>
@@ -245,10 +242,10 @@ const UserOrdersManagement = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-4 md:mt-0">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4 md:mt-0">
                                                     <StatusBadge status={order.orderStatus} />
-                                                    <div className="text-right">
-                                                        <p className="text-lg font-semibold text-gray-900">
+                                                    <div className="text-left sm:text-right">
+                                                        <p className="text-base sm:text-lg font-semibold text-gray-900">
                                                             {(() => {
                                                                 // Recalculate total using actual shipping cost
                                                                 const subtotal = order.orderSummary.subtotal || 0;

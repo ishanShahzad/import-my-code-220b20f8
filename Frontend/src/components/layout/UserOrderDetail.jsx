@@ -155,11 +155,11 @@ const OrderDetail = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="bg-white rounded-lg shadow overflow-hidden"
+            className="bg-white rounded-lg shadow overflow-hidden max-w-full"
         >
             {/* Header */}
-            <div className="p-6 mt-6 border-b border-gray-200 flex items-center justify-between">
-                <div className="flex items-start gap-3 sm:gap-4 mb-4 mt-12 sm:mt-0">
+            <div className="p-3 sm:p-6 mt-6 border-b border-gray-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex items-start gap-3 sm:gap-4 mt-12 sm:mt-0 min-w-0 flex-1">
                     <Link to={"/user-dashboard/orders"}>
                         <button className="p-2 rounded-lg hover:bg-gray-100 flex-shrink-0 relative z-10">
                             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -176,20 +176,20 @@ const OrderDetail = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                     <span
-                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full flex items-center gap-1 ${getStatusColor(
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full flex items-center gap-1 whitespace-nowrap ${getStatusColor(
                             order?.orderStatus
                         )}`}
                     >
                         {getStatusIcon(order?.orderStatus)}
-                        <span className="hidden xs:inline">
+                        <span className="hidden sm:inline">
                             {order?.orderStatus?.charAt(0).toUpperCase() +
                                 order?.orderStatus.slice(1)}
                         </span>
                     </span>
                     <span
-                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full whitespace-nowrap ${
                             order?.isPaid
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
@@ -198,8 +198,8 @@ const OrderDetail = () => {
                         {order?.isPaid ? "Paid" : "Unpaid"}
                     </span>
                     {order?.spinDiscount?.applied && (
-                        <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold flex items-center gap-1">
-                            🎉 <span className="hidden xs:inline">Spin Discount:</span> {order.spinDiscount.label}
+                        <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold flex items-center gap-1 whitespace-nowrap">
+                            🎉 <span className="hidden sm:inline">Spin Discount:</span> {order.spinDiscount.label}
                         </span>
                     )}
                 </div>
@@ -235,15 +235,15 @@ const OrderDetail = () => {
                                 <p className="text-xs sm:text-sm text-gray-500">
                                     Address
                                 </p>
-                                <p className="font-medium">
+                                <p className="text-sm sm:text-base font-medium break-words">
                                     {order?.shippingInfo.address}
                                 </p>
-                                <p className="font-medium">
+                                <p className="text-sm sm:text-base font-medium break-words">
                                     {order?.shippingInfo.city},{" "}
                                     {order?.shippingInfo.state}{" "}
                                     {order?.shippingInfo.postalCode}
                                 </p>
-                                <p className="font-medium">
+                                <p className="text-sm sm:text-base font-medium break-words">
                                     {order?.shippingInfo.country}
                                 </p>
                             </div>
@@ -324,11 +324,11 @@ const OrderDetail = () => {
                     </div>
 
                     {/* Order Summary */}
-                    <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                        <h2 className="text-lg font-medium text-gray-800 mb-4">
+                    <div className="mt-6 bg-gray-50 p-3 sm:p-4 rounded-lg">
+                        <h2 className="text-base sm:text-lg font-medium text-gray-800 mb-3 sm:mb-4">
                             Order Summary
                         </h2>
-                        <div className="space-y-2">
+                        <div className="space-y-2 text-sm sm:text-base">
                             <div className="flex justify-between pt-2">
                                 <span className="text-gray-600">
                                     Subtotal
@@ -424,13 +424,13 @@ const OrderDetail = () => {
                     </div>
 
                     {/* Payment */}
-                    <div className="mt-6 bg-white shadow-md rounded-2xl p-6 border border-gray-200">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <CreditCard className="w-5 h-5 text-indigo-600" />
+                    <div className="mt-6 bg-white shadow-md rounded-2xl p-3 sm:p-6 border border-gray-200">
+                        <h2 className="text-base sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+                            <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                             Payment Details
                         </h2>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4 text-sm sm:text-base">
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-600 font-medium">
                                     Method:
@@ -458,11 +458,11 @@ const OrderDetail = () => {
                             </div>
 
                             {order.paymentResult?.paymentIntentId && (
-                                <div className="flex justify-between items-center">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
                                     <span className="text-gray-600 font-medium">
                                         Payment Intent ID:
                                     </span>
-                                    <span className="text-gray-900 break-all">
+                                    <span className="text-gray-900 break-all text-xs sm:text-sm">
                                         {order.paymentResult.paymentIntentId}
                                     </span>
                                 </div>

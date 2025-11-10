@@ -100,7 +100,7 @@ const OrderManagement = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 ">
+        <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
             <OrderList
                 orders={orders}
                 onSelectOrder={setSelectedOrder}
@@ -220,28 +220,28 @@ const OrderList = ({
                         )
                     :
                 (
-                <table className="min-w-full divide-y divide-gray-200 hidden md:table">
+                <table className="w-full divide-y divide-gray-200 hidden md:table">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Order ID
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Customer
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Date
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Payment
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Total
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 lg:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
@@ -257,25 +257,26 @@ const OrderList = ({
                                     transition={{ duration: 0.2 }}
                                     className="hover:bg-gray-50"
                                 >
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                                         <div className="flex flex-col gap-1">
-                                            <span>{order.orderId}</span>
+                                            <span className="text-xs lg:text-sm">{order.orderId}</span>
                                             {order.spinDiscount?.applied && (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-[10px] font-semibold rounded-full border border-purple-200 w-fit">
-                                                    🎉 Spin Discount
+                                                <span className="inline-flex items-center gap-1 px-1 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-[8px] font-semibold rounded-full border border-purple-200 w-fit">
+                                                    🎉
                                                 </span>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {order.shippingInfo.fullName}
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap text-xs lg:text-sm text-gray-500">
+                                        <span className="max-w-[100px] lg:max-w-[150px] truncate block">{order.shippingInfo.fullName}</span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(order.createdAt).toLocaleDateString()}
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap text-xs lg:text-sm text-gray-500">
+                                        <span className="hidden lg:inline">{new Date(order.createdAt).toLocaleDateString()}</span>
+                                        <span className="lg:hidden">{new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap">
                                         <span
-                                            className={`px-2 py-1 text-xs rounded-full ${order.isPaid
+                                            className={`px-1.5 lg:px-2 py-0.5 lg:py-1 text-[9px] lg:text-xs rounded-full ${order.isPaid
                                                 ? "bg-green-100 text-green-800"
                                                 : "bg-red-100 text-red-800"
                                                 }`}
@@ -283,20 +284,20 @@ const OrderList = ({
                                             {order.isPaid ? "Paid" : "Unpaid"}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap">
                                         <span
-                                            className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 w-fit ${getStatusColor(
+                                            className={`px-1.5 lg:px-2 py-0.5 lg:py-1 text-[9px] lg:text-xs rounded-full flex items-center space-x-1 w-fit ${getStatusColor(
                                                 order.orderStatus
                                             )}`}
                                         >
                                             {getStatusIcon(order.orderStatus)}
-                                            <span>
+                                            <span className="hidden xl:inline">
                                                 {order.orderStatus.charAt(0).toUpperCase() +
                                                     order.orderStatus.slice(1)}
                                             </span>
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap text-xs lg:text-sm text-gray-500">
                                         {(() => {
                                             // For sellers, backend already filtered the order summary
                                             // For admin, recalculate using actual shipping cost
@@ -317,13 +318,13 @@ const OrderList = ({
                                             return formatPrice(subtotal + tax + actualShipping);
                                         })()}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <td className="px-2 lg:px-4 py-3 whitespace-nowrap text-xs lg:text-sm font-medium">
                                         <Link to={`/${currentUser?.role === 'seller' ? 'seller' : 'admin'}-dashboard/order/${order._id}`}>
                                             <button
-                                                // onClick={() => onSelectOrder(order)}
-                                                className="text-blue-600 hover:text-blue-900"
+                                                className="text-blue-600 hover:text-blue-900 text-xs lg:text-sm"
                                             >
-                                                View Details
+                                                <span className="hidden xl:inline">View Details</span>
+                                                <span className="xl:hidden">View</span>
                                             </button>
                                         </Link>
                                     </td>

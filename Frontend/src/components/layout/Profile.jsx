@@ -269,29 +269,31 @@ const UserProfile = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsEditing(true)}
-                      className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg"
+                      className="flex items-center bg-blue-600 text-white px-3 py-2 text-sm md:px-4 md:text-base rounded-lg"
                     >
-                      <Edit3 className="h-4 w-4 mr-2" />
-                      Edit Username
+                      <Edit3 className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden sm:inline">Edit Username</span>
+                      <span className="sm:hidden">Edit</span>
                     </motion.button>
                   ) : (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleSave}
-                        className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg"
+                        className="flex items-center justify-center bg-green-600 text-white px-3 py-2 text-sm md:px-4 md:text-base rounded-lg"
                       >
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Changes
+                        <Save className="h-4 w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Save Changes</span>
+                        <span className="sm:hidden">Save</span>
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleCancel}
-                        className="flex items-center bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
+                        className="flex items-center justify-center bg-gray-200 text-gray-800 px-3 py-2 text-sm md:px-4 md:text-base rounded-lg"
                       >
-                        <X className="h-4 w-4 mr-2" />
+                        <X className="h-4 w-4 mr-1 md:mr-2" />
                         Cancel
                       </motion.button>
                     </div>
@@ -403,21 +405,23 @@ const UserProfile = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowPasswordFields(true)}
-                      className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg"
+                      className="flex items-center bg-blue-600 text-white px-3 py-2 text-sm md:px-4 md:text-base rounded-lg"
                     >
-                      <Lock className="h-4 w-4 mr-2" />
-                      Change Password
+                      <Lock className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden sm:inline">Change Password</span>
+                      <span className="sm:hidden">Change</span>
                     </motion.button>
                   ) : (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         type='submit'
-                        className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg"
+                        className="flex items-center justify-center bg-green-600 text-white px-3 py-2 text-sm md:px-4 md:text-base rounded-lg"
                       >
-                        <Save className="h-4 w-4 mr-2" />
-                        Update Password
+                        <Save className="h-4 w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Update Password</span>
+                        <span className="sm:hidden">Update</span>
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -431,9 +435,9 @@ const UserProfile = () => {
                             confirmPassword: ''
                           }));
                         }}
-                        className="flex items-center bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
+                        className="flex items-center justify-center bg-gray-200 text-gray-800 px-3 py-2 text-sm md:px-4 md:text-base rounded-lg"
                       >
-                        <X className="h-4 w-4 mr-2" />
+                        <X className="h-4 w-4 mr-1 md:mr-2" />
                         Cancel
                       </motion.button>
                     </div>

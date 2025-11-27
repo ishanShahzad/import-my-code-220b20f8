@@ -1,7 +1,8 @@
 
 const express = require('express')
-const { getUsers, toggleBlockUser, toggleAdminUser, deleteUser, getSingle, updateUser, saveSpinResult, getSpinResult, updateSpinProducts, markSpinCheckedOut } = require('../controllers/userController')
+const { getUsers, toggleBlockUser, toggleAdminUser, deleteUser, getSingle, updateUser, saveSpinResult, getSpinResult, updateSpinProducts, markSpinCheckedOut, becomeSeller } = require('../controllers/userController')
 const verifyToken = require('../middleware/authMiddleware')
+const upload = require('../middleware/upload')
 const router = express.Router()
 
 router.get('/get', verifyToken, getUsers)
@@ -16,5 +17,11 @@ router.post('/spin/save', verifyToken, saveSpinResult)
 router.get('/spin/get', verifyToken, getSpinResult)
 router.patch('/spin/products', verifyToken, updateSpinProducts)
 router.patch('/spin/checkout', verifyToken, markSpinCheckedOut)
+
+// Become a seller
+router.post('/become-seller', verifyToken, upload.fields([
+    { name: 'logo', maxCount: 1 },
+    { name: 'banner', maxCount: 1 }
+]), becomeSeller)
 
 module.exports = router

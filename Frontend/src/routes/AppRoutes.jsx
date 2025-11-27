@@ -32,6 +32,7 @@ import StorePage from '../pages/StorePage'
 import StoresListing from '../pages/StoresListing'
 import TrustedStoresPage from '../pages/TrustedStoresPage'
 import StoreVerifications from '../pages/admin/StoreVerifications'
+import BecomeSeller from '../pages/BecomeSeller'
 import { ToastContainer } from 'react-toastify'
 
 function AppRoutes() {
@@ -52,6 +53,12 @@ function AppRoutes() {
                     <Route path='/stores/trusted' element={
                         <ProtectedRoute>
                             <TrustedStoresPage />
+                        </ProtectedRoute>
+                    } />
+                    
+                    <Route path='/become-seller' element={
+                        <ProtectedRoute>
+                            <BecomeSeller />
                         </ProtectedRoute>
                     } />
 

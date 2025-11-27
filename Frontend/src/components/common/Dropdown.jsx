@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Crown, LayoutDashboard, LogOut, LogOutIcon, User } from "lucide-react";
+import { ChevronDown, Crown, LayoutDashboard, LogOut, LogOutIcon, User, Store } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -21,9 +21,22 @@ const NavDropdown = () => {
     }, []);
 
     const navigate = useNavigate()
+    
+    // Build menu items based on user role
     const menuItems = [
-        // { label: "Your Profile", icon: <User size={20} />, onClick: () => navigate('/profile') },
         { label: "Your Dashboard", icon: <LayoutDashboard size={20} />, onClick: () => navigate('/user-dashboard/account-overview') },
+    ];
+    
+    // Add "Become a Seller" option only for regular users (not sellers or admins)
+    if (currentUser?.role === 'user') {
+        menuItems.push({ 
+            label: "Become a Seller", 
+            icon: <Store size={20} />, 
+            onClick: () => navigate('/become-seller') 
+        });
+    }
+    
+    menuItems.push(
         { divider: true },
         {
             label: (
@@ -31,8 +44,8 @@ const NavDropdown = () => {
                     <LogOutIcon size={20} /> Logout
                 </span>
             ),
-        },
-    ];
+        }
+    );
 
     return (
         <div className="relative" ref={dropdownRef}>

@@ -228,3 +228,111 @@ exports.markSpinCheckedOut = async (req, res) => {
         res.status(500).json({ msg: 'Server error while marking spin as checked out.' })
     }
 }
+
+// Become a seller - create store and update user role
+exports.becomeSeller = async (req, res) => {
+    const { id: _id } = req.user
+    const { storeName, description } = req.body
+    const Store = require('../models/Store')
+
+    try {
+        // Check if user exists
+        const user = await User.findById(_id)
+        if (!user) return res.status(404).json({ message: 'User not found!' })
+
+        // Check if user is already a seller or admin
+        if (user.role === 'seller' || user.role === 'admin') {
+            return res.status(400).json({ message: 'You are already a seller or admin' })
+        }
+
+        // Check if user already has a store
+        const existingStore = await Store.findOne({ seller: _id })
+        if (existingStore) {
+            return res.status(400).json({ message: 'You already have a store' })
+        }
+
+        // Validate store name
+        if (!storeName || storeName.trim().length < 3) {
+            return res.status(400).json({ message: 'Store name must be at least 3 characters' })
+        }
+
+        // Check if store name already exists (case-insensitive)
+        const storeNameExists = await Store.findOne({ 
+            storeName: { $regex: new RegExp(`^${storeName.trim()}$`, 'i') }
+        })
+        if (storeNameExists) {
+            return res.status(400).json({ message: 'Store name already exists. Please choose another name.' })
+        }
+
+        // Generate unique slug
+        let storeSlug = storeName
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+
+        // Ensure slug is unique
+        let slugExists = await Store.findOne({ storeSlug })
+        let counter = 1
+        while (slugExists) {
+            storeSlug = `${storeName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}-${counter}`
+            slugExists = await Store.findOne({ storeSlug })
+            counter++
+        }
+
+        // Handle file uploads (logo and banner)
+        let logoUrl = ''
+        let bannerUrl = ''
+
+        if (req.files) {
+            const cloudinary = require('../utils/cloudinary')
+            
+            if (req.files.logo) {
+                const logoResult = await cloudinary.uploader.upload(req.files.logo[0].path, {
+                    folder: 'stores/logos',
+                    transformation: [{ width: 400, height: 400, crop: 'fill' }]
+                })
+                logoUrl = logoResult.secure_url
+            }
+
+            if (req.files.banner) {
+                const bannerResult = await cloudinary.uploader.upload(req.files.banner[0].path, {
+                    folder: 'stores/banners',
+                    transformation: [{ width: 1200, height: 400, crop: 'fill' }]
+                })
+                bannerUrl = bannerResult.secure_url
+            }
+        }
+
+        // Create the store
+        const newStore = new Store({
+            seller: _id,
+            storeName: storeName.trim(),
+            storeSlug,
+            description: description?.trim() || '',
+            logo: logoUrl,
+            banner: bannerUrl
+        })
+
+        await newStore.save()
+
+        // Update user role to seller
+        user.role = 'seller'
+        await user.save()
+
+        res.status(201).json({ 
+            message: 'Congratulations! You are now a seller',
+            store: newStore,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        })
+    } catch (error) {
+        console.error('Error in becomeSeller:', error);
+        res.status(500).json({ message: 'Server error while creating seller account.' })
+    }
+}

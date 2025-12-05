@@ -59,6 +59,9 @@ const CartDropdown = () => {
 
   // Calculate discounted price for a product
   const getDiscountedPrice = (product) => {
+    // Return 0 if product is null
+    if (!product) return 0;
+    
     const spinResult = getSpinDiscount();
     const spinSelectedProducts = JSON.parse(localStorage.getItem('spinSelectedProducts') || '[]');
     
@@ -110,6 +113,10 @@ const CartDropdown = () => {
                   </div>) :
                   cartItems.cart.map((item, index) => {
                     const {product, qty, _id: id } = item
+              
+              // Skip if product is null (deleted product)
+              if (!product) return null;
+              
               const {
                 _id,
                 name,

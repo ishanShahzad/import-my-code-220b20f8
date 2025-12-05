@@ -156,12 +156,12 @@ const StoreSearch = () => {
                                                 </div>
                                             )}
                                             <div className="flex-1">
-                                                <p className="font-medium text-gray-800 flex items-center gap-1.5">
+                                                <div className="font-medium text-gray-800 flex items-center gap-1.5">
                                                     {store.storeName}
                                                     {store.verification?.isVerified && (
                                                         <VerifiedBadge size="sm" />
                                                     )}
-                                                </p>
+                                                </div>
                                                 <div className="flex items-center gap-2 text-xs text-gray-500">
                                                     <span>/{store.storeSlug}</span>
                                                     <span>•</span>

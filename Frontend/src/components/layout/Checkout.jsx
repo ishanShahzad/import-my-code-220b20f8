@@ -393,12 +393,16 @@ export default function Checkout() {
 
       if (order.paymentMethod == 'cash_on_delivery') {
         // Track purchase with GSM for cash on delivery
-        if (window.GSM) {
-          window.GSM.trackPurchase({
-            orderId: res.data.orderId || 'cash_' + Date.now(),
-            amount: order.orderSummary.totalAmount,
-            customerEmail: order.shippingInfo.email
-          });
+        if (window.GSM && res.data.order) {
+          try {
+            window.GSM.trackPurchase({
+              orderId: res.data.order.orderId,
+              amount: res.data.order.totalAmount,
+              customerEmail: res.data.order.email
+            });
+          } catch (gsmError) {
+            console.error('GSM tracking failed:', gsmError);
+          }
         }
         
         setIsProcessing(false);

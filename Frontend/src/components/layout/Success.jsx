@@ -30,11 +30,15 @@ export default function Success() {
             
             // Track purchase with GSM
             if (sessionData && window.GSM) {
-                window.GSM.trackPurchase({
-                    orderId: sessionData.metadata?.orderId || sessionData.id,
-                    amount: sessionData.amount_total / 100,
-                    customerEmail: sessionData.customer_details?.email
-                });
+                try {
+                    window.GSM.trackPurchase({
+                        orderId: sessionData.metadata?.orderId || sessionData.id,
+                        amount: sessionData.amount_total / 100,
+                        customerEmail: sessionData.customer_details?.email
+                    });
+                } catch (gsmError) {
+                    console.error('GSM tracking failed:', gsmError);
+                }
             }
         } catch (error) {
             console.error(error);

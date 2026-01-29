@@ -152,6 +152,12 @@ exports.placeOrder = async (req, res) => {
             
             return res.status(200).json({
                 msg: 'Order placed successfully',
+                orderId: newOrder.orderId,
+                order: {
+                    orderId: newOrder.orderId,
+                    totalAmount: newOrder.orderSummary.totalAmount,
+                    email: newOrder.shippingInfo.email
+                }
             });
         }
 

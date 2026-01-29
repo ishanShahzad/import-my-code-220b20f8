@@ -392,6 +392,15 @@ export default function Checkout() {
       toast.success(res.data.msg)
 
       if (order.paymentMethod == 'cash_on_delivery') {
+        // Track purchase with GSM for cash on delivery
+        if (window.GSM) {
+          window.GSM.trackPurchase({
+            orderId: res.data.orderId || 'cash_' + Date.now(),
+            amount: order.orderSummary.totalAmount,
+            customerEmail: order.shippingInfo.email
+          });
+        }
+        
         setIsProcessing(false);
         
         // Redirect to success page after a short delay

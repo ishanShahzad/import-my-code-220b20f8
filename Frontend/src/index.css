@@ -389,6 +389,10 @@ input, select, textarea {
     outline: none;
 }
 
+.glass-input-search {
+    padding-left: 2.75rem !important;
+}
+
 .glass-input::placeholder {
     color: hsl(var(--muted-foreground));
 }

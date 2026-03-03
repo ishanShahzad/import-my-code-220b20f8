@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useRef, useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, ShoppingCart, Star, ChevronRight, ChevronLeft, Zap, Sparkles, Share, Clock, User, Shield, Truck, RotateCcw, Loader2 } from 'lucide-react';
+import { Heart, ShoppingCart, Star, ChevronRight, ChevronLeft, Zap, Sparkles, Share2, RotateCcw, Loader2, Home, Tag, Package } from 'lucide-react';
 import Loader from '../components/common/Loader';
 import StoreInfo from '../components/common/StoreInfo';
 import { toast } from 'react-toastify';
@@ -29,20 +29,14 @@ function ProductDetailPage() {
     const [loading, setLoading] = useState(true);
     const [rating, setRating] = useState(5);
     const [imageLoading, setImageLoading] = useState(true);
-    const [activeImageTab, setActiveImageTab] = useState(0);
     const [storeData, setStoreData] = useState(null);
     const commentRef = useRef();
 
     const isInWishlist = product && wishlistItems?.some((item) => item._id === product._id);
     const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id);
-    
-    // SPIN WHEEL DISABLED - getSpinDiscount and getDiscountedPrice removed
-    // const getSpinDiscount = () => { ... }
-    // const getDiscountedPrice = () => { ... }
 
     const displayPrice = product.discountedPrice || product.price;
     const originalPrice = product.price;
-    // const hasSpinDiscount = false; // SPIN WHEEL DISABLED
 
     const discountPercentage = product.discountedPrice && product.discountedPrice < product.price
         ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
@@ -68,7 +62,6 @@ function ProductDetailPage() {
     const handleAddReview = async (e) => {
         e.preventDefault();
         if (!commentRef.current.value.trim()) return toast.error('Please write a review comment');
-
         try {
             const token = localStorage.getItem('jwtToken');
             const res = await axios.post(
@@ -94,8 +87,6 @@ function ProductDetailPage() {
             setProduct(res.data.product);
             setMainImg(res.data.product.image);
             setImageLoading(true);
-            
-            // Fetch seller's store data
             if (res.data.product.seller) {
                 try {
                     const storeRes = await axios.get(
@@ -103,11 +94,9 @@ function ProductDetailPage() {
                     );
                     setStoreData(storeRes.data.store);
                 } catch (error) {
-                    // Store not found is okay - seller might not have configured one
                     console.log('No store configured for this seller');
                 }
             }
-
         } catch (err) {
             toast.error('Product not found');
         } finally {
@@ -115,35 +104,20 @@ function ProductDetailPage() {
         }
     };
 
-    useEffect(() => {
-        fetchProduct();
-    }, [id]);
+    useEffect(() => { fetchProduct(); }, [id]);
 
-    // Animation variants
     const fadeIn = {
         hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" }
-        }
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
     };
 
     const staggerChildren = {
-        visible: {
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
+        visible: { transition: { staggerChildren: 0.1 } }
     };
 
     const imageVariants = {
-        hidden: { opacity: 0, scale: 0.9 },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            transition: { duration: 0.4, ease: "easeOut" }
-        }
+        hidden: { opacity: 0, scale: 0.95 },
+        visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } }
     };
 
     if (loading) return (
@@ -162,34 +136,40 @@ function ProductDetailPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Breadcrumb */}
                 <motion.div
-                    className="flex items-center text-sm text-slate-500 mb-6"
+                    className="flex items-center text-sm mb-6"
+                    style={{ color: 'hsl(var(--muted-foreground))' }}
                     variants={fadeIn}
                     initial="hidden"
                     animate="visible"
                 >
-                    <Link to={'/'}>
-                        <button className='flex hover:text-indigo-600 items-center'>
-                            <span className=" cursor-pointer">Home</span>
-                        </button>
+                    <Link to="/" className="flex items-center gap-1 transition-colors hover:text-[hsl(220,70%,55%)]">
+                        <Home size={15} />
+                        <span>Home</span>
                     </Link>
-                    <ChevronRight size={16} className="mx-2" />
-                    <span className="">{product.category}</span>
-                    <ChevronRight size={16} className="mx-2" />
-                    <span className="text-slate-800 font-medium truncate">{product.name}</span>
+                    <ChevronRight size={14} className="mx-1.5 opacity-50" />
+                    <span>{product.category}</span>
+                    <ChevronRight size={14} className="mx-1.5 opacity-50" />
+                    <span className="font-medium truncate" style={{ color: 'hsl(var(--foreground))' }}>{product.name}</span>
                 </motion.div>
 
                 {/* Product Card */}
                 <motion.div
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-white/60 overflow-hidden mb-10"
+                    className="glass-panel-strong water-shimmer relative overflow-hidden mb-10"
                     variants={fadeIn}
                     initial="hidden"
                     animate="visible"
                 >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
+                    {/* Decorative orbs */}
+                    <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
+                         style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))' }} />
+                    <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full opacity-15 blur-3xl pointer-events-none"
+                         style={{ background: 'linear-gradient(135deg, hsl(200, 80%, 55%), hsl(170, 70%, 45%))' }} />
+
+                    <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
                         {/* Images Section */}
                         <div className="flex flex-col">
                             {/* Main Image */}
-                            <div className="relative h-80 md:h-96 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
+                            <div className="relative h-80 md:h-96 glass-inner rounded-2xl overflow-hidden flex items-center justify-center">
                                 <AnimatePresence mode="wait">
                                     <motion.img
                                         key={mainImg}
@@ -202,7 +182,7 @@ function ProductDetailPage() {
                                         exit="hidden"
                                         onLoad={() => setImageLoading(false)}
                                         onError={(e) => {
-                                            e.target.onerror = null; // Prevent infinite loop
+                                            e.target.onerror = null;
                                             e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Crect width='500' height='500' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%239ca3af'%3EImage Not Found%3C/text%3E%3C/svg%3E";
                                         }}
                                     />
@@ -211,14 +191,10 @@ function ProductDetailPage() {
                                 {/* Loading shimmer */}
                                 {imageLoading && (
                                     <motion.div
-                                        className="absolute inset-0 bg-linear-to-r from-slate-200 via-slate-300 to-slate-200 bg-size-[200%_100%]"
-                                        animate={{
-                                            backgroundPosition: ['0% 0%', '100% 0%', '0% 0%'],
-                                        }}
-                                        transition={{
-                                            duration: 1.5,
-                                            repeat: Infinity,
-                                        }}
+                                        className="absolute inset-0 rounded-2xl"
+                                        style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15), rgba(255,255,255,0.05))', backgroundSize: '200% 100%' }}
+                                        animate={{ backgroundPosition: ['0% 0%', '100% 0%', '0% 0%'] }}
+                                        transition={{ duration: 1.5, repeat: Infinity }}
                                     />
                                 )}
 
@@ -227,7 +203,7 @@ function ProductDetailPage() {
                                     <>
                                         <motion.button
                                             onClick={handlePrevImage}
-                                            className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md backdrop-blur-sm"
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 glass-button p-2 rounded-full"
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.95 }}
                                         >
@@ -235,7 +211,7 @@ function ProductDetailPage() {
                                         </motion.button>
                                         <motion.button
                                             onClick={handleNextImage}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md backdrop-blur-sm"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 glass-button p-2 rounded-full"
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.95 }}
                                         >
@@ -251,21 +227,18 @@ function ProductDetailPage() {
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                                            className="px-3 py-1 bg-linear-to-r from-indigo-500 to-sky-400 text-white text-xs font-semibold rounded-full flex items-center gap-1"
+                                            className="tag-pill flex items-center gap-1"
                                         >
                                             <Zap size={12} fill="currentColor" /> Featured
                                         </motion.span>
                                     )}
-                                    {/* SPIN WHEEL DISABLED - spin prize badge removed */}
-                                    {/* {hasSpinDiscount && (
-                                        <motion.span ...>🎉 SPIN PRIZE!</motion.span>
-                                    )} */}
                                     {discountPercentage > 0 && (
                                         <motion.span
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{ type: "spring", stiffness: 500, damping: 15, delay: 0.1 }}
-                                            className="px-3 py-1 bg-linear-to-r from-red-500 to-pink-500 text-white text-xs font-semibold rounded-full"
+                                            className="px-3 py-1 text-xs font-semibold rounded-full"
+                                            style={{ background: 'rgba(239, 68, 68, 0.15)', color: 'hsl(0, 72%, 55%)', border: '1px solid rgba(239, 68, 68, 0.25)' }}
                                         >
                                             -{discountPercentage}% OFF
                                         </motion.span>
@@ -282,16 +255,17 @@ function ProductDetailPage() {
                                             onClick={() => handleImgShow(idx)}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${idx === selectedIdx
-                                                ? 'border-indigo-400 shadow-md'
-                                                : 'border-slate-200 hover:border-slate-300'
-                                                }`}
+                                            className="shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all"
+                                            style={{
+                                                border: idx === selectedIdx
+                                                    ? '2px solid hsl(220, 70%, 55%)'
+                                                    : '2px solid var(--glass-border)',
+                                                boxShadow: idx === selectedIdx
+                                                    ? '0 0 12px -2px hsl(220, 70%, 55%, 0.3)'
+                                                    : 'none'
+                                            }}
                                         >
-                                            <img
-                                                src={img.url}
-                                                alt={`Thumbnail ${idx + 1}`}
-                                                className="w-full h-full object-cover"
-                                            />
+                                            <img src={img.url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                                         </motion.button>
                                     ))}
                                 </div>
@@ -306,187 +280,134 @@ function ProductDetailPage() {
                             animate="visible"
                         >
                             <motion.h1
-                                className="text-3xl md:text-4xl font-bold text-gray-900 mb-2"
+                                className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2"
+                                style={{ color: 'hsl(var(--foreground))' }}
                                 variants={fadeIn}
                             >
                                 {product.name}
                             </motion.h1>
 
-                            <motion.div
-                                className="flex items-center gap-3 mb-4"
-                                variants={fadeIn}
-                            >
+                            <motion.div className="flex items-center gap-3 mb-4 flex-wrap" variants={fadeIn}>
                                 <div className="flex items-center">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star
-                                            key={i}
-                                            size={18}
-                                            className={i < Math.floor(product.rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+                                        <Star key={i} size={18}
+                                            className={i < Math.floor(product.rating || 0) ? "" : ""}
+                                            style={{ color: i < Math.floor(product.rating || 0) ? 'hsl(45, 93%, 47%)' : 'hsl(var(--muted-foreground))', fill: i < Math.floor(product.rating || 0) ? 'hsl(45, 93%, 47%)' : 'none' }}
                                         />
                                     ))}
-                                    <span className="ml-2 text-sm text-gray-600">
+                                    <span className="ml-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
                                         ({product.numReviews || 0} reviews)
                                     </span>
                                 </div>
-                                <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                                <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <span className="w-1 h-1 rounded-full" style={{ background: 'hsl(var(--muted-foreground))' }} />
+                                <span className="text-sm font-medium"
+                                    style={{ color: product.stock > 0 ? 'hsl(150, 60%, 40%)' : 'hsl(0, 72%, 55%)' }}>
                                     {product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
                                 </span>
                             </motion.div>
 
-                            <motion.div
-                                className="mb-6"
-                                variants={fadeIn}
-                            >
-                                {/* SPIN WHEEL DISABLED - spin discount badge removed */}
-                                {/* {hasSpinDiscount && (<div className="mb-2"><span>🎉 Spin Discount Applied!</span></div>)} */}
+                            <motion.div className="mb-6" variants={fadeIn}>
                                 {discountPercentage > 0 ? (
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-3xl font-bold text-gray-900">
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <span className="text-3xl font-extrabold" style={{ color: 'hsl(var(--foreground))' }}>
                                             {getCurrencySymbol()}{convertPrice(displayPrice).toFixed(2)}
                                         </span>
-                                        <span className="text-xl text-gray-500 line-through">
+                                        <span className="text-xl line-through" style={{ color: 'hsl(var(--muted-foreground))' }}>
                                             {getCurrencySymbol()}{convertPrice(originalPrice).toFixed(2)}
                                         </span>
-                                        <span className="px-2 py-1 text-sm font-semibold rounded bg-red-100 text-red-700">
+                                        <span className="tag-pill text-xs font-semibold"
+                                            style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'hsl(0, 72%, 55%)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
                                             Save {discountPercentage}%
                                         </span>
                                     </div>
                                 ) : (
-                                    <span className="text-3xl font-bold text-gray-900">
+                                    <span className="text-3xl font-extrabold" style={{ color: 'hsl(var(--foreground))' }}>
                                         {getCurrencySymbol()}{convertPrice(displayPrice).toFixed(2)}
                                     </span>
                                 )}
                             </motion.div>
 
                             <motion.p
-                                className="text-gray-600 mb-6 leading-relaxed"
+                                className="text-sm mb-6 leading-relaxed"
+                                style={{ color: 'hsl(var(--muted-foreground))' }}
                                 variants={fadeIn}
                             >
                                 {product.description}
                             </motion.p>
 
-                            <motion.div
-                                className="grid grid-cols-2 gap-4 mb-6"
-                                variants={fadeIn}
-                            >
-                                {/* <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Shield size={18} className="text-blue-500" />
-                                    <span>2 Year Warranty</span>
-                                </div> */}
-                                {/* <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Truck size={18} className="text-green-500" />
-                                    <span>Free Shipping</span>
-                                </div> */}
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <RotateCcw size={18} className="text-indigo-500" />
+                            <motion.div className="flex items-center gap-3 mb-6" variants={fadeIn}>
+                                <div className="glass-inner flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm" style={{ color: 'hsl(var(--foreground))' }}>
+                                    <RotateCcw size={16} style={{ color: 'hsl(var(--primary))' }} />
                                     <span>30-Day Returns</span>
                                 </div>
-                                {/* <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Clock size={18} className="text-amber-500" />
-                                    <span>Delivery in 2-4 days</span>
-                                </div> */}
                             </motion.div>
 
                             {product.tags && product.tags.length > 0 && (
-                                <motion.div
-                                    className="flex flex-wrap gap-2 mb-6"
-                                    variants={fadeIn}
-                                >
+                                <motion.div className="flex flex-wrap gap-2 mb-6" variants={fadeIn}>
                                     {product.tags.map((tag) => (
-                                        <span key={tag} className="px-3 py-1 bg-sky-50 text-sky-700 text-sm font-medium rounded-full border border-sky-100">
-                                            {tag}
+                                        <span key={tag} className="tag-pill text-xs font-medium"
+                                            style={{ background: 'rgba(56, 189, 248, 0.1)', color: 'hsl(200, 80%, 50%)', borderColor: 'rgba(56, 189, 248, 0.18)' }}>
+                                            <Tag size={11} /> {tag}
                                         </span>
                                     ))}
                                 </motion.div>
                             )}
 
-                            <motion.div
-                                className="flex gap-3 mb-6"
-                                variants={fadeIn}
-                            >
+                            <motion.div className="flex gap-3 mb-6" variants={fadeIn}>
                                 <motion.button
                                     disabled={product.stock === 0 || isCartLoading || loadingProductId === id}
                                     onClick={() => { handleAddToCart(id) }}
                                     whileHover={product.stock > 0 ? { scale: 1.02 } : {}}
                                     whileTap={product.stock > 0 ? { scale: 0.98 } : {}}
-                                    className={`flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${product.stock === 0
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : isInCart
-                                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                            : 'bg-linear-to-r from-indigo-600 to-sky-500 text-white hover:from-indigo-700 hover:to-sky-600'
-                                        }`}
+                                    className="flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all text-sm"
+                                    style={
+                                        product.stock === 0
+                                            ? { background: 'rgba(255,255,255,0.08)', color: 'hsl(var(--muted-foreground))', cursor: 'not-allowed' }
+                                            : isInCart
+                                                ? { background: 'rgba(16, 185, 129, 0.15)', color: 'hsl(150, 60%, 40%)', border: '1px solid rgba(16, 185, 129, 0.25)' }
+                                                : { background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', color: 'white', boxShadow: '0 0 20px -4px hsl(220, 70%, 55%, 0.35)' }
+                                    }
                                 >
-                                    {
-                                        product.stock === 0 ? (
-                                            "Out of Stock"
-                                        ) :
-                                            isCartLoading && loadingProductId === id ? (
-                                                <motion.span
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    transition={{ duration: 0.3 }}
-                                                    className=" flex items-center justify-center  gap-2"
-                                                >
-                                                    <span className="animate-spin"> <Loader2 /> </span> <span>Adding to Cart...</span>
-                                                </motion.span>
-                                            ) :
-
-
-                                                isInCart ? (
-                                                    <motion.span
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        transition={{ duration: 0.3 }}
-                                                        className="flex items-center justify-center gap-2"
-                                                    >
-                                                        <Sparkles size={16} /> Added to Cart
-                                                    </motion.span>
-                                                ) : (
-                                                    <motion.span
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        transition={{ duration: 0.3 }}
-                                                        className="flex items-center justify-center gap-2"
-                                                    >
-                                                        <ShoppingCart size={16} /> Add to Cart
-                                                    </motion.span>
-                                                )
+                                    {product.stock === 0 ? "Out of Stock" :
+                                        isCartLoading && loadingProductId === id ? (
+                                            <span className="flex items-center gap-2">
+                                                <Loader2 size={16} className="animate-spin" /> Adding...
+                                            </span>
+                                        ) : isInCart ? (
+                                            <span className="flex items-center gap-2">
+                                                <Sparkles size={16} /> Added to Cart
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-2">
+                                                <ShoppingCart size={16} /> Add to Cart
+                                            </span>
+                                        )
                                     }
                                 </motion.button>
 
                                 <motion.button
                                     disabled={product.stock === 0}
                                     onClick={() => {
-                                        if (isInWishlist) {
-                                            handleDeleteFromWishlist(product._id);
-                                        } else {
-                                            handleAddToWishlist(product._id);
-                                        }
+                                        if (isInWishlist) handleDeleteFromWishlist(product._id);
+                                        else handleAddToWishlist(product._id);
                                     }}
                                     whileHover={product.stock > 0 ? { scale: 1.05 } : {}}
                                     whileTap={product.stock > 0 ? { scale: 0.95 } : {}}
-                                    className={`p-3 rounded-xl font-semibold flex items-center justify-center transition-all ${product.stock === 0
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : isInWishlist
-                                            ? 'bg-red-100 text-red-600'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
+                                    className="glass-button p-3 rounded-xl flex items-center justify-center transition-all"
+                                    style={
+                                        product.stock === 0
+                                            ? { cursor: 'not-allowed', opacity: 0.5 }
+                                            : isInWishlist
+                                                ? { background: 'rgba(239, 68, 68, 0.12)', borderColor: 'rgba(239, 68, 68, 0.25)', color: 'hsl(0, 72%, 55%)' }
+                                                : {}
+                                    }
                                 >
-                                    <Heart
-                                        size={20}
-                                        fill={isInWishlist ? "currentColor" : "none"}
-                                    />
+                                    <Heart size={20} fill={isInWishlist ? "currentColor" : "none"} />
                                 </motion.button>
-
-
                             </motion.div>
 
                             {/* Store Info */}
-                            <motion.div
-                                className="my-6"
-                                variants={fadeIn}
-                            >
+                            <motion.div className="my-6" variants={fadeIn}>
                                 <StoreInfo
                                     storeName={storeData?.storeName}
                                     storeSlug={storeData?.storeSlug}
@@ -499,16 +420,18 @@ function ProductDetailPage() {
                             </motion.div>
 
                             <motion.div
-                                className="border-t pt-4"
+                                className="glass-inner rounded-xl p-4"
                                 variants={fadeIn}
                             >
-                                <div className="flex items-center gap-2 text-sm text-gray-500">
-                                    <span>Category:</span>
-                                    <span className="font-medium text-gray-700">{product.category}</span>
+                                <div className="flex items-center gap-2 text-sm mb-1.5">
+                                    <Package size={14} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Category:</span>
+                                    <span className="font-medium" style={{ color: 'hsl(var(--foreground))' }}>{product.category}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-500">
-                                    <span>Brand:</span>
-                                    <span className="font-medium text-gray-700">{product.brand}</span>
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Tag size={14} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Brand:</span>
+                                    <span className="font-medium" style={{ color: 'hsl(var(--foreground))' }}>{product.brand}</span>
                                 </div>
                             </motion.div>
                         </motion.div>
@@ -517,26 +440,28 @@ function ProductDetailPage() {
 
                 {/* Reviews Section */}
                 <motion.div
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md border border-white/60 overflow-hidden p-6 md:p-8"
+                    className="glass-panel p-6 md:p-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
+                    <h2 className="text-2xl font-extrabold tracking-tight mb-6" style={{ color: 'hsl(var(--foreground))' }}>
+                        Customer Reviews
+                    </h2>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Add Review */}
                         <motion.div
-                            className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-white/50"
+                            className="glass-inner rounded-2xl p-6"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.3 }}
                         >
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Add Your Review</h3>
+                            <h3 className="text-lg font-semibold mb-4" style={{ color: 'hsl(var(--foreground))' }}>Add Your Review</h3>
 
                             <form onSubmit={handleAddReview} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'hsl(var(--muted-foreground))' }}>Your Rating</label>
                                     <div className="flex gap-1">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <motion.button
@@ -547,9 +472,8 @@ function ProductDetailPage() {
                                                 whileTap={{ scale: 0.9 }}
                                                 className="p-1"
                                             >
-                                                <Star
-                                                    size={28}
-                                                    className={star <= rating ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+                                                <Star size={28}
+                                                    style={{ color: star <= rating ? 'hsl(45, 93%, 47%)' : 'hsl(var(--muted-foreground))', fill: star <= rating ? 'hsl(45, 93%, 47%)' : 'none' }}
                                                 />
                                             </motion.button>
                                         ))}
@@ -557,12 +481,13 @@ function ProductDetailPage() {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                                    <label htmlFor="comment" className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'hsl(var(--muted-foreground))' }}>Your Review</label>
                                     <textarea
                                         ref={commentRef}
                                         id="comment"
                                         rows="4"
-                                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white/70 transition-colors"
+                                        className="glass-input"
+                                        style={{ resize: 'vertical' }}
                                         placeholder="Share your experience with this product..."
                                     />
                                 </div>
@@ -571,7 +496,8 @@ function ProductDetailPage() {
                                     type="submit"
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="w-full bg-linear-to-r from-indigo-600 to-sky-500 hover:from-indigo-700 hover:to-sky-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-md shadow-indigo-300/30"
+                                    className="w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all"
+                                    style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', color: 'white', boxShadow: '0 0 20px -4px hsl(220, 70%, 55%, 0.35)' }}
                                 >
                                     Submit Review
                                 </motion.button>
@@ -580,11 +506,11 @@ function ProductDetailPage() {
 
                         {/* Existing Reviews */}
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                            <h3 className="text-lg font-semibold mb-4" style={{ color: 'hsl(var(--foreground))' }}>
                                 {product.reviews?.length || 0} Review{product.reviews?.length !== 1 ? 's' : ''}
                             </h3>
 
-                            <div className="space-y-5 max-h-96 overflow-y-auto pr-2">
+                            <div className="space-y-4 max-h-96 overflow-y-auto pr-2 filter-sb">
                                 <AnimatePresence>
                                     {product.reviews && product.reviews.length > 0 ? (
                                         product.reviews.map((review, index) => {
@@ -595,30 +521,29 @@ function ProductDetailPage() {
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: -10 }}
-                                                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                                                    className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-white/60 shadow-sm"
+                                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                    className="glass-inner rounded-xl p-4"
                                                 >
                                                     <div className="flex items-start gap-3">
-                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                            <img className='rounded-full' src={review.user.avatar || 'https://res.cloudinary.com/dus5sac8g/image/upload/v1756983317/Profile_Picture_dxq4w8.jpg'} alt="" />
+                                                        <div className="w-10 h-10 rounded-full overflow-hidden shrink-0"
+                                                            style={{ border: '2px solid var(--glass-border)' }}>
+                                                            <img className='w-full h-full object-cover' src={review.user.avatar || 'https://res.cloudinary.com/dus5sac8g/image/upload/v1756983317/Profile_Picture_dxq4w8.jpg'} alt="" />
                                                         </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <span className="font-medium text-gray-900">{review.user?.username || 'Anonymous'}</span>
-                                                                <div className="flex gap-1">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                <span className="font-medium text-sm" style={{ color: 'hsl(var(--foreground))' }}>{review.user?.username || 'Anonymous'}</span>
+                                                                <div className="flex gap-0.5">
                                                                     {[...Array(5)].map((_, i) => (
-                                                                        <Star
-                                                                            key={i}
-                                                                            size={14}
-                                                                            className={i < review.rating ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+                                                                        <Star key={i} size={12}
+                                                                            style={{ color: i < review.rating ? 'hsl(45, 93%, 47%)' : 'hsl(var(--muted-foreground))', fill: i < review.rating ? 'hsl(45, 93%, 47%)' : 'none' }}
                                                                         />
                                                                     ))}
                                                                 </div>
                                                             </div>
-                                                            <div className="text-xs text-gray-500 mb-2">
+                                                            <div className="text-xs mb-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
                                                                 {date.toLocaleDateString()} at {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </div>
-                                                            <p className="text-gray-700">{review.comment}</p>
+                                                            <p className="text-sm" style={{ color: 'hsl(var(--foreground))' }}>{review.comment}</p>
                                                         </div>
                                                     </div>
                                                 </motion.div>
@@ -628,10 +553,14 @@ function ProductDetailPage() {
                                         <motion.div
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className="text-center py-10 text-gray-500"
+                                            className="text-center py-10"
                                         >
-                                            <Star size={40} className="mx-auto text-gray-300 mb-3" />
-                                            <p>No reviews yet. Be the first to review this product!</p>
+                                            <div className="glass-inner p-4 rounded-2xl inline-block mb-3">
+                                                <Star size={32} style={{ color: 'hsl(var(--muted-foreground))' }} />
+                                            </div>
+                                            <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                                No reviews yet. Be the first to review this product!
+                                            </p>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>

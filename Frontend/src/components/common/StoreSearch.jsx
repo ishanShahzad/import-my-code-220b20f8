@@ -58,7 +58,7 @@ const StoreSearch = () => {
                 <input type="text" value={query} onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown} onFocus={() => query.trim().length > 0 && setIsOpen(true)}
                     placeholder="Search for stores..."
-                    className="glass-input pl-10" />
+                    className="glass-input glass-input-search" />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'hsl(var(--muted-foreground))' }}>
                     {loading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
                 </div>

@@ -112,8 +112,7 @@ const StoresListing = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search for stores..."
-                                className="glass-input"
-                                style={{ paddingLeft: '2.5rem' }}
+                                className="glass-input glass-input-search"
                             />
                         </div>
                         <select

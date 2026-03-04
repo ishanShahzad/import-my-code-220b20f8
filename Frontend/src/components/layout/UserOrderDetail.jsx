@@ -66,7 +66,7 @@ const OrderDetail = () => {
     const ss = getStatusStyle(order?.orderStatus);
 
     return (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-full">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-full p-4 sm:p-6">
             {/* Header */}
             <div className="glass-panel p-4 sm:p-6 mb-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

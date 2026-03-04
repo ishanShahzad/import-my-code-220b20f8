@@ -37,7 +37,7 @@ export default function OrdersScreen({ navigation }) {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load orders');
     } finally { setIsLoading(false); setRefreshing(false); }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
   const onRefresh = useCallback(() => { setRefreshing(true); fetchOrders(); }, [fetchOrders]);

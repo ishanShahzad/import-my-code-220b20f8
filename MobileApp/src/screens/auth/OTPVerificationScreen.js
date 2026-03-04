@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../config/api';
 import GlassBackground from '../../components/common/GlassBackground';
 import GlassPanel from '../../components/common/GlassPanel';
 import { colors, spacing, fontSize, borderRadius, shadows, fontWeight, glass } from '../../styles/theme';
@@ -55,7 +56,12 @@ export default function OTPVerificationScreen({ route, navigation }) {
   const handleResend = async () => {
     if (countdown > 0) return;
     setIsResending(true); setOtp(Array(OTP_LENGTH).fill('')); setError('');
-    await signup({ name, email, password: '__resend__' });
+    try {
+      await api.post('/api/auth/resend-otp', { email });
+    } catch {
+      // Fallback: re-trigger signup flow which sends a new OTP
+      await signup({ name, email, password: '' });
+    }
     setIsResending(false); setCountdown(RESEND_COOLDOWN); inputRefs.current[0]?.focus();
   };
 

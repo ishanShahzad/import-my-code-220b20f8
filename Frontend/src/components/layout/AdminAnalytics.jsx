@@ -41,9 +41,32 @@ const AdminAnalytics = () => {
         fetchData();
     }, []);
 
+    const days = parseInt(timeRange);
+
+    // Filter orders by selected time range
+    const filteredOrders = useMemo(() => {
+        const now = new Date();
+        const startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - days);
+        startDate.setHours(0, 0, 0, 0);
+        return orders.filter(o => new Date(o.createdAt) >= startDate);
+    }, [orders, days]);
+
+    // Previous period orders for comparison
+    const previousPeriodOrders = useMemo(() => {
+        const now = new Date();
+        const startCurrent = new Date(now);
+        startCurrent.setDate(startCurrent.getDate() - days);
+        const startPrev = new Date(startCurrent);
+        startPrev.setDate(startPrev.getDate() - days);
+        return orders.filter(o => {
+            const d = new Date(o.createdAt);
+            return d >= startPrev && d < startCurrent;
+        });
+    }, [orders, days]);
+
     // Revenue over time
     const revenueData = useMemo(() => {
-        const days = parseInt(timeRange);
         const now = new Date();
         const buckets = {};
         for (let i = days - 1; i >= 0; i--) {
@@ -51,7 +74,7 @@ const AdminAnalytics = () => {
             const key = d.toISOString().slice(0, 10);
             buckets[key] = { date: key, revenue: 0, orders: 0 };
         }
-        orders.forEach(o => {
+        filteredOrders.forEach(o => {
             const key = new Date(o.createdAt).toISOString().slice(0, 10);
             if (buckets[key]) {
                 buckets[key].orders += 1;
@@ -63,7 +86,7 @@ const AdminAnalytics = () => {
             label: new Date(b.date).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
             revenue: Math.round(b.revenue * rate * 100) / 100,
         }));
-    }, [orders, timeRange, rate]);
+    }, [filteredOrders, days, rate]);
 
     // Store stats
     const totalStores = stores.length;
@@ -96,9 +119,9 @@ const AdminAnalytics = () => {
     // Order status breakdown
     const statusData = useMemo(() => {
         const counts = { pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
-        orders.forEach(o => { if (counts[o.orderStatus] !== undefined) counts[o.orderStatus]++; });
+        filteredOrders.forEach(o => { const s = o.orderStatus || 'pending'; if (counts[s] !== undefined) counts[s]++; });
         return Object.entries(counts).map(([name, value]) => ({ name, value }));
-    }, [orders]);
+    }, [filteredOrders]);
 
     const STATUS_COLORS = ['hsl(30,90%,50%)', 'hsl(220,70%,55%)', 'hsl(200,80%,50%)', 'hsl(150,60%,45%)', 'hsl(0,72%,55%)'];
 
@@ -114,26 +137,40 @@ const AdminAnalytics = () => {
 
     const CAT_COLORS = ['hsl(220,70%,55%)', 'hsl(150,60%,45%)', 'hsl(200,80%,50%)', 'hsl(280,60%,55%)', 'hsl(30,90%,50%)', 'hsl(340,65%,55%)', 'hsl(170,60%,45%)', 'hsl(260,55%,55%)'];
 
-    // Summary
-    const totalRevenue = orders.reduce((s, o) => o.isPaid ? s + (o.orderSummary?.totalAmount || 0) : s, 0);
-    const paidOrders = orders.filter(o => o.isPaid).length;
+    // Real summary with period comparison
+    const totalRevenue = filteredOrders.reduce((s, o) => o.isPaid ? s + (o.orderSummary?.totalAmount || 0) : s, 0);
+    const prevRevenue = previousPeriodOrders.reduce((s, o) => o.isPaid ? s + (o.orderSummary?.totalAmount || 0) : s, 0);
+    const paidOrders = filteredOrders.filter(o => o.isPaid).length;
+    const prevPaidOrders = previousPeriodOrders.filter(o => o.isPaid).length;
     const avgOrderValue = paidOrders > 0 ? totalRevenue / paidOrders : 0;
-    const totalUnitsSold = orders.reduce((s, o) => o.isPaid ? s + o.orderItems.reduce((a, i) => a + i.quantity, 0) : s, 0);
+    const prevAvg = prevPaidOrders > 0 ? prevRevenue / prevPaidOrders : 0;
+    const totalUnitsSold = filteredOrders.reduce((s, o) => o.isPaid ? s + o.orderItems.reduce((a, i) => a + i.quantity, 0) : s, 0);
+
+    const calcChange = (curr, prev) => {
+        if (prev === 0 && curr === 0) return { text: '0%', up: true };
+        if (prev === 0) return { text: '+100%', up: true };
+        const pct = Math.round(((curr - prev) / prev) * 100);
+        return { text: `${pct >= 0 ? '+' : ''}${pct}%`, up: pct >= 0 };
+    };
+
+    const revenueChange = calcChange(totalRevenue, prevRevenue);
+    const ordersChange = calcChange(filteredOrders.length, previousPeriodOrders.length);
+    const avgChange = calcChange(avgOrderValue, prevAvg);
 
     const summaryStats = [
-        { label: 'Total Revenue', value: `${symbol}${(totalRevenue * rate).toFixed(2)}`, icon: <DollarSign size={20} />, color: 'hsl(150,60%,45%)', bg: 'rgba(16,185,129,0.12)', change: '+12%', up: true },
-        { label: 'Total Orders', value: orders.length, icon: <ShoppingBag size={20} />, color: 'hsl(220,70%,55%)', bg: 'rgba(99,102,241,0.12)', change: '+8%', up: true },
+        { label: 'Total Revenue', value: `${symbol}${(totalRevenue * rate).toFixed(2)}`, icon: <DollarSign size={20} />, color: 'hsl(150,60%,45%)', bg: 'rgba(16,185,129,0.12)', change: revenueChange.text, up: revenueChange.up },
+        { label: 'Total Orders', value: filteredOrders.length, icon: <ShoppingBag size={20} />, color: 'hsl(220,70%,55%)', bg: 'rgba(99,102,241,0.12)', change: ordersChange.text, up: ordersChange.up },
         { label: 'Total Stores', value: totalStores, icon: <Store size={20} />, color: 'hsl(200,80%,50%)', bg: 'rgba(14,165,233,0.12)', change: `${verifiedStores} verified`, up: true },
         { label: 'Total Users', value: users.length, icon: <Users size={20} />, color: 'hsl(280,60%,55%)', bg: 'rgba(139,92,246,0.12)', change: `${users.filter(u => u.role === 'seller').length} sellers`, up: true },
-        { label: 'Products', value: products.length, icon: <Package size={20} />, color: 'hsl(30,90%,50%)', bg: 'rgba(249,115,22,0.12)', change: `${products.filter(p => p.stock === 0).length} OOS`, up: false },
-        { label: 'Avg Order Value', value: `${symbol}${(avgOrderValue * rate).toFixed(2)}`, icon: <TrendingUp size={20} />, color: 'hsl(340,65%,55%)', bg: 'rgba(244,63,94,0.12)', change: '+5%', up: true },
+        { label: 'Products', value: products.length, icon: <Package size={20} />, color: 'hsl(30,90%,50%)', bg: 'rgba(249,115,22,0.12)', change: `${products.filter(p => p.stock === 0).length} out of stock`, up: false },
+        { label: 'Avg Order Value', value: `${symbol}${(avgOrderValue * rate).toFixed(2)}`, icon: <TrendingUp size={20} />, color: 'hsl(340,65%,55%)', bg: 'rgba(244,63,94,0.12)', change: avgChange.text, up: avgChange.up },
     ];
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (!active || !payload?.length) return null;
         return (
-            <div className="glass-panel p-3" style={{ minWidth: 140 }}>
-                <p className="text-xs font-semibold mb-1" style={{ color: 'hsl(var(--foreground))' }}>{label}</p>
+            <div className="p-3" style={{ minWidth: 140, background: 'rgba(30,30,40,0.92)', backdropFilter: 'blur(16px)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)' }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.9)' }}>{label}</p>
                 {payload.map((p, i) => (
                     <p key={i} className="text-xs" style={{ color: p.color }}>
                         {p.name}: {p.name === 'revenue' ? `${symbol}${p.value}` : p.value}
@@ -168,7 +205,7 @@ const AdminAnalytics = () => {
                         Admin Analytics
                     </h1>
                     <p className="text-sm mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                        Platform-wide performance overview
+                        Platform-wide performance overview · Last {timeRange} days vs previous {timeRange} days
                     </p>
                 </div>
                 <div className="flex gap-2">

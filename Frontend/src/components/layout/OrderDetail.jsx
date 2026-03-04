@@ -51,9 +51,10 @@ const OrderDetail = () => {
     const ss = getStatusStyle(order?.orderStatus);
 
     return (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-panel overflow-hidden">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6">
+            <div className="glass-panel overflow-hidden">
             {/* Header */}
-            <div className="p-4 sm:p-6 mt-12 sm:mt-6" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+            <div className="p-4 sm:p-6 mt-2" style={{ borderBottom: '1px solid var(--glass-border)' }}>
                 <div className="flex items-start gap-3 sm:gap-4 mb-4">
                     <Link to={`/${currentUser?.role === 'seller' ? 'seller' : 'admin'}-dashboard/order-management`}>
                         <button className="p-2 rounded-xl glass-inner relative z-10"><ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: 'hsl(var(--foreground))' }} /></button>
@@ -244,6 +245,7 @@ const OrderDetail = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            </div>
         </motion.div>
     );
 };

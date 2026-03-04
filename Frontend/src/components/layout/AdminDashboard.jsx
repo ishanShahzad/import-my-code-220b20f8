@@ -168,18 +168,26 @@ const AdminDashboard = () => {
         return 'Admin Dashboard';
     };
 
-    // Build notifications from local data
+    // Build notifications from local data, filtered by user preferences
     const buildNotifications = () => {
+        let prefs = {};
+        try { prefs = JSON.parse(localStorage.getItem('notificationPrefs')) || {}; } catch {}
         const notifs = [];
-        products.filter(p => p.stock === 0).forEach(p => {
-            notifs.push({ id: `s-${p._id}`, type: 'critical', title: `${p.name} is out of stock`, description: 'Update inventory immediately', time: new Date().toISOString() });
-        });
-        products.filter(p => p.stock > 0 && p.stock <= 10).forEach(p => {
-            notifs.push({ id: `l-${p._id}`, type: 'warning', title: `${p.name} running low`, description: `${p.stock} units left`, time: new Date().toISOString() });
-        });
-        orders.filter(o => o.orderStatus === 'pending').slice(0, 5).forEach(o => {
-            notifs.push({ id: `o-${o._id}`, type: 'info', title: `Pending order #${o.orderId}`, description: o.shippingInfo?.fullName || '', time: o.createdAt });
-        });
+        if (prefs.stockAlerts !== false) {
+            products.filter(p => p.stock === 0).forEach(p => {
+                notifs.push({ id: `s-${p._id}`, type: 'critical', title: `${p.name} is out of stock`, description: 'Update inventory immediately', time: new Date().toISOString() });
+            });
+        }
+        if (prefs.lowStockAlerts !== false) {
+            products.filter(p => p.stock > 0 && p.stock <= 10).forEach(p => {
+                notifs.push({ id: `l-${p._id}`, type: 'warning', title: `${p.name} running low`, description: `${p.stock} units left`, time: new Date().toISOString() });
+            });
+        }
+        if (prefs.orderAlerts !== false) {
+            orders.filter(o => o.orderStatus === 'pending').slice(0, 5).forEach(o => {
+                notifs.push({ id: `o-${o._id}`, type: 'info', title: `Pending order #${o.orderId}`, description: o.shippingInfo?.fullName || '', time: o.createdAt });
+            });
+        }
         return notifs;
     };
 
@@ -255,7 +263,7 @@ const AdminDashboard = () => {
                                             exit={{ opacity: 0, y: 8, scale: 0.96 }}
                                             transition={{ duration: 0.2 }}
                                             className="absolute right-0 top-full mt-2 w-80 sm:w-96 overflow-hidden z-50"
-                                            style={{ borderRadius: 20, maxHeight: '70vh', background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(44px)', WebkitBackdropFilter: 'blur(44px)', border: '1px solid rgba(255,255,255,0.4)', boxShadow: '0 16px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08)' }}>
+                                            style={{ borderRadius: 20, maxHeight: '70vh', background: 'rgba(240,240,245,0.88)', backdropFilter: 'blur(60px) saturate(180%)', WebkitBackdropFilter: 'blur(60px) saturate(180%)', border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 20px 60px rgba(0,0,0,0.18), 0 4px 20px rgba(0,0,0,0.1)' }}>
                                             <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                                 <h3 className="text-sm font-bold" style={{ color: 'hsl(var(--foreground))' }}>Notifications</h3>
                                                 <span className="text-[10px] font-medium px-2 py-0.5 rounded-full"
@@ -513,18 +521,27 @@ const ProductForm = ({ product, setProduct, onSave, onClose, uploadingImages }) 
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-                className="glass-panel-strong max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-start justify-center p-4 pt-8 sm:pt-12 z-50 overflow-y-auto">
+            <motion.div initial={{ scale: 0.92, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.92, opacity: 0, y: 30 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="w-full max-w-4xl mb-8"
+                style={{ background: 'rgba(245,245,250,0.92)', backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 24px 80px rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.1)' }}>
+                <div className="max-h-[85vh] overflow-y-auto" style={{ borderRadius: 24 }}>
 
                 {/* Header */}
-                <div className="p-6 flex justify-between items-center" style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                    <h3 className="text-lg font-bold" style={{ color: 'hsl(var(--foreground))' }}>
-                        {product._id ? "Edit Product" : "Add New Product"}
-                    </h3>
-                    <button onClick={onClose} className="p-2 rounded-xl glass-inner transition-colors" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                <div className="sticky top-0 z-10 p-5 sm:p-6 flex justify-between items-center" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', background: 'rgba(245,245,250,0.95)', backdropFilter: 'blur(20px)', borderRadius: '24px 24px 0 0' }}>
+                    <div>
+                        <h3 className="text-xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>
+                            {product._id ? "Edit Product" : "Add New Product"}
+                        </h3>
+                        <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                            {product._id ? 'Update product details below' : 'Fill in the details to create a new product'}
+                        </p>
+                    </div>
+                    <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} onClick={onClose} 
+                        className="p-2.5 rounded-xl transition-colors" style={{ background: 'rgba(0,0,0,0.05)', color: 'hsl(var(--muted-foreground))' }}>
                         <X size={20} />
-                    </button>
+                    </motion.button>
                 </div>
 
                 <form onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }} onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -737,6 +754,7 @@ const ProductForm = ({ product, setProduct, onSave, onClose, uploadingImages }) 
                         </motion.button>
                     </div>
                 </form>
+                </div>
             </motion.div>
         </motion.div>
     );

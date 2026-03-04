@@ -104,13 +104,23 @@ const ProductManagement = () => {
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {deleteConfirm && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="glass-panel p-6 max-w-md w-full">
-                            <h3 className="text-lg font-semibold mb-4" style={{ color: 'hsl(var(--foreground))' }}>Confirm Deletion</h3>
-                            <p className="text-sm mb-6" style={{ color: 'hsl(var(--muted-foreground))' }}>Are you sure you want to delete this product? This action cannot be undone.</p>
-                            <div className="flex justify-end space-x-3">
-                                <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 rounded-xl glass-inner font-medium" style={{ color: 'hsl(var(--foreground))' }}>Cancel</button>
-                                <button onClick={() => handleDeleteProduct(deleteConfirm)} className="px-4 py-2 rounded-xl text-white font-medium" style={{ background: 'hsl(0, 72%, 55%)' }}>Delete</button>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                        <motion.div initial={{ scale: 0.92, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="max-w-md w-full p-6"
+                            style={{ background: 'rgba(245,245,250,0.92)', backdropFilter: 'blur(40px) saturate(180%)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.5)', boxShadow: '0 24px 80px rgba(0,0,0,0.2)' }}>
+                            <div className="text-center mb-5">
+                                <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center mb-3" style={{ background: 'rgba(239,68,68,0.12)' }}>
+                                    <Trash2 size={24} style={{ color: 'hsl(0, 72%, 55%)' }} />
+                                </div>
+                                <h3 className="text-lg font-bold" style={{ color: 'hsl(var(--foreground))' }}>Delete Product?</h3>
+                                <p className="text-sm mt-2" style={{ color: 'hsl(var(--muted-foreground))' }}>This action cannot be undone. The product will be permanently removed.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm"
+                                    style={{ background: 'rgba(0,0,0,0.05)', color: 'hsl(var(--foreground))' }}>Cancel</button>
+                                <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleDeleteProduct(deleteConfirm)} className="flex-1 px-4 py-2.5 rounded-xl text-white font-semibold text-sm"
+                                    style={{ background: 'linear-gradient(135deg, hsl(0, 72%, 55%), hsl(340, 65%, 50%))', boxShadow: '0 4px 16px rgba(239,68,68,0.3)' }}>Delete</motion.button>
                             </div>
                         </motion.div>
                     </motion.div>

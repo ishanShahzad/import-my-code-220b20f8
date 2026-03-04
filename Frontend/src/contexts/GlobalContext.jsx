@@ -328,4 +328,10 @@ export const GlobalProvider = ({ children }) => {
     );
 };
 
-export const useGlobal = () => useContext(GlobalContext);
+export const useGlobal = () => {
+  const context = useContext(GlobalContext);
+  if (context === undefined) {
+    throw new Error('useGlobal must be used within a GlobalProvider');
+  }
+  return context;
+};

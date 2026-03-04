@@ -2,11 +2,11 @@
  * ProductDetailScreen — Liquid Glass Design
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   Dimensions, FlatList, Share, Animated, Modal, TextInput,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +31,7 @@ export default function ProductDetailScreen({ route, navigation }) {
 
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [storeData, setStoreData] = useState(null);
   const flatListRef = useRef(null);
@@ -62,8 +63,13 @@ export default function ProductDetailScreen({ route, navigation }) {
         try { const storeRes = await api.get(`/api/stores/seller/${res.data.product.seller}`); setStoreData(storeRes.data.store); } catch {}
       }
     } catch { Toast.show({ type: 'error', text1: 'Error', text2: 'Product not found' }); navigation.goBack(); }
-    finally { setIsLoading(false); }
+    finally { setIsLoading(false); setRefreshing(false); }
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchProduct();
+  }, [productId]);
 
   const displayPrice = product?.discountedPrice || product?.price || 0;
   const originalPrice = product?.price;
@@ -102,7 +108,8 @@ export default function ProductDetailScreen({ route, navigation }) {
 
   return (
     <GlassBackground>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}>
         {/* Image Gallery */}
         <View style={styles.imageSection}>
           <FlatList ref={flatListRef} data={images} horizontal pagingEnabled showsHorizontalScrollIndicator={false}

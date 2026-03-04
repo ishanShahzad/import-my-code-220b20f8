@@ -2,9 +2,9 @@
  * CartScreen — Liquid Glass Design
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, Alert,
+  View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, Alert, RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +21,15 @@ export default function CartScreen({ navigation }) {
   const { cartItems, fetchCart, handleRemoveCartItem, handleQtyInc, handleQtyDec, isCartLoading, qtyUpdateId } = useGlobal();
   const { formatPrice } = useCurrency();
 
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => { if (currentUser) fetchCart(); }, [currentUser]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchCart();
+    setRefreshing(false);
+  }, [fetchCart]);
 
   const getDiscountedPrice = (product) => product?.discountedPrice || product?.price || 0;
 
@@ -126,6 +134,7 @@ export default function CartScreen({ navigation }) {
             renderItem={renderCartItem}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
             ListHeaderComponent={heroHeader}
             ListFooterComponent={
               <GlassPanel variant="panel" style={styles.orderSummary}>

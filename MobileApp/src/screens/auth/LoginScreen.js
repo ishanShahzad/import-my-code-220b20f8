@@ -1,20 +1,16 @@
+/**
+ * LoginScreen — Liquid Glass Design
+ */
+
 import React, { useState, useRef } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  StatusBar,
-  Animated,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import GlassBackground from '../../components/common/GlassBackground';
+import GlassPanel from '../../components/common/GlassPanel';
 import { colors, spacing, fontSize, borderRadius, shadows, fontWeight } from '../../styles/theme';
 
 export default function LoginScreen({ navigation }) {
@@ -32,9 +28,7 @@ export default function LoginScreen({ navigation }) {
     setGoogleLoading(true);
     const result = await googleSignIn();
     setGoogleLoading(false);
-    if (result?.success) {
-      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
-    }
+    if (result?.success) navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
   };
 
   const handleLogin = async () => {
@@ -46,25 +40,21 @@ export default function LoginScreen({ navigation }) {
     setIsLoading(true);
     const result = await login({ email, password });
     setIsLoading(false);
-    if (result.success) {
-      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
-    }
+    if (result.success) navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} />
+    <GlassBackground>
+      <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.topHeader}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={22} color={colors.white} />
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
             </TouchableOpacity>
             <View style={styles.logoRow}>
-              <View style={styles.logoIcon}>
-                <Ionicons name="storefront" size={20} color={colors.white} />
-              </View>
+              <View style={styles.logoIcon}><Ionicons name="storefront" size={20} color={colors.white} /></View>
               <Text style={styles.logoText}>Tortrose</Text>
             </View>
             <View style={{ width: 40 }} />
@@ -76,24 +66,18 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.heroSubtitle}>Sign in to your account to continue shopping</Text>
           </View>
 
-          {/* Card */}
-          <View style={styles.card}>
+          {/* Form Card */}
+          <GlassPanel variant="strong" style={styles.card}>
             {/* Email */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email Address</Text>
               <View style={[styles.inputContainer, emailFocused && styles.inputFocused, errors.email && styles.inputError]}>
                 <Ionicons name="mail-outline" size={20} color={emailFocused ? colors.primary : colors.grayLight} style={styles.inputIcon} />
                 <TextInput
-                  style={styles.input}
-                  placeholder="john@example.com"
-                  placeholderTextColor={colors.grayLight}
-                  value={email}
-                  onChangeText={(t) => { setEmail(t); setErrors(e => ({...e, email: null})); }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onFocus={() => setEmailFocused(true)}
-                  onBlur={() => setEmailFocused(false)}
+                  style={styles.input} placeholder="john@example.com" placeholderTextColor={colors.grayLight}
+                  value={email} onChangeText={(t) => { setEmail(t); setErrors(e => ({...e, email: null})); }}
+                  keyboardType="email-address" autoCapitalize="none" autoCorrect={false}
+                  onFocus={() => setEmailFocused(true)} onBlur={() => setEmailFocused(false)}
                 />
               </View>
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
@@ -105,14 +89,10 @@ export default function LoginScreen({ navigation }) {
               <View style={[styles.inputContainer, passwordFocused && styles.inputFocused, errors.password && styles.inputError]}>
                 <Ionicons name="lock-closed-outline" size={20} color={passwordFocused ? colors.primary : colors.grayLight} style={styles.inputIcon} />
                 <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  placeholderTextColor={colors.grayLight}
-                  value={password}
-                  onChangeText={(t) => { setPassword(t); setErrors(e => ({...e, password: null})); }}
+                  style={styles.input} placeholder="Enter your password" placeholderTextColor={colors.grayLight}
+                  value={password} onChangeText={(t) => { setPassword(t); setErrors(e => ({...e, password: null})); }}
                   secureTextEntry={!showPassword}
-                  onFocus={() => setPasswordFocused(true)}
-                  onBlur={() => setPasswordFocused(false)}
+                  onFocus={() => setPasswordFocused(true)} onBlur={() => setPasswordFocused(false)}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
                   <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.grayLight} />
@@ -121,83 +101,55 @@ export default function LoginScreen({ navigation }) {
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
 
-            {/* Forgot Password */}
             <TouchableOpacity style={styles.forgotContainer} onPress={() => navigation.navigate('ForgotPassword')}>
               <Text style={styles.forgotText}>Forgot your password?</Text>
             </TouchableOpacity>
 
-            {/* Sign In Button */}
             <TouchableOpacity style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} onPress={handleLogin} disabled={isLoading} activeOpacity={0.85}>
-              {isLoading ? (
-                <ActivityIndicator color={colors.white} size="small" />
-              ) : (
-                <>
-                  <Text style={styles.loginButtonText}>Sign In</Text>
-                  <Ionicons name="arrow-forward" size={20} color={colors.white} />
-                </>
+              {isLoading ? <ActivityIndicator color={colors.white} size="small" /> : (
+                <><Text style={styles.loginButtonText}>Sign In</Text><Ionicons name="arrow-forward" size={20} color={colors.white} /></>
               )}
             </TouchableOpacity>
 
-            {/* Divider */}
             <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
+              <View style={styles.dividerLine} /><Text style={styles.dividerText}>or continue with</Text><View style={styles.dividerLine} />
             </View>
 
-            {/* Google Sign-In Button */}
-            <TouchableOpacity
-              style={[styles.googleButton, googleLoading && styles.googleButtonDisabled]}
-              onPress={handleGoogleSignIn}
-              disabled={googleLoading}
-              activeOpacity={0.85}
-            >
-              {googleLoading ? (
-                <ActivityIndicator color="#4285F4" size="small" />
-              ) : (
-                <>
-                  <View style={styles.googleIcon}>
-                    <Text style={styles.googleIconText}>G</Text>
-                  </View>
-                  <Text style={styles.googleButtonText}>Continue with Google</Text>
-                </>
+            <TouchableOpacity style={[styles.googleButton, googleLoading && styles.googleButtonDisabled]} onPress={handleGoogleSignIn} disabled={googleLoading} activeOpacity={0.85}>
+              {googleLoading ? <ActivityIndicator color="#4285F4" size="small" /> : (
+                <><View style={styles.googleIcon}><Text style={styles.googleIconText}>G</Text></View><Text style={styles.googleButtonText}>Continue with Google</Text></>
               )}
             </TouchableOpacity>
 
-            {/* Sign Up Link */}
             <View style={styles.signUpRow}>
               <Text style={styles.signUpText}>Don't have an account?</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signUpLink}> Create Account</Text>
-              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}><Text style={styles.signUpLink}> Create Account</Text></TouchableOpacity>
             </View>
-          </View>
+          </GlassPanel>
 
-          {/* Footer */}
           <Text style={styles.footerText}>By signing in, you agree to our Terms of Service and Privacy Policy</Text>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </GlassBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.primaryDark },
   keyboardView: { flex: 1 },
   scrollContent: { flexGrow: 1, paddingBottom: spacing.xxxl },
-  topHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm },
-  backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center' },
+  topHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.xxxl, paddingBottom: spacing.sm },
+  backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.5)', justifyContent: 'center', alignItems: 'center' },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  logoIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
-  logoText: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: colors.white },
-  heroSection: { paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, paddingBottom: spacing.xxxl },
-  heroTitle: { fontSize: fontSize.title, fontWeight: fontWeight.extrabold, color: colors.white, marginBottom: spacing.sm },
-  heroSubtitle: { fontSize: fontSize.md, color: 'rgba(255,255,255,0.75)', lineHeight: 22 },
-  card: { backgroundColor: colors.white, borderTopLeftRadius: borderRadius.xxxl, borderTopRightRadius: borderRadius.xxxl, padding: spacing.xxl, paddingTop: spacing.xxxl, flex: 1, minHeight: 480 },
+  logoIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
+  logoText: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: colors.text },
+  heroSection: { paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl, paddingBottom: spacing.xl },
+  heroTitle: { fontSize: fontSize.title, fontWeight: fontWeight.extrabold, color: colors.text, marginBottom: spacing.sm },
+  heroSubtitle: { fontSize: fontSize.md, color: colors.textSecondary, lineHeight: 22 },
+  card: { marginHorizontal: spacing.lg, padding: spacing.xxl, marginBottom: spacing.lg },
   inputGroup: { marginBottom: spacing.lg },
-  label: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold, color: colors.dark, marginBottom: spacing.sm, letterSpacing: 0.3 },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.lighter, borderRadius: borderRadius.xl, borderWidth: 1.5, borderColor: colors.light, paddingHorizontal: spacing.md, height: 56 },
-  inputFocused: { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
+  label: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold, color: colors.text, marginBottom: spacing.sm, letterSpacing: 0.3 },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: borderRadius.xl, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.4)', paddingHorizontal: spacing.md, height: 56 },
+  inputFocused: { borderColor: colors.primary, backgroundColor: 'rgba(255,255,255,0.8)' },
   inputError: { borderColor: colors.error, backgroundColor: colors.errorSubtle },
   inputIcon: { marginRight: spacing.sm },
   input: { flex: 1, fontSize: fontSize.md, color: colors.text, paddingVertical: 0 },
@@ -209,15 +161,15 @@ const styles = StyleSheet.create({
   loginButtonDisabled: { opacity: 0.7 },
   loginButtonText: { color: colors.white, fontSize: fontSize.lg, fontWeight: fontWeight.bold },
   divider: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xl },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.light },
-  dividerText: { marginHorizontal: spacing.md, fontSize: fontSize.sm, color: colors.grayLight, fontWeight: fontWeight.medium },
-  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.light, borderRadius: borderRadius.xl, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, marginBottom: spacing.xl, gap: spacing.sm, ...shadows.sm },
+  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.3)' },
+  dividerText: { marginHorizontal: spacing.md, fontSize: fontSize.sm, color: colors.textSecondary, fontWeight: fontWeight.medium },
+  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.7)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.4)', borderRadius: borderRadius.xl, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, marginBottom: spacing.xl, gap: spacing.sm },
   googleButtonDisabled: { opacity: 0.7 },
   googleIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#4285F4', alignItems: 'center', justifyContent: 'center' },
   googleIconText: { color: colors.white, fontSize: fontSize.md, fontWeight: fontWeight.bold, lineHeight: 20 },
-  googleButtonText: { fontSize: fontSize.md, color: colors.dark, fontWeight: fontWeight.semibold },
+  googleButtonText: { fontSize: fontSize.md, color: colors.text, fontWeight: fontWeight.semibold },
   signUpRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   signUpText: { fontSize: fontSize.md, color: colors.textSecondary },
   signUpLink: { fontSize: fontSize.md, color: colors.primary, fontWeight: fontWeight.bold },
-  footerText: { fontSize: fontSize.xs, color: 'rgba(255,255,255,0.5)', textAlign: 'center', paddingHorizontal: spacing.xxl, marginTop: spacing.xl },
+  footerText: { fontSize: fontSize.xs, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.xxl, marginTop: spacing.md },
 });

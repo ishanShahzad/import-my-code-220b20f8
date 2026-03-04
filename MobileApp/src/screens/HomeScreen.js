@@ -14,7 +14,6 @@ import {
   RefreshControl,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   Modal,
   ScrollView,
@@ -26,6 +25,7 @@ import api from '../config/api';
 import ProductCard from '../components/ProductCard';
 import CurrencySelector from '../components/CurrencySelector';
 import { Loader, EmptySearch } from '../components/common';
+import GlassBackground from '../components/common/GlassBackground';
 import { useAuth } from '../contexts/AuthContext';
 import { useGlobal } from '../contexts/GlobalContext';
 import { useCurrency } from '../contexts/CurrencyContext';
@@ -513,10 +513,10 @@ export default function HomeScreen({ navigation }) {
   // Loading state with custom loader
   if (isLoading && products.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <GlassBackground>
+        <StatusBar barStyle="dark-content" />
         <Loader fullScreen size="large" />
-      </SafeAreaView>
+      </GlassBackground>
     );
   }
 
@@ -531,8 +531,8 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+    <GlassBackground>
+      <StatusBar barStyle="dark-content" />
       <FlatList
         data={products}
         keyExtractor={(item) => item._id}
@@ -548,7 +548,6 @@ export default function HomeScreen({ navigation }) {
             onRefresh={onRefresh}
             colors={[colors.primary]}
             tintColor={colors.primary}
-            progressBackgroundColor={colors.white}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -565,12 +564,12 @@ export default function HomeScreen({ navigation }) {
         )}
       />
       {renderFilterModal()}
-    </SafeAreaView>
+    </GlassBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1 },
   // Hero Header
   heroHeader: { backgroundColor: colors.primaryDark, paddingBottom: spacing.xxxl },
   heroTopBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.md },

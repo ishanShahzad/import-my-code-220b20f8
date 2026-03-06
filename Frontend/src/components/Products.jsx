@@ -12,6 +12,7 @@ import { toast } from 'react-toastify'
 import { useAuth } from '../contexts/AuthContext'
 import CurrencySelector from './common/CurrencySelector'
 import { useCurrency } from '../contexts/CurrencyContext'
+import SEOHead from './common/SEOHead'
 
 
 function Products() {
@@ -210,6 +211,32 @@ function Products() {
 
   return (
     <div className='relative flex flex-col lg:flex-row min-h-screen'>
+      <SEOHead
+        title={null}
+        description="Shop unique products from independent sellers on Tortrose. Filter by category, brand and price. Secure checkout with multi-currency support."
+        canonical="/"
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Tortrose',
+            url: 'https://tortrose.com',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: 'https://tortrose.com/?search={search_term_string}',
+              'query-input': 'required name=search_term_string',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Tortrose',
+            url: 'https://tortrose.com',
+            logo: 'https://tortrose.com/tortrose-logo.svg',
+            sameAs: [],
+          },
+        ]}
+      />
       {/* Mobile Filter Toggle */}
       <div className='lg:hidden fixed bottom-6 right-6 z-40'>
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}

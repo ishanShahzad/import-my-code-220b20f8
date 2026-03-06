@@ -34,7 +34,6 @@ function MainLayoutPage() {
 
   return (
     <div className='relative min-h-screen'>
-      <SEOHead canonical="/" />
       <GlassBackground />
       <AnimatePresence mode='wait'>
         {

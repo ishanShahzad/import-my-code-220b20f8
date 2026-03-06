@@ -35,8 +35,21 @@ function ContactPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <SEOHead
         title="Contact Us"
-        description="Get in touch with the Tortrose team. We respond within 24 hours for all support and seller inquiries."
+        description="Get in touch with the Tortrose team. Email support@tortrose.com — we respond within 24 hours for all support and seller inquiries."
         canonical="/contact"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'Tortrose',
+          url: 'https://tortrose.com',
+          contactPoint: {
+            '@type': 'ContactPoint',
+            email: 'support@tortrose.com',
+            contactType: 'customer support',
+            availableLanguage: 'English',
+            areaServed: 'Worldwide',
+          },
+        }}
       />
       <motion.div
         initial={{ opacity: 0, y: 20 }}

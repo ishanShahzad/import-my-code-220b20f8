@@ -3,20 +3,49 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Tortrose — A modern marketplace for independent sellers. Shop trusted stores, discover unique products, and enjoy a seamless shopping experience with secure payments." />
-  <meta name="keywords" content="marketplace, online shopping, independent sellers, trusted stores, e-commerce, Tortrose" />
+
+  <!-- Favicon & App Icons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/tortrose-logo.svg" />
+  <meta name="theme-color" content="#1a1f2e" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- Default SEO (overridden per-page by react-helmet-async) -->
+  <title>Tortrose — Modern Marketplace for Independent Sellers</title>
+  <meta name="description" content="Tortrose — A modern marketplace for unique products from trusted independent sellers. Shop securely with multi-currency support and global shipping." />
   <meta name="author" content="Tortrose" />
-  <meta property="og:title" content="Tortrose — Modern Marketplace for Independent Sellers" />
-  <meta property="og:description" content="Shop trusted stores, discover unique products, and enjoy seamless checkout with secure payments." />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+  <!-- Default Open Graph -->
+  <meta property="og:site_name" content="Tortrose" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tortrose — Modern Marketplace for Independent Sellers" />
+  <meta property="og:description" content="Shop unique products from trusted independent sellers. Multi-currency, secure payments, global shipping." />
   <meta property="og:url" content="https://tortrose.com" />
-  <meta property="og:image" content="/tortrose-logo.svg" />
+  <meta property="og:image" content="https://tortrose.com/og-image.png" />
+  <meta property="og:image:alt" content="Tortrose — Modern Marketplace" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+
+  <!-- Default Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Tortrose — Modern Marketplace" />
-  <meta name="twitter:description" content="A trusted marketplace for independent sellers and thoughtful shoppers." />
+  <meta name="twitter:site" content="@TortroseHQ" />
+  <meta name="twitter:title" content="Tortrose — Modern Marketplace for Independent Sellers" />
+  <meta name="twitter:description" content="Shop unique products from trusted independent sellers. Multi-currency, secure payments, global shipping." />
+  <meta name="twitter:image" content="https://tortrose.com/og-image.png" />
+
+  <!-- Monetag -->
   <meta name="monetag" content="f4ef594788483f710c46efabfbd34701">
+
+  <!-- Performance: Preconnect & DNS Prefetch -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+  <link rel="dns-prefetch" href="https://api.stripe.com" />
+
   <!-- Google AdSense  -->
   <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8889081457352257"
     crossorigin="anonymous"></script> -->

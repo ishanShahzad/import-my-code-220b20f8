@@ -137,30 +137,47 @@ function ProductDetailPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <SEOHead
                     title={product.name}
-                    description={product.description?.slice(0, 155) || `Buy ${product.name} on Tortrose.`}
-                    canonical={`/product/${id}`}
+                    description={product.description?.slice(0, 155) || `Buy ${product.name} on Tortrose. ${product.category ? `Category: ${product.category}.` : ''} Fast shipping, secure checkout.`}
+                    canonical={`/single-product/${id}`}
                     ogType="product"
                     ogImage={product.image}
-                    jsonLd={{
-                        "@context": "https://schema.org",
-                        "@type": "Product",
-                        "name": product.name,
-                        "description": product.description,
-                        "image": product.image,
-                        "offers": {
-                            "@type": "Offer",
-                            "price": product.discountedPrice || product.price,
-                            "priceCurrency": "USD",
-                            "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                    ogImageAlt={product.name}
+                    jsonLd={[
+                        {
+                            '@context': 'https://schema.org',
+                            '@type': 'Product',
+                            name: product.name,
+                            description: product.description,
+                            image: product.image,
+                            brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+                            offers: {
+                                '@type': 'Offer',
+                                price: product.discountedPrice || product.price,
+                                priceCurrency: 'USD',
+                                availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                                url: `https://tortrose.com/single-product/${id}`,
+                                seller: { '@type': 'Organization', name: 'Tortrose' },
+                            },
+                            ...(product.rating && {
+                                aggregateRating: {
+                                    '@type': 'AggregateRating',
+                                    ratingValue: product.rating,
+                                    reviewCount: product.numReviews || 0,
+                                    bestRating: 5,
+                                    worstRating: 1,
+                                },
+                            }),
                         },
-                        ...(product.rating && {
-                            "aggregateRating": {
-                                "@type": "AggregateRating",
-                                "ratingValue": product.rating,
-                                "reviewCount": product.numReviews || 0
-                            }
-                        })
-                    }}
+                        {
+                            '@context': 'https://schema.org',
+                            '@type': 'BreadcrumbList',
+                            itemListElement: [
+                                { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://tortrose.com/' },
+                                { '@type': 'ListItem', position: 2, name: product.category || 'Products', item: 'https://tortrose.com/' },
+                                { '@type': 'ListItem', position: 3, name: product.name, item: `https://tortrose.com/single-product/${id}` },
+                            ],
+                        },
+                    ]}
                 />
                 {/* Breadcrumb */}
                 <motion.div
@@ -189,9 +206,9 @@ function ProductDetailPage() {
                 >
                     {/* Decorative orbs */}
                     <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
-                         style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))' }} />
+                        style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))' }} />
                     <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full opacity-15 blur-3xl pointer-events-none"
-                         style={{ background: 'linear-gradient(135deg, hsl(200, 80%, 55%), hsl(170, 70%, 45%))' }} />
+                        style={{ background: 'linear-gradient(135deg, hsl(200, 80%, 55%), hsl(170, 70%, 45%))' }} />
 
                     <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
                         {/* Images Section */}

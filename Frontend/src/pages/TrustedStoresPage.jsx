@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import Loader from '../components/common/Loader';
 import { useAuth } from '../contexts/AuthContext';
 import VerifiedBadge from '../components/common/VerifiedBadge';
+import SEOHead from '../components/common/SEOHead';
 
 const TrustedStoresPage = () => {
     const [trustedStores, setTrustedStores] = useState([]);
@@ -66,7 +67,12 @@ const TrustedStoresPage = () => {
             transition={{ duration: 0.5 }}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Breadcrumb */}
+                <SEOHead
+                    title="My Trusted Stores"
+                    description="Your personal list of trusted independent stores on Tortrose."
+                    canonical="/stores/trusted"
+                    noindex={true}
+                />
                 <motion.div
                     className="flex items-center text-sm text-slate-500 mb-6"
                     initial={{ opacity: 0, y: -10 }}
@@ -149,7 +155,7 @@ const TrustedStoresPage = () => {
                                             <Store size={28} className="text-white" />
                                         </div>
                                     )}
-                                    
+
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-lg font-bold text-gray-900 truncate flex items-center gap-2">
                                             {store.storeName}

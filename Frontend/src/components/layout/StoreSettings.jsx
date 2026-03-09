@@ -38,7 +38,8 @@ const StoreSettings = () => {
     const [storeData, setStoreData] = useState({
         storeName: '', description: '', logo: '', banner: '', storeSlug: '',
         address: { street: '', city: '', state: '', country: '', postalCode: '' },
-        socialLinks: { website: '', facebook: '', instagram: '', twitter: '', youtube: '', tiktok: '' }
+        socialLinks: { website: '', facebook: '', instagram: '', twitter: '', youtube: '', tiktok: '' },
+        returnPolicy: { returnsEnabled: false, returnDuration: 0, refundType: 'none', warrantyEnabled: false, warrantyDuration: 0, warrantyDescription: '', policyDescription: '' }
     });
 
     const [analytics, setAnalytics] = useState({ views: 0, productCount: 0, totalSales: 0, trustCount: 0 });

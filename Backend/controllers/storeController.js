@@ -1,5 +1,42 @@
 const Store = require('../models/Store');
 const User = require('../models/User');
+const { sendEmail } = require('./mailController');
+
+// Email template helper
+const storeEmailTemplate = (title, bodyHtml, ctaUrl, ctaText) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>${title}</title>
+  <style>
+    body { background-color: #F8F9FA; font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; color: #1A1A1A; margin: 0; padding: 0; }
+    .email-wrapper { max-width: 600px; margin: 0 auto; padding: 1.5rem; }
+    .card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); padding: 2rem; }
+    .header { background: linear-gradient(135deg, #4F46E5, #3B82F6); color: #fff; padding: 1.25rem 2rem; border-radius: 12px 12px 0 0; font-size: 1.2rem; font-weight: 600; text-align: center; }
+    .content { padding: 1.5rem 0; line-height: 1.7; }
+    .content p { margin: 0.75rem 0; }
+    .button { display: inline-block; margin-top: 1.25rem; background: linear-gradient(135deg, #4F46E5, #3B82F6); color: white !important; padding: 0.75rem 1.75rem; border-radius: 10px; text-decoration: none; font-weight: 600; }
+    .footer { font-size: 13px; text-align: center; color: #6B7280; margin-top: 2rem; }
+    .highlight { background: #F0F4FF; border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; border-left: 4px solid #4F46E5; }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="card">
+      <div class="header">${title}</div>
+      <div class="content">
+        ${bodyHtml}
+        ${ctaUrl ? `<p style="text-align:center"><a href="${ctaUrl}" class="button">${ctaText || 'View Details'}</a></p>` : ''}
+        <p>Best regards,<br/>The Tortrose Team</p>
+      </div>
+    </div>
+    <div class="footer">&copy; ${new Date().getFullYear()} Tortrose. All rights reserved.</div>
+  </div>
+</body>
+</html>
+`;
 
 // Helper function to generate unique slug
 const generateUniqueSlug = async (storeName) => {

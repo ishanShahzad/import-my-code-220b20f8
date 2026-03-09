@@ -261,7 +261,7 @@ exports.getMyStore = async (req, res) => {
 // Update store
 exports.updateStore = async (req, res) => {
     try {
-        const { storeName, storeSlug, description, logo, banner, socialLinks, address } = req.body;
+        const { storeName, storeSlug, description, logo, banner, socialLinks, address, returnPolicy } = req.body;
         const sellerId = req.user.id;
 
         // Find seller's store

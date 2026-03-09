@@ -914,6 +914,31 @@ exports.removeVerification = async (req, res) => {
 
         await store.save();
 
+        // Send deactivation email to seller
+        try {
+            const seller = await User.findById(store.seller);
+            if (seller?.email) {
+                const html = storeEmailTemplate(
+                    '⚠️ Store Verification Removed',
+                    `<p>Hello ${seller.username || 'Seller'},</p>
+                    <p>We're writing to inform you that the verification for your store <strong>"${store.storeName}"</strong> has been removed by an administrator.</p>
+                    <div class="highlight">
+                        <strong>What this means:</strong><br/>
+                        • Your subdomain <strong>${store.storeSlug}.tortrose.com</strong> is no longer active<br/>
+                        • The verified badge has been removed from your store<br/>
+                        • Your store is still accessible at its regular URL
+                    </div>
+                    <p><strong>Reason:</strong> ${reason || 'No reason provided'}</p>
+                    <p>If you believe this was a mistake or would like to reapply, please visit your Store Settings or contact our support team.</p>`,
+                    `${process.env.FRONTEND_URL}/seller-dashboard/store-settings`,
+                    'Go to Store Settings'
+                );
+                await sendEmail({ to: seller.email, subject: `Store Verification Removed — ${store.storeName}`, html });
+            }
+        } catch (emailErr) {
+            console.error('Verification removal email failed:', emailErr.message);
+        }
+
         res.status(200).json({
             msg: 'Store verification removed successfully',
             store

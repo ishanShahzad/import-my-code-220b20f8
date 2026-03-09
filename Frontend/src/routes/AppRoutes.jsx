@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
+import { Route, Routes, useNavigate } from 'react-router-dom'
 import Login from '../components/auth/Login'
 import SignUp from '../components/auth/SignUp'
 import MainLayoutPage from '../pages/MainLayoutPage'
@@ -48,8 +48,7 @@ function AppRoutes() {
     const navigate = useNavigate()
 
     return (
-        <>
-            <Routes>
+        <Routes>
                 <Route path='/' element={<MainLayoutPage />} >
                     {/* PUBLIC ROUTES */}
                     <Route index element={<Products />} />
@@ -255,7 +254,6 @@ function AppRoutes() {
                     } />
                 </Route>
             </Routes>
-        </>
     )
 }
 

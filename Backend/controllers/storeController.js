@@ -790,6 +790,28 @@ exports.approveVerification = async (req, res) => {
 
         await store.save();
 
+        // Send activation email to seller
+        try {
+            const seller = await User.findById(store.seller);
+            if (seller?.email) {
+                const html = storeEmailTemplate(
+                    '✅ Store Verified — Subdomain Activated!',
+                    `<p>Hello ${seller.username || 'Seller'},</p>
+                    <p>Great news! Your store <strong>"${store.storeName}"</strong> has been verified by the Tortrose team.</p>
+                    <div class="highlight">
+                        <strong>🌐 Your subdomain is now live:</strong><br/>
+                        <a href="https://${store.storeSlug}.tortrose.com" style="color:#4F46E5;font-weight:600">${store.storeSlug}.tortrose.com</a>
+                    </div>
+                    <p>Your store now displays a verified badge and customers can access it via your custom subdomain. Share your link to start getting traffic!</p>`,
+                    `${process.env.FRONTEND_URL}/seller-dashboard/subdomain`,
+                    'View Subdomain Dashboard'
+                );
+                await sendEmail({ to: seller.email, subject: `Your Store "${store.storeName}" is Now Verified! ✅`, html });
+            }
+        } catch (emailErr) {
+            console.error('Verification approval email failed:', emailErr.message);
+        }
+
         res.status(200).json({
             msg: 'Store verification approved successfully',
             store

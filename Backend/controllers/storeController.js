@@ -346,7 +346,20 @@ exports.updateStore = async (req, res) => {
                 country: address.country || '',
                 postalCode: address.postalCode || ''
             };
-            store.markModified('address'); // Mark nested object as modified
+            store.markModified('address');
+        }
+
+        if (returnPolicy !== undefined) {
+            store.returnPolicy = {
+                returnsEnabled: returnPolicy.returnsEnabled || false,
+                returnDuration: returnPolicy.returnDuration || 0,
+                refundType: returnPolicy.refundType || 'none',
+                warrantyEnabled: returnPolicy.warrantyEnabled || false,
+                warrantyDuration: returnPolicy.warrantyDuration || 0,
+                warrantyDescription: returnPolicy.warrantyDescription || '',
+                policyDescription: returnPolicy.policyDescription || '',
+            };
+            store.markModified('returnPolicy');
         }
 
         await store.save();

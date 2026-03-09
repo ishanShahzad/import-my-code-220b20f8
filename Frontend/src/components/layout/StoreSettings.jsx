@@ -58,12 +58,17 @@ const StoreSettings = () => {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}api/stores/my-store`, { headers: { Authorization: `Bearer ${token}` } });
             const defaultSocialLinks = { website: '', facebook: '', instagram: '', twitter: '', youtube: '', tiktok: '' };
             const defaultAddress = { street: '', city: '', state: '', country: '', postalCode: '' };
+            const slug = res.data.store.storeSlug || '';
             setStoreData({
                 storeName: res.data.store.storeName, description: res.data.store.description,
-                logo: res.data.store.logo, banner: res.data.store.banner, storeSlug: res.data.store.storeSlug,
+                logo: res.data.store.logo, banner: res.data.store.banner, storeSlug: slug,
                 address: { ...defaultAddress, ...(res.data.store.address || {}) },
                 socialLinks: { ...defaultSocialLinks, ...(res.data.store.socialLinks || {}) }
             });
+            setCustomSubdomain(slug);
+            setSubdomainOwned(true);
+            setSubdomainAvailable(true);
+            setSubdomainMessage('This is your current subdomain');
             setHasStore(true);
         } catch (error) {
             if (error.response?.status === 404) setHasStore(false);

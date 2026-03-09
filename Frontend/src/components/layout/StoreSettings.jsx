@@ -113,6 +113,47 @@ const StoreSettings = () => {
     const handleSocialLinkChange = (platform, value) => { setStoreData(prev => ({ ...prev, socialLinks: { ...prev.socialLinks, [platform]: value } })); };
     const handleAddressChange = (field, value) => { setStoreData(prev => ({ ...prev, address: { ...prev.address, [field]: value } })); };
 
+    // Sanitize subdomain input: lowercase, alphanumeric + hyphens only
+    const sanitizeSubdomain = (val) =>
+        val.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-+|-+$/g, '').replace(/-{2,}/g, '-');
+
+    const checkSubdomainAvailability = useCallback(async (slug) => {
+        if (!slug || slug.length < 3) {
+            setSubdomainAvailable(null);
+            setSubdomainMessage('');
+            setSubdomainOwned(false);
+            return;
+        }
+        try {
+            setSubdomainChecking(true);
+            const token = localStorage.getItem('jwtToken');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/stores/check-subdomain/${slug}`, { headers: { Authorization: `Bearer ${token}` } });
+            setSubdomainAvailable(res.data.available);
+            setSubdomainOwned(res.data.isOwned || false);
+            setSubdomainMessage(res.data.msg);
+        } catch (e) {
+            setSubdomainAvailable(null);
+            setSubdomainMessage('Could not check availability');
+        } finally {
+            setSubdomainChecking(false);
+        }
+    }, []);
+
+    // Debounce subdomain check
+    useEffect(() => {
+        if (!customSubdomain || customSubdomain === storeData.storeSlug) return;
+        const timer = setTimeout(() => checkSubdomainAvailability(customSubdomain), 600);
+        return () => clearTimeout(timer);
+    }, [customSubdomain, storeData.storeSlug, checkSubdomainAvailability]);
+
+    const handleSubdomainChange = (e) => {
+        const val = sanitizeSubdomain(e.target.value);
+        setCustomSubdomain(val);
+        setSubdomainAvailable(null);
+        setSubdomainMessage('');
+        setSubdomainOwned(false);
+    };
+
     const handleLogoUpload = async (e) => {
         const file = e.target.files[0]; if (!file) return;
         if (file.size > 5 * 1024 * 1024) { toast.error('Logo must be less than 5MB'); return; }

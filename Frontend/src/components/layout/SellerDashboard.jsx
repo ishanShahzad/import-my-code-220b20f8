@@ -191,6 +191,7 @@ const SellerDashboard = () => {
         if (path.includes('notification-settings')) return 'Notification Settings';
         if (path.includes('notifications')) return 'Notifications';
         if (path.includes('analytics')) return 'Analytics';
+        if (path.includes('subdomain')) return 'Subdomain';
         if (path.includes('seller-home')) return 'Dashboard';
         return 'Dashboard';
     };
@@ -495,6 +496,7 @@ const SellerSidebar = ({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOpe
         { id: 'products', label: 'Products', icon: <Package size={18} />, link: '/seller-dashboard/product-management', badge: lowStockProducts },
         { id: 'orders', label: 'Orders', icon: <ShoppingBag size={18} />, link: '/seller-dashboard/order-management', badge: pendingOrders },
         { id: 'shipping', label: 'Shipping', icon: <Truck size={18} />, link: '/seller-dashboard/shipping-configuration' },
+        { id: 'subdomain', label: 'Subdomain', icon: <LayoutPanelLeft size={18} />, link: '/seller-dashboard/subdomain' },
         { id: 'notifications', label: 'Notifications', icon: <Bell size={18} />, link: '/seller-dashboard/notifications' },
         { id: 'store', label: 'Store Settings', icon: <Settings size={18} />, link: '/seller-dashboard/store-settings' },
         { id: 'notif-settings', label: 'Notif Settings', icon: <Settings size={18} />, link: '/seller-dashboard/notification-settings' },

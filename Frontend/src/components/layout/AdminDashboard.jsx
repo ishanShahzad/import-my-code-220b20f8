@@ -176,6 +176,7 @@ const AdminDashboard = () => {
         if (path.includes('product-management')) return 'Product Management';
         if (path.includes('order-management')) return 'Order Management';
         if (path.includes('store-verifications')) return 'Store Verifications';
+        if (path.includes('subdomains')) return 'Subdomains';
         if (path.includes('tax-configuration')) return 'Tax Configuration';
         if (path.includes('notifications')) return 'Notifications';
         if (path.includes('notification-settings')) return 'Settings';
@@ -428,6 +429,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOpen
         { id: 'products', label: 'Products', icon: <Package size={18} />, link: '/admin-dashboard/product-management', badge: lowStockProducts },
         { id: 'orders', label: 'Orders', icon: <ShoppingBag size={18} />, link: '/admin-dashboard/order-management', badge: pendingOrders },
         { id: 'verifications', label: 'Verifications', icon: <CheckCircle size={18} />, link: '/admin-dashboard/store-verifications' },
+        { id: 'subdomains', label: 'Subdomains', icon: <Store size={18} />, link: '/admin-dashboard/subdomains' },
         { id: 'tax', label: 'Tax Config', icon: <DollarSign size={18} />, link: '/admin-dashboard/tax-configuration' },
         { id: 'notifications', label: 'Notifications', icon: <Bell size={18} />, link: '/admin-dashboard/notifications' },
         { id: 'settings', label: 'Settings', icon: <Settings size={18} />, link: '/admin-dashboard/notification-settings' },

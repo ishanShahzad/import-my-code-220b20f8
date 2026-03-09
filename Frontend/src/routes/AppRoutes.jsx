@@ -33,6 +33,8 @@ import UserOrderDetail from '../components/layout/UserOrderDetail'
 import Success from '../components/layout/Success'
 import GoogleAuthSuccess from '../components/auth/GoogleAuthSuccess'
 import StoreSettings from '../components/layout/StoreSettings'
+import SellerSubdomainManagement from '../components/layout/SellerSubdomainManagement'
+import AdminSubdomainManagement from '../components/layout/AdminSubdomainManagement'
 import StorePage from '../pages/StorePage'
 import StoresListing from '../pages/StoresListing'
 import TrustedStoresPage from '../pages/TrustedStoresPage'
@@ -193,6 +195,11 @@ function AppRoutes() {
                             <NotificationSettings />
                         </ProtectedRoute>
                     } />
+                    <Route path='/admin-dashboard/subdomains' element={
+                        <ProtectedRoute role={'admin'}>
+                            <AdminSubdomainManagement />
+                        </ProtectedRoute>
+                    } />
                 </Route>
 
                 {/* SELLER DASHBOARD */}
@@ -250,6 +257,11 @@ function AppRoutes() {
                     <Route path='/seller-dashboard/notification-settings' element={
                         <ProtectedRoute role={'seller'}>
                             <NotificationSettings />
+                        </ProtectedRoute>
+                    } />
+                    <Route path='/seller-dashboard/subdomain' element={
+                        <ProtectedRoute role={'seller'}>
+                            <SellerSubdomainManagement />
                         </ProtectedRoute>
                     } />
                 </Route>

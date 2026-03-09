@@ -1,4 +1,3 @@
-import { BrowserRouter } from 'react-router-dom'
 import AppRoutes from './routes/AppRoutes'
 import SubdomainStorePage from './pages/SubdomainStorePage'
 import { isSubdomain } from './utils/subdomainHelper'
@@ -13,9 +12,7 @@ function App() {
   return (
     <HelmetProvider>
       <ToastContainer position='top-center' autoClose={2300} />
-      <BrowserRouter>
-        {onSubdomain ? <SubdomainStorePage /> : <AppRoutes />}
-      </BrowserRouter>
+      {onSubdomain ? <SubdomainStorePage /> : <AppRoutes />}
     </HelmetProvider>
   )
 }

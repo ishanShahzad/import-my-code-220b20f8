@@ -55,6 +55,7 @@ function MainLayoutPage() {
       </div>
       <Footer />
       <ChatBot />
+      <VoiceCommerce />
     </div>
   )
 }

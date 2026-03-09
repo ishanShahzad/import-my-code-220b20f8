@@ -173,6 +173,15 @@ exports.createStore = async (req, res) => {
                 state: '',
                 country: '',
                 postalCode: ''
+            },
+            returnPolicy: returnPolicy || {
+                returnsEnabled: false,
+                returnDuration: 0,
+                refundType: 'none',
+                warrantyEnabled: false,
+                warrantyDuration: 0,
+                warrantyDescription: '',
+                policyDescription: ''
             }
         });
 

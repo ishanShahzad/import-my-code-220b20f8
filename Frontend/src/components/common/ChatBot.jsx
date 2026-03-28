@@ -271,6 +271,17 @@ const ChatBot = () => {
   const callTimerRef = useRef(null);
   const isSpeakingRef = useRef(false);
 
+  // ─── Persist messages to localStorage ───
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        // Only save non-streaming messages
+        const toSave = messages.filter(m => !m._streaming).map(({ _streaming, ...rest }) => rest);
+        localStorage.setItem('tortrose_chat_history', JSON.stringify(toSave));
+      } catch {}
+    }
+  }, [messages]);
+
   // ─── Scroll to bottom ───
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

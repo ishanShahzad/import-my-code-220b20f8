@@ -55,7 +55,7 @@ function Products() {
 
   const serializeFilters = () => {
     let params = new URLSearchParams()
-    Object.keys(filters).forEach((key) => {
+    Object.keys(filters || {}).forEach((key) => {
       const value = filters[key]
       if (Array.isArray(value)) {
         if (key === 'priceRange') params.append(key, value.join(','))

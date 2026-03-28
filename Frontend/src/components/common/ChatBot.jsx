@@ -243,7 +243,13 @@ const ChatBot = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isVoiceCallMode, setIsVoiceCallMode] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tortrose_chat_history');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [showComplaintForm, setShowComplaintForm] = useState(false);
@@ -264,6 +270,17 @@ const ChatBot = () => {
   const recognitionRef = useRef(null);
   const callTimerRef = useRef(null);
   const isSpeakingRef = useRef(false);
+
+  // ─── Persist messages to localStorage ───
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        // Only save non-streaming messages
+        const toSave = messages.filter(m => !m._streaming).map(({ _streaming, ...rest }) => rest);
+        localStorage.setItem('tortrose_chat_history', JSON.stringify(toSave));
+      } catch {}
+    }
+  }, [messages]);
 
   // ─── Scroll to bottom ───
   useEffect(() => {
@@ -792,7 +809,7 @@ const ChatBot = () => {
                     {ttsEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
                   </button>
                   <button
-                    onClick={() => { setMessages([]); }}
+                    onClick={() => { setMessages([]); localStorage.removeItem('tortrose_chat_history'); }}
                     className="p-1.5 rounded-lg glass-inner"
                     style={{ color: 'hsl(var(--muted-foreground))' }}
                     title="Clear chat"

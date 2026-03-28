@@ -120,11 +120,11 @@ async function streamChat({ messages, userContext, onDelta, onToolCall, onDone }
 // ─── Voice Waveform Animation ───
 const VoiceWaveform = ({ isActive }) => (
   <div className="flex items-center justify-center gap-[3px] h-16">
-    {[...Array(24)].map((_, i) => (
+    {[...Array(12)].map((_, i) => (
       <motion.div
         key={i}
         className="w-[3px] rounded-full"
-        style={{ background: `hsl(${220 + i * 5}, 70%, ${55 + Math.sin(i) * 10}%)` }}
+        style={{ background: `hsl(${220 + i * 10}, 70%, ${55 + Math.sin(i) * 10}%)` }}
         animate={isActive ? {
           height: [8, 20 + Math.random() * 40, 12, 30 + Math.random() * 30, 8],
         } : { height: 8 }}
@@ -132,7 +132,7 @@ const VoiceWaveform = ({ isActive }) => (
           duration: 0.8 + Math.random() * 0.4,
           repeat: Infinity,
           ease: 'easeInOut',
-          delay: i * 0.04,
+          delay: i * 0.08,
         } : { duration: 0.3 }}
       />
     ))}

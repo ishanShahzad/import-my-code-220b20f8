@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageCircle, X, Send, Bot, User, ShoppingCart, Package,
   AlertCircle, Loader2, ExternalLink, Mic, MicOff, Phone, PhoneOff,
-  Sparkles, Palette, Clock, ArrowRight, Volume2, VolumeX, ChevronDown
+  Sparkles, Palette, Clock, ArrowRight, Volume2, VolumeX, ChevronDown, Trash2
 } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -790,6 +790,14 @@ const ChatBot = () => {
                     title={ttsEnabled ? 'Mute voice' : 'Enable voice'}
                   >
                     {ttsEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+                  </button>
+                  <button
+                    onClick={() => { setMessages([]); }}
+                    className="p-1.5 rounded-lg glass-inner"
+                    style={{ color: 'hsl(var(--muted-foreground))' }}
+                    title="Clear chat"
+                  >
+                    <Trash2 size={14} />
                   </button>
                   <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg glass-inner" style={{ color: 'hsl(var(--muted-foreground))' }}>
                     <X size={16} />

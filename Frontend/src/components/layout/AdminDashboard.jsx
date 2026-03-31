@@ -24,6 +24,7 @@ import ChatBotComponent from '../common/ChatBot';
 const AdminDashboard = () => {
     const { currentUser } = useAuth();
     const [isMobile, setIsMobile] = useState(false);
+    const [aiChatOpen, setAiChatOpen] = useState(false);
 
     useEffect(() => {
         const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);

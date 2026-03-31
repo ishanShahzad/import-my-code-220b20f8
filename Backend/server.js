@@ -253,6 +253,7 @@ app.use('/api/analytics', analyticsRoutes)
 app.use('/api/subdomain', subdomainRoutes)
 app.use('/api/chatbot', chatbotRoutes)
 app.use('/api/smart-tags', smartTagRoutes)
+app.use('/api/ai-actions', aiActionRoutes)
 
 // Centralized JSON error responses
 app.use((err, req, res, next) => {

@@ -17,6 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const SellerDashboard = () => {
     const { currentUser } = useAuth();
     const [isMobile, setIsMobile] = useState(false);
+    const [aiChatOpen, setAiChatOpen] = useState(false);
 
     useEffect(() => {
         const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);

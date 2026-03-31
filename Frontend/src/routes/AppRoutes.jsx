@@ -271,6 +271,11 @@ function AppRoutes() {
                             <SellerSubdomainManagement />
                         </ProtectedRoute>
                     } />
+                    <Route path='/seller-dashboard/subscription' element={
+                        <ProtectedRoute role={'seller'}>
+                            <SellerSubscription />
+                        </ProtectedRoute>
+                    } />
                 </Route>
             </Routes>
     )

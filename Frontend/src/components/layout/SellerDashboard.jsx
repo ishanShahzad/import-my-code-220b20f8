@@ -471,6 +471,46 @@ const SellerDashboard = () => {
                     )}
                 </div>
 
+                {/* Subscription Warning Banners */}
+                {isSubBlocked && (
+                    <div className="mx-4 mt-3">
+                        <Link to="/seller-dashboard/subscription">
+                            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                                className="p-4 rounded-2xl border cursor-pointer hover:scale-[1.01] transition-transform"
+                                style={{ background: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                                <div className="flex items-center gap-3">
+                                    <Lock size={18} style={{ color: 'hsl(0, 72%, 55%)' }} />
+                                    <div className="flex-1">
+                                        <p className="text-xs font-bold" style={{ color: 'hsl(0, 72%, 55%)' }}>Store Blocked — Subscribe to Reactivate</p>
+                                        <p className="text-[11px]" style={{ color: 'hsl(var(--muted-foreground))' }}>Your store and products are hidden. Click to subscribe.</p>
+                                    </div>
+                                    <Crown size={16} style={{ color: 'hsl(0, 72%, 55%)' }} />
+                                </div>
+                            </motion.div>
+                        </Link>
+                    </div>
+                )}
+                {isTrialExpiring && !isSubBlocked && (
+                    <div className="mx-4 mt-3">
+                        <Link to="/seller-dashboard/subscription">
+                            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                                className="p-4 rounded-2xl border cursor-pointer hover:scale-[1.01] transition-transform"
+                                style={{ background: 'rgba(245, 158, 11, 0.08)', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
+                                <div className="flex items-center gap-3">
+                                    <AlertTriangle size={18} style={{ color: 'hsl(45, 80%, 40%)' }} />
+                                    <div className="flex-1">
+                                        <p className="text-xs font-bold" style={{ color: 'hsl(45, 80%, 40%)' }}>
+                                            Trial expires in {subscriptionData?.trialDaysRemaining} day{subscriptionData?.trialDaysRemaining !== 1 ? 's' : ''}
+                                        </p>
+                                        <p className="text-[11px]" style={{ color: 'hsl(var(--muted-foreground))' }}>Subscribe now — 90 days free, then $5/mo</p>
+                                    </div>
+                                    <Crown size={16} style={{ color: 'hsl(45, 80%, 40%)' }} />
+                                </div>
+                            </motion.div>
+                        </Link>
+                    </div>
+                )}
+
                 {/* Page Content */}
                 <div className="flex-1">
                     <Outlet context={outletContext} />

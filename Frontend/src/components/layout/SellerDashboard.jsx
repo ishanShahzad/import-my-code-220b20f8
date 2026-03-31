@@ -520,7 +520,7 @@ import ChatBotComponent from '../common/ChatBot';
 // ============================
 // Sidebar Component
 // ============================
-const SellerSidebar = ({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOpen, isMobile, pendingOrders, lowStockProducts }) => {
+const SellerSidebar = ({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOpen, isMobile, pendingOrders, lowStockProducts, onAiChat }) => {
     const { currentUser } = useAuth();
     const location = useLocation();
 

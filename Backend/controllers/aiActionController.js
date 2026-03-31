@@ -62,7 +62,7 @@ exports.incrementRateLimit = async (req, res) => {
         const role = req.user?.role || 'guest';
         const ip = req.headers['cf-connecting-ip'] || req.ip || req.socket?.remoteAddress || 'unknown';
         const today = getToday();
-        const limit = RATE_LIMITS[role] || RATE_LIMITS.guest;
+        const limit = role === 'seller' ? await getSellerRateLimit(userId) : (RATE_LIMITS[role] || RATE_LIMITS.guest);
 
         const query = userId ? { userId, date: today } : { ip, date: today, userId: null };
 

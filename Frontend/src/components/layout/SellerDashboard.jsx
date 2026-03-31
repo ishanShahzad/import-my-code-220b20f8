@@ -18,6 +18,7 @@ const SellerDashboard = () => {
     const { currentUser } = useAuth();
     const [isMobile, setIsMobile] = useState(false);
     const [aiChatOpen, setAiChatOpen] = useState(false);
+    const [subscriptionData, setSubscriptionData] = useState(null);
 
     useEffect(() => {
         const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);

@@ -1,142 +1,251 @@
 
 
-# Unified AI Shopping Assistant — Lovable AI + Voice Call Mode + Personal Stylist
+# Complete Plan: Role-Based AI Command Center with All Features
 
-## Overview
+This is the unified plan merging **all previously discussed features** (Voice Call Mode, Personal Stylist, Smart Navigation, Contextual Chips) with the **new role-based dashboard integration, comprehensive action tools, and rate limiting**.
 
-Replace HuggingFace with **Lovable AI** (Gemini via gateway) and transform the chatbot into an intelligent personal shopping advisor with voice call mode. The AI acts as a fashion consultant — it asks follow-up questions about occasion, style preferences, and budget, gives color coordination advice, remembers user history, and proactively suggests outfits.
+---
 
 ## Architecture
 
 ```text
-┌─────────────────────────────────────────────┐
-│          ChatBot.jsx (Unified UI)           │
-│                                             │
-│  TEXT MODE          │  VOICE CALL MODE      │
-│  Chat bubbles       │  Animated pulsing orb │
-│  Product cards      │  Live waveform bars   │
-│  Style advice cards │  "Listening..."       │
-│  [🎤] [Send]        │  [End Call] button     │
-│                     │  Call timer            │
-│─────────────────────┴──────────────────────│
-│              ↓ both feed into ↓             │
-│  ┌─────────────────────────────────────┐    │
-│  │  Backend Edge Function (Lovable AI) │    │
-│  │  - Product DB context injected      │    │
-│  │  - User order history injected      │    │
-│  │  - Conversation history maintained  │    │
-│  │  - Returns: text + actions + products│   │
-│  └─────────────────────────────────────┘    │
-│              ↓                              │
-│  Action execution + optional TTS response   │
-│  Navigation cards / Product cards in chat   │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│           ChatBot.jsx (Unified UI)              │
+│                                                 │
+│  TEXT MODE           │  VOICE CALL MODE         │
+│  Chat bubbles        │  Animated pulsing orb    │
+│  Product cards       │  Live waveform bars      │
+│  Style advice cards  │  "Listening..."          │
+│  Outfit suggestions  │  Call timer              │
+│  Color swatches      │  [End Call] button       │
+│  [🎤] [Send]         │  TTS auto-response       │
+│──────────────────────┴─────────────────────────│
+│  EMBEDDED MODE (Dashboard sidebar)              │
+│  - Same component, `embedded` prop              │
+│  - Role detected from currentUser.role          │
+│  - Role-specific quick chips & greeting         │
+│──────────────────────┴─────────────────────────│
+│             ↓ all feed into ↓                   │
+│  ┌───────────────────────────────────────────┐  │
+│  │   Edge Function (ai-chat) — Role-Based    │  │
+│  │   - Role-specific system prompt           │  │
+│  │   - Role-specific tool definitions        │  │
+│  │   - User context injected                 │  │
+│  │   - Token-optimized history (last 20)     │  │
+│  │   - Returns: text + tool calls            │  │
+│  └───────────────────────────────────────────┘  │
+│             ↓                                   │
+│  Tool execution → Backend AI Action APIs        │
+│  Action confirmations / Product cards in chat   │
+│  Rate limit enforcement (5/20/25/∞ per day)     │
+└─────────────────────────────────────────────────┘
 ```
 
-## What Changes
+---
 
-### 1. New Supabase Edge Function: `supabase/functions/ai-chat/index.ts`
+## Step 1: Backend — Rate Limit Model & Endpoints
 
-Replaces HuggingFace entirely. Uses Lovable AI gateway (`LOVABLE_API_KEY` already available).
+**Create `Backend/models/AIRateLimit.js`**
+- Schema: `userId` (ObjectId, nullable), `ip` (for guests), `messageCount`, `date` (YYYY-MM-DD)
 
-**System prompt** instructs the AI to be a personal fashion/shopping consultant:
-- Ask clarifying questions: "What occasion is this for?", "What's your budget range?", "Do you prefer slim fit or relaxed?"
-- Give styling advice: color theory, outfit coordination, seasonal suggestions
-- Proactively suggest complementary items: "That shirt pairs great with dark jeans"
-- Use tool calling to return structured actions (product search, navigate, add to cart)
+**Add to `Backend/routes/chatbotRoutes.js`:**
+- `GET /api/chatbot/rate-limit` — returns remaining messages today
+- `POST /api/chatbot/rate-limit/increment` — increments, returns remaining
 
-**Tool definitions** the AI can call:
-- `search_products(query, category, maxPrice, minPrice, style)` — fuzzy search products
-- `navigate(route)` — navigate user to a page
-- `get_user_orders()` — fetch recent order history
-- `show_style_advice(advice, colorPalette, occasion)` — render a styled advice card
-- `suggest_outfit(products, reason)` — show a curated outfit with explanation
+Limits: Guest 5/day, User 20/day, Seller 25/day, Admin unlimited. Resets at midnight.
 
-**Flow**: Frontend sends full conversation history → edge function adds system prompt + user context (order history, browsing context) → Lovable AI responds with text and/or tool calls → frontend renders responses and executes actions.
+---
 
-### 2. New Backend Endpoint: `GET /api/chatbot/user-context`
+## Step 2: Backend — Complete AI Action Layer
 
-Returns user's recent orders, favorite categories, and past purchases for AI personalization. Called once when chat opens.
+**Create `Backend/controllers/aiActionController.js`** and **`Backend/routes/aiActionRoutes.js`** — thin validated wrappers around existing controllers with role checks.
 
-### 3. Rewrite `Frontend/src/components/common/ChatBot.jsx`
+**Register in `Backend/server.js`.**
 
-**Voice Call Mode:**
-- Mic button in input bar transforms the panel into a full-screen voice interface
+### Seller Actions (17 tools)
+
+| Tool | What it does |
+|------|-------------|
+| `add_product` | Create product (validates required fields, asks AI to request missing ones) |
+| `edit_product` | Update any product field (name, price, description, stock, images, category) |
+| `delete_product` | Delete product by name or ID |
+| `list_my_products` | List seller's products with search/filter/pagination |
+| `bulk_discount` | Apply percentage or fixed discount to multiple products |
+| `bulk_price_update` | Update prices of multiple products at once |
+| `remove_discount` | Remove discounts from selected products |
+| `get_seller_analytics` | Revenue trends, top products, order stats, conversion rates |
+| `get_seller_notifications` | Recent alerts and activity feed |
+| `get_seller_orders` | List orders for seller's products with status filters |
+| `update_order_status` | Change order status (processing → shipped → delivered) |
+| `get_my_store` | Store details, settings, verification status |
+| `update_store` | Update store name, description, logo, banner, social links, return policy |
+| `get_store_analytics` | Store views, trust count, product performance |
+| `apply_for_verification` | Submit store verification application |
+| `get_shipping_methods` | View configured shipping methods and rates |
+| `update_shipping` | Add/update/remove shipping methods and rates |
+
+### Admin Actions (22 tools — all seller tools plus)
+
+| Tool | What it does |
+|------|-------------|
+| `get_all_users` | List/search all users with role, status, date filters |
+| `delete_user` | Delete any user (with confirmation) |
+| `block_user` | Block/unblock a user |
+| `change_user_role` | Change user role (user/seller/admin) |
+| `get_admin_analytics` | Platform-wide revenue, user growth, store distribution |
+| `get_admin_notifications` | System alerts (new stores, verification requests, flagged content) |
+| `get_all_orders` | View all orders across platform with filters |
+| `cancel_order` | Cancel any order |
+| `get_order_detail` | Detailed info about a specific order |
+| `get_all_complaints` | List all complaints with category/status filters |
+| `update_complaint` | Respond to, resolve, or escalate complaints |
+| `get_pending_verifications` | List stores awaiting verification |
+| `approve_verification` | Approve a store's verification |
+| `reject_verification` | Reject with reason |
+| `remove_verification` | Revoke verified status |
+| `get_all_stores` | List all stores on platform |
+| `get_verified_stores` | List verified stores |
+| `update_tax_config` | Change platform tax settings |
+| `get_tax_config` | View current tax configuration |
+| `search_products` | Search all products on platform (admin-level) |
+
+### User Actions (7 tools)
+
+| Tool | What it does |
+|------|-------------|
+| `search_products` | Search and filter products (with style/occasion context) |
+| `navigate` | Navigate to any page in the app |
+| `get_my_orders` | View own order history |
+| `get_order_detail` | View specific order details |
+| `cancel_order` | Cancel own pending order |
+| `submit_complaint` | File a complaint |
+| `get_my_complaints` | View own complaint history |
+
+---
+
+## Step 3: Edge Function — Role-Based Prompts, Full Tools, Token Optimization
+
+**Major rewrite of `supabase/functions/ai-chat/index.ts`:**
+
+- Accept `role` field in request body
+- **Three distinct system prompts:**
+  - **User/Guest**: Current personal stylist prompt (fashion consultant, color theory, occasion-based)
+  - **Seller**: Business assistant — analytics advisor, product management helper, growth strategist, social media advisor, order manager. Proactively suggests: run ads, optimize listings, seasonal promotions, cross-selling strategies
+  - **Admin**: Platform commander — unrestricted access, user management, compliance, platform health monitoring
+- **Role-specific tool definitions** (all tools from Step 2 registered as AI function-calling tools)
+- **Token optimization:**
+  - Only send last 20 messages to AI
+  - Older messages summarized into 2-3 sentence context block
+  - Strip tool results from history (keep text only)
+  - Cap individual historical messages to 500 chars (full content for latest 3)
+
+---
+
+## Step 4: ChatBot.jsx — Complete Refactor
+
+### Existing features preserved and enhanced:
+
+**Voice Call Mode (from original plan):**
+- Mic button transforms panel into full-screen voice interface
 - Animated pulsing orb + sound wave bars (CSS animations)
-- `SpeechRecognition` with `continuous = true` — stays open like a phone call
-- Each recognized sentence sent to AI immediately, AI responds via TTS
-- "End Call" dumps full transcript into chat history as bubbles
+- `SpeechRecognition` with `continuous = true` — open phone-call style
+- Each recognized sentence sent to AI, AI responds via browser TTS
+- "End Call" dumps transcript into chat history
 - Call duration timer displayed
+- Graceful degradation: mic button hidden if browser lacks Speech API
 
-**Personal Stylist Features (rendered in chat):**
-- **Style Advice Cards**: When AI gives fashion advice, render a styled card with color palette swatches, occasion tag, and reasoning
-- **Outfit Suggestion Cards**: Group of product cards with "Why this works" explanation
-- **Follow-up Question Chips**: AI-generated contextual chips ("For a party", "Casual wear", "Office look") that the user can tap instead of typing
-- **Color Harmony Display**: Visual color swatches when AI discusses color combinations
+**Personal Stylist Features (from original plan):**
+- **Style Advice Cards**: Rendered when AI gives fashion advice — color palette swatches, occasion tag, reasoning
+- **Outfit Suggestion Cards**: Grouped product cards with "Why this works" explanation
+- **Follow-up Question Chips**: AI-generated contextual chips ("For a party", "Casual wear")
+- **Color Harmony Display**: Visual swatches when AI discusses color combos
 
-**Smart Navigation Engine** (client-side intent execution from AI tool calls):
-- `navigate(route)` → `useNavigate` to profile, orders, checkout, stores, etc.
-- `addToCart(productId)` → calls global context `handleAddToCart`
-- Shows inline action confirmation cards
+**Smart Navigation Engine (from original plan):**
+- `navigate(route)` → `useNavigate`
+- `addToCart(productId)` → global context `handleAddToCart`
+- Inline action confirmation cards
 
-**Personalization on Open:**
-- Fetches user context (orders, preferences) via `/api/chatbot/user-context`
-- AI greeting references their history: "Welcome back! How are those sneakers working out?"
+**Personalization on Open (from original plan):**
+- Fetches user context via `/api/chatbot/user-context`
+- AI greeting references history: "Welcome back! How are those sneakers?"
 - Time-aware greetings
 
-**Contextual Quick Action Chips** that change based on conversation:
-- Initial: "Help me find an outfit", "Track my order", "Style advice", "Browse stores"
-- After product search: "Show me more like this", "What goes with this?", "Add to cart"
-- After style discussion: "Show me options", "Different color", "Higher budget"
+**Persistent Chat History (already implemented):**
+- MongoDB-backed for logged-in users
+- localStorage fallback
+- Debounced save, clear button
 
-### 4. Update `Backend/controllers/chatbotController.js`
+### New features added:
 
-- Remove `callHF` dependency for the main chat (keep complaint/order logic as server-side handlers)
-- Add `getUserContext` endpoint that returns last 5 orders with product details, most-bought categories, and total spend
+**Embedded Mode:**
+- Accept `embedded` prop — renders inline (no floating bubble) when opened from dashboard sidebar
+- Accept `dashboardRole` prop to override role detection
 
-### 5. Delete `Frontend/src/components/common/VoiceCommerce.jsx`
+**Rate Limiting UI:**
+- On mount and before each send, check remaining messages via backend
+- Show "X messages remaining today" indicator in header
+- When limit reached: show login prompt (guests) or "limit reached, resets tomorrow" (users)
 
-### 6. Update `Frontend/src/pages/MainLayoutPage.jsx`
+**Role-Aware Behavior:**
+- Detect role from `currentUser?.role`, pass to edge function
+- **Role-specific greetings:**
+  - Seller: "Welcome back! I'm your business assistant. I can help with analytics, products, orders, and growth strategies."
+  - Admin: "Welcome, Admin. I can manage users, review analytics, handle complaints, and run platform operations."
+- **Role-specific contextual chips:**
+  - **User initial**: "Help me find an outfit", "Track my order", "Style advice", "Browse stores"
+  - **User after search**: "Show me more like this", "What goes with this?", "Add to cart"
+  - **User after style talk**: "Show me options", "Different color", "Higher budget"
+  - **Seller**: "📊 Show analytics", "📦 Add a product", "💰 Apply discount", "📋 Recent orders", "🚀 Growth tips", "🚚 Shipping setup"
+  - **Admin**: "👥 User overview", "📊 Platform stats", "🛡️ Complaints", "🔍 Find user", "🏪 Verifications", "⚙️ Tax config"
 
-- Remove VoiceCommerce import and component
+**All Tool Call Handlers:**
+- `add_product`: Call backend, handle missing fields (AI asks user)
+- `edit_product`, `delete_product`: With confirmation for destructive actions
+- `bulk_discount`, `bulk_price_update`: Execute and confirm
+- `get_seller_analytics`, `get_store_analytics`: Fetch and return to AI
+- `delete_user`, `block_user`, `change_user_role`: Confirmation dialog first
+- `approve_verification`, `reject_verification`: Execute and confirm
+- `update_tax_config`: Execute with confirmation
+- All other tools: Call backend API → return result to AI for response
 
-### 7. Update `supabase/config.toml`
+---
 
-- Register the new `ai-chat` edge function
+## Step 5: Dashboard Integration
 
-## AI Personality & Capabilities
+**Update `Frontend/src/components/layout/SellerDashboard.jsx`:**
+- Add `Bot` icon to sidebar menu items as "AI Assistant"
+- Toggle state for embedded chat panel
+- When clicked, slide-out panel on right with `<ChatBot embedded dashboardRole="seller" />`
 
-The system prompt makes the AI behave as:
+**Update `Frontend/src/components/layout/AdminDashboard.jsx`:**
+- Same pattern — "AI Assistant" in sidebar
+- Panel with `<ChatBot embedded dashboardRole="admin" />`
 
-- **Personal Stylist**: "This navy blazer with khaki chinos is a timeless combo — perfect for a semi-formal dinner. The warm tones complement each other without clashing."
-- **Conversational**: Asks follow-up questions naturally — "Where are you planning to wear this?", "Do you usually go for bold or neutral colors?"
-- **Color Expert**: "Earth tones like olive and tan work great for your skin tone. Avoid pairing two saturated colors — one should be muted."
-- **Occasion-Aware**: Different suggestions for party, office, casual, date night, travel
-- **Budget-Sensitive**: "I found some great options under $40 that still look premium"
-- **Proactive**: "By the way, that store has free shipping right now" / "This item is 30% off today"
-- **Reorder Helper**: "Want to reorder those joggers you bought last month?"
-- **Comparison Helper**: "Between these two, the cotton one breathes better for summer, but the polyester blend is more wrinkle-resistant for travel"
+---
 
-## Technical Details
+## Step 6: Cleanup
 
-- **AI Provider**: Lovable AI gateway (`google/gemini-3-flash-preview`) via Supabase edge function
-- **API Key**: `LOVABLE_API_KEY` (already provisioned)
-- **Voice**: Web Speech API (browser-native, no dependencies)
-- **TTS**: Browser `SpeechSynthesis` with adjustable rate
-- **Streaming**: SSE streaming from edge function for real-time token rendering
-- **No new npm dependencies** — all browser-native APIs + existing libraries
-- **Graceful degradation**: Mic button hidden if browser doesn't support Speech API
+- Delete `Frontend/src/components/common/VoiceCommerce.jsx`
+- Remove VoiceCommerce from `Frontend/src/pages/MainLayoutPage.jsx`
+- Delete `Backend/utils/hfClient.js`
+
+---
 
 ## Files Summary
 
 | Action | File |
 |--------|------|
-| Create | `supabase/functions/ai-chat/index.ts` |
-| Create | `supabase/config.toml` |
-| Rewrite | `Frontend/src/components/common/ChatBot.jsx` |
-| Modify | `Backend/controllers/chatbotController.js` (add user-context endpoint) |
-| Modify | `Backend/routes/chatbotRoutes.js` (add user-context route) |
-| Modify | `Frontend/src/pages/MainLayoutPage.jsx` (remove VoiceCommerce) |
+| Create | `Backend/models/AIRateLimit.js` |
+| Create | `Backend/controllers/aiActionController.js` |
+| Create | `Backend/routes/aiActionRoutes.js` |
+| Edit | `Backend/routes/chatbotRoutes.js` (rate limit routes) |
+| Edit | `Backend/controllers/chatbotController.js` (rate limit logic) |
+| Edit | `Backend/server.js` (register aiActionRoutes) |
+| Rewrite | `supabase/functions/ai-chat/index.ts` (role-based prompts, all tools, token optimization) |
+| Rewrite | `Frontend/src/components/common/ChatBot.jsx` (embedded mode, voice call, role-awareness, rate limits, all tool handlers, stylist cards) |
+| Edit | `Frontend/src/components/layout/SellerDashboard.jsx` (AI sidebar button + panel) |
+| Edit | `Frontend/src/components/layout/AdminDashboard.jsx` (AI sidebar button + panel) |
+| Edit | `Frontend/src/pages/MainLayoutPage.jsx` (remove VoiceCommerce) |
 | Delete | `Frontend/src/components/common/VoiceCommerce.jsx` |
-| Delete | `Backend/utils/hfClient.js` (no longer needed) |
+| Delete | `Backend/utils/hfClient.js` |
 

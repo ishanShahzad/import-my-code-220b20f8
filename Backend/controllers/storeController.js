@@ -1,6 +1,7 @@
 const Store = require('../models/Store');
 const User = require('../models/User');
 const { sendEmail } = require('./mailController');
+const { initializeSubscription } = require('./subscriptionController');
 
 // Email template helper
 const storeEmailTemplate = (title, bodyHtml, ctaUrl, ctaText) => `

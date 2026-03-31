@@ -515,6 +515,7 @@ const SellerDashboard = () => {
 
 export default SellerDashboard;
 
+import ChatBotComponent from '../common/ChatBot';
 
 // ============================
 // Sidebar Component

@@ -310,6 +310,7 @@ const AdminDashboard = () => {
                 isMobile={isMobile}
                 pendingOrders={pendingOrders}
                 lowStockProducts={lowStockProducts + outOfStockProducts}
+                onAiChat={() => setAiChatOpen(true)}
             />
 
             {/* Main Content */}

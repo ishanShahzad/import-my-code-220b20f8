@@ -693,66 +693,95 @@ export default function Checkout() {
                           </button>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          {cartItems.cart.map((item) => {
-                            const { product, qty } = item;
-                            const { _id, name, price, image, discountedPrice } = product;
+                        <div className="space-y-6">
+                          {Object.entries(cartItemsBySeller).map(([sellerId, sellerItems]) => {
+                            const couponConfig = getCouponInputConfig(sellerId, sellerItems);
+                            const groupKey = `seller-${sellerId}`;
                             
-                            // SPIN WHEEL DISABLED - was getDiscountedPrice(product)
-                            const itemPrice = discountedPrice || price;
-                            // const hasSpinDiscount = false; // SPIN WHEEL DISABLED
-
                             return (
-                              <motion.div
-                                key={item._id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="flex items-center relative justify-between p-3 sm:p-4 glass-inner rounded-xl"
-                              >
-                                <div className="flex items-center  gap-4">
-                                  <AnimatePresence mode="wait">
-                                    {
-                                      qtyUpdateId === item._id && (
-                                        <motion.div
-                                          initial={{ opacity: 0 }}
-                                          animate={{ opacity: 1 }}
-                                          exit={{ opacity: 0 }}
-                                          className="w-full h-full absolute backdrop-blur-lg top-0 left-0 z-2 flex justify-center items-center gap-1 rounded-xl"
-                                          style={{ color: 'hsl(220, 70%, 55%)' }}>
-                                          Processing <span className="animate-spin"> <Loader2 /> </span>
-                                        </motion.div>
-                                      )
-                                    }
-                                  </AnimatePresence>
-                                  <img
-                                    className="h-16 w-16 rounded-lg object-cover"
-                                    src={image}
-                                    alt={name}
+                              <div key={sellerId} className="space-y-3">
+                                {/* Seller items */}
+                                {sellerItems.map((item) => {
+                                  const { product, qty } = item;
+                                  const { _id, name, price, image, discountedPrice } = product;
+                                  const itemPrice = discountedPrice || price;
+                                  const productCouponDiscount = getProductCouponDiscount(_id, itemPrice, qty);
+                                  const productKey = `product-${_id}`;
+                                  const showPerProductInput = couponConfig?.type === 'per-product' && couponConfig.productIds.includes(_id);
+
+                                  return (
+                                    <div key={item._id}>
+                                      <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="flex items-center relative justify-between p-3 sm:p-4 glass-inner rounded-xl"
+                                      >
+                                        <div className="flex items-center gap-4">
+                                          <AnimatePresence mode="wait">
+                                            {qtyUpdateId === item._id && (
+                                              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                                className="w-full h-full absolute backdrop-blur-lg top-0 left-0 z-2 flex justify-center items-center gap-1 rounded-xl"
+                                                style={{ color: 'hsl(220, 70%, 55%)' }}>
+                                                Processing <span className="animate-spin"><Loader2 /></span>
+                                              </motion.div>
+                                            )}
+                                          </AnimatePresence>
+                                          <img className="h-16 w-16 rounded-lg object-cover" src={image} alt={name} />
+                                          <div>
+                                            <h4 className="font-medium text-sm sm:text-base" style={{ color: 'hsl(var(--foreground))' }}>{name}</h4>
+                                            <p>
+                                              <span className="font-bold text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>{formatPrice(itemPrice)}</span>
+                                              {productCouponDiscount > 0 && (
+                                                <span className="ml-2 text-xs font-semibold" style={{ color: 'hsl(150, 60%, 45%)' }}>
+                                                  -{formatPrice(productCouponDiscount)} coupon
+                                                </span>
+                                              )}
+                                            </p>
+                                            <QuantitySelector
+                                              qty={qty}
+                                              onIncrement={() => handleQtyInc(item._id)}
+                                              onDecrement={() => handleQtyDec(item._id)}
+                                            />
+                                          </div>
+                                        </div>
+                                        <button onClick={() => handleRemoveCartItem(_id)} type="button" className="absolute cursor-pointer top-2 right-2">
+                                          <X />
+                                        </button>
+                                      </motion.div>
+
+                                      {/* Per-product coupon input */}
+                                      {showPerProductInput && (
+                                        <CouponInput
+                                          inputKey={productKey}
+                                          couponInputs={couponInputs}
+                                          setCouponInputs={setCouponInputs}
+                                          appliedCoupons={appliedCoupons}
+                                          couponLoading={couponLoading}
+                                          onApply={() => applyCoupon(productKey, [_id])}
+                                          onRemove={() => removeCoupon(productKey)}
+                                          formatPrice={formatPrice}
+                                        />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+
+                                {/* Group-level coupon input for this seller */}
+                                {couponConfig?.type === 'group' && (
+                                  <CouponInput
+                                    inputKey={groupKey}
+                                    couponInputs={couponInputs}
+                                    setCouponInputs={setCouponInputs}
+                                    appliedCoupons={appliedCoupons}
+                                    couponLoading={couponLoading}
+                                    onApply={() => applyCoupon(groupKey, sellerItems.map(i => i.product._id))}
+                                    onRemove={() => removeCoupon(groupKey)}
+                                    formatPrice={formatPrice}
+                                    isGroup
                                   />
-                                  <div>
-                                    <h4 className="font-medium text-sm sm:text-base" style={{ color: 'hsl(var(--foreground))' }}>{name}</h4>
-                                    {/* SPIN WHEEL DISABLED - spin discount badge removed */}
-                                    {/* {hasSpinDiscount && (<p className="text-xs text-green-600 font-semibold">🎉 Spin Discount Applied!</p>)} */}
-                                    <p>
-                                      <span className="font-bold text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>{formatPrice(itemPrice)}</span>
-                                    </p>
-                                    <QuantitySelector
-                                      qty={qty}
-                                      onIncrement={() => handleQtyInc(item._id)}
-                                      onDecrement={() => handleQtyDec(item._id)}
-                                    />
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    handleRemoveCartItem(_id)
-                                  }}
-                                  type="button"
-                                  className="absolute cursor-pointer top-2 right-2">
-                                  <X />
-                                </button>
-                              </motion.div>
+                                )}
+                              </div>
                             );
                           })}
                         </div>

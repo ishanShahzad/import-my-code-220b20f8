@@ -32,6 +32,8 @@ function ProductDetailPage() {
     const [selectedColor, setSelectedColor] = useState(null);
     const [imageLoading, setImageLoading] = useState(true);
     const [storeData, setStoreData] = useState(null);
+    const [availableCoupons, setAvailableCoupons] = useState([]);
+    const [copiedCoupon, setCopiedCoupon] = useState(null);
     const commentRef = useRef();
 
     const isInWishlist = product && wishlistItems?.some((item) => item._id === product._id);

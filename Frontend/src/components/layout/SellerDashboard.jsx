@@ -729,6 +729,13 @@ const ProductForm = ({ product, setProduct, onSave, onClose, uploadingImages }) 
         }
     };
     const handleRemoveTag = (tagToRemove) => setProduct({ ...product, tags: product.tags.filter(tag => tag !== tagToRemove) });
+    const handleAddColor = () => {
+        if (newColor.trim() && !(product.colors || []).includes(newColor.trim())) {
+            setProduct({ ...product, colors: [...(product.colors || []), newColor.trim()] });
+            setNewColor("");
+        }
+    };
+    const handleRemoveColor = (c) => setProduct({ ...product, colors: (product.colors || []).filter(color => color !== c) });
     const handleAddImage = () => {
         if (newImage.trim()) {
             setProduct({ ...product, images: [...product.images, { url: newImage.trim() }] });

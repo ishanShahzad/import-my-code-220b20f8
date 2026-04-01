@@ -47,6 +47,7 @@ export default function HomeScreen({ navigation }) {
   const { currentUser } = useAuth();
   const { fetchCart } = useGlobal();
   const { formatPrice } = useCurrency();
+  const [showAI, setShowAI] = useState(false);
   
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

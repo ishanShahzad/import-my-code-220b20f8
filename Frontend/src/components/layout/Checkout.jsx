@@ -1542,3 +1542,56 @@ const PaymentOption = React.forwardRef(({ value, title, description, icon, selec
     </div>
   </label>
 ));
+
+/* ---------- Coupon Input Component ---------- */
+function CouponInput({ inputKey, couponInputs, setCouponInputs, appliedCoupons, couponLoading, onApply, onRemove, formatPrice, isGroup }) {
+  const applied = appliedCoupons[inputKey];
+  const isLoading = couponLoading[inputKey];
+
+  if (applied) {
+    return (
+      <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+        className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl ${isGroup ? 'mt-2' : 'mt-1 ml-4 sm:ml-8'}`}
+        style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-full" style={{ background: 'rgba(16,185,129,0.15)' }}>
+            <Check size={14} style={{ color: 'hsl(150, 60%, 45%)' }} />
+          </div>
+          <div>
+            <span className="text-xs font-bold font-mono tracking-wider" style={{ color: 'hsl(150, 60%, 45%)' }}>
+              {applied.code}
+            </span>
+            <span className="text-xs ml-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              {applied.discountType === 'percentage' ? `${applied.discountValue}% off` : `${formatPrice(applied.discountValue)} off`}
+            </span>
+          </div>
+        </div>
+        <button type="button" onClick={onRemove} className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+          style={{ color: 'hsl(0, 72%, 55%)' }}>
+          <X size={14} />
+        </button>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center gap-2 ${isGroup ? 'mt-2' : 'mt-1 ml-4 sm:ml-8'}`}>
+      <div className="flex-1 relative">
+        <Ticket size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'hsl(var(--muted-foreground))' }} />
+        <input
+          type="text"
+          placeholder="Enter coupon code"
+          value={couponInputs[inputKey] || ''}
+          onChange={(e) => setCouponInputs(prev => ({ ...prev, [inputKey]: e.target.value.toUpperCase() }))}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onApply())}
+          className="glass-input w-full pl-9 pr-3 py-2 text-xs font-mono uppercase tracking-wider"
+        />
+      </div>
+      <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={onApply} disabled={isLoading}
+        className="px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap disabled:opacity-50"
+        style={{ background: 'linear-gradient(135deg, hsl(280, 60%, 55%), hsl(320, 50%, 55%))', color: 'white' }}>
+        {isLoading ? <Loader2 size={14} className="animate-spin" /> : 'Apply'}
+      </motion.button>
+    </div>
+  );
+}

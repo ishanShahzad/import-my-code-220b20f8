@@ -146,6 +146,8 @@ export default function Checkout() {
     handleSubmit,
     watch,
     trigger,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: "all",

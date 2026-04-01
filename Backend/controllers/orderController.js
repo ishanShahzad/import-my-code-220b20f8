@@ -133,7 +133,15 @@ exports.placeOrder = async (req, res) => {
         if (order.instructions && order.instructions !== '') newOrder.instructions = order.instructions
 
         await newOrder.save();
-        // console.log('new order:::', newOrder);
+
+        // Record coupon usage
+        if (order.appliedCoupons && order.appliedCoupons.length > 0) {
+            for (const couponData of order.appliedCoupons) {
+                if (couponData.couponId) {
+                    await recordCouponUsage(couponData.couponId, userId);
+                }
+            }
+        }
 
 
         // const domainURL = process.env.FRONTEND_URL || 'http://localhost:5173'

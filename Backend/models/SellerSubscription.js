@@ -17,6 +17,10 @@ const sellerSubscriptionSchema = new mongoose.Schema({
         enum: ['trial', 'free_period', 'active', 'past_due', 'cancelled', 'blocked'],
         default: 'trial',
     },
+    planName: {
+        type: String,
+        default: 'Tortrose Starter',
+    },
     plan: {
         type: String,
         enum: ['free_trial', 'starter'],

@@ -108,7 +108,23 @@ function ProductDetailPage() {
         }
     };
 
-    useEffect(() => { fetchProduct(); }, [id]);
+    useEffect(() => { fetchProduct(); fetchProductCoupons(); }, [id]);
+
+    const fetchProductCoupons = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/coupons/product/${id}`);
+            setAvailableCoupons(res.data.coupons || []);
+        } catch (err) {
+            console.log('No coupons available');
+        }
+    };
+
+    const copyCouponCode = (code) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCoupon(code);
+        toast.success('Coupon code copied!');
+        setTimeout(() => setCopiedCoupon(null), 2000);
+    };
 
     // Track product view for personalized recommendations
     useEffect(() => {

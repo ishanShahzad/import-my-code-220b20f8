@@ -109,7 +109,7 @@ const SellerDashboard = () => {
         setEditingProduct({
             name: '', description: '', price: '', discountedPrice: "",
             category: '', brand: '', stock: "", image: '', images: [],
-            tags: [], isFeatured: false
+            tags: [], colors: [], isFeatured: false
         });
         setIsFormOpen(true);
     };

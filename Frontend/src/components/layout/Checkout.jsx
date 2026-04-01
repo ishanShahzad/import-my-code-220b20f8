@@ -97,6 +97,133 @@ export default function Checkout() {
     }
   };
 
+  const fetchAvailableCoupons = async () => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      if (!token) return;
+      const sellerIds = [...new Set(cartItems.cart.map(item => item.product.seller))];
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/coupons/checkout-coupons`,
+        { sellerIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSellerCoupons(res.data.sellerCoupons || {});
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+    }
+  };
+
+  // Determine where to show coupon inputs for a given seller
+  const getCouponInputConfig = (sellerId, sellerProducts) => {
+    const coupons = sellerCoupons[sellerId];
+    if (!coupons || coupons.length === 0) return null;
+    
+    // Check if ANY coupon from this seller applies to ALL products
+    const hasAllCoupon = coupons.some(c => c.applicableTo === 'all');
+    // Check if coupons target selected products
+    const selectedCoupons = coupons.filter(c => c.applicableTo === 'selected');
+    
+    if (hasAllCoupon && selectedCoupons.length === 0) {
+      // Only "all" coupons — show single input for the seller group
+      return { type: 'group', sellerId };
+    }
+    
+    if (!hasAllCoupon && selectedCoupons.length > 0) {
+      // Only "selected" coupons — determine which products have coupons
+      const productIdsWithCoupons = new Set();
+      selectedCoupons.forEach(c => c.applicableProducts.forEach(pid => productIdsWithCoupons.add(pid)));
+      
+      const productsWithCoupons = sellerProducts.filter(item => productIdsWithCoupons.has(item.product._id));
+      
+      if (productsWithCoupons.length === sellerProducts.length) {
+        // All products have coupons — show group input
+        return { type: 'group', sellerId };
+      }
+      // Show per-product inputs for eligible products
+      return { type: 'per-product', productIds: [...productIdsWithCoupons] };
+    }
+    
+    // Mix of "all" and "selected" coupons — show group input (simplest UX)
+    return { type: 'group', sellerId };
+  };
+
+  const applyCoupon = async (inputKey, productIds) => {
+    const code = couponInputs[inputKey]?.trim();
+    if (!code) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+    setCouponLoading(prev => ({ ...prev, [inputKey]: true }));
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/coupons/validate`,
+        { code, productIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.valid) {
+        const coupon = res.data.coupon;
+        // Check min order amount for applicable products
+        const applicableItems = cartItems.cart.filter(item => coupon.applicableProductIds.includes(item.product._id));
+        const applicableSubtotal = applicableItems.reduce((sum, item) => {
+          const price = item.product.discountedPrice || item.product.price;
+          return sum + (price * item.qty);
+        }, 0);
+        
+        if (coupon.minOrderAmount > 0 && applicableSubtotal < coupon.minOrderAmount) {
+          toast.error(`Minimum order amount of ${formatPrice(coupon.minOrderAmount)} required for this coupon`);
+          return;
+        }
+        
+        setAppliedCoupons(prev => ({ ...prev, [inputKey]: coupon }));
+        toast.success(`Coupon ${coupon.code} applied! ${coupon.discountType === 'percentage' ? `${coupon.discountValue}% off` : `${formatPrice(coupon.discountValue)} off`}`);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.msg || 'Invalid coupon code');
+    } finally {
+      setCouponLoading(prev => ({ ...prev, [inputKey]: false }));
+    }
+  };
+
+  const removeCoupon = (inputKey) => {
+    setAppliedCoupons(prev => {
+      const copy = { ...prev };
+      delete copy[inputKey];
+      return copy;
+    });
+    setCouponInputs(prev => ({ ...prev, [inputKey]: '' }));
+    toast.info('Coupon removed');
+  };
+
+  // Calculate coupon discount for a specific product
+  const getProductCouponDiscount = (productId, itemPrice, qty) => {
+    let totalDiscount = 0;
+    Object.values(appliedCoupons).forEach(coupon => {
+      if (coupon.applicableProductIds.includes(productId)) {
+        let discount = 0;
+        if (coupon.discountType === 'percentage') {
+          discount = (itemPrice * qty * coupon.discountValue) / 100;
+        } else {
+          discount = coupon.discountValue; // Fixed discount spread across
+        }
+        if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
+          discount = coupon.maxDiscountAmount;
+        }
+        totalDiscount += discount;
+      }
+    });
+    return totalDiscount;
+  };
+
+  // Total coupon discount
+  const totalCouponDiscount = useMemo(() => {
+    if (!cartItems?.cart || Object.keys(appliedCoupons).length === 0) return 0;
+    let total = 0;
+    cartItems.cart.forEach(item => {
+      const price = item.product.discountedPrice || item.product.price;
+      total += getProductCouponDiscount(item.product._id, price, item.qty);
+    });
+    return total;
+  }, [cartItems, appliedCoupons]);
+
   const handleAutoFill = () => {
     if (!savedShippingInfo) return;
     setValue('fullName', savedShippingInfo.fullName || '');

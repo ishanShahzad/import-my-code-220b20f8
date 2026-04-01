@@ -33,6 +33,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [storeData, setStoreData] = useState(null);
   const flatListRef = useRef(null);
   const bottomBarAnim = useRef(new Animated.Value(0)).current;
@@ -43,7 +44,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   const [submittingReview, setSubmittingReview] = useState(false);
 
   const isInWishlist = product && wishlistItems?.some((item) => item._id === product._id);
-  const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id);
+  const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id && (item.selectedColor || null) === (selectedColor || null));
 
   useEffect(() => {
     fetchProduct();

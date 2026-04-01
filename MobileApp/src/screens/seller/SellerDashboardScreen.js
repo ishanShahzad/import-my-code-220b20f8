@@ -93,15 +93,19 @@ export default function SellerDashboardScreen({ navigation }) {
 
   const fetchDashboardData = async () => {
     try {
-      const storeRes = await api.get('/api/stores/my-store').catch(() => ({ data: { store: null } }));
+      const [storeRes, productsRes, ordersRes, subRes] = await Promise.all([
+        api.get('/api/stores/my-store').catch(() => ({ data: { store: null } })),
+        api.get('/api/products/get-seller-products').catch(() => ({ data: [] })),
+        api.get('/api/order/get').catch(() => ({ data: { orders: [] } })),
+        api.get('/api/subscription/status').catch(() => ({ data: { subscription: null } })),
+      ]);
       setStore(storeRes.data?.store);
-      const productsRes = await api.get('/api/products/get-seller-products').catch(() => ({ data: [] }));
       const fetchedProducts = productsRes.data?.products || productsRes.data || [];
       setProducts(fetchedProducts);
-      const ordersRes = await api.get('/api/order/get').catch(() => ({ data: { orders: [] } }));
       const fetchedOrders = ordersRes.data?.orders || [];
       setOrders(fetchedOrders);
       setStats(calculateSellerStats(fetchedProducts, fetchedOrders));
+      setSubscription(subRes.data?.subscription);
     } catch (error) { console.error('Error fetching dashboard data:', error); }
     finally { setIsLoading(false); setRefreshing(false); }
   };

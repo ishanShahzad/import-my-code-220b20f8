@@ -720,6 +720,7 @@ const ProductForm = ({ product, setProduct, onSave, onClose, uploadingImages }) 
     const { currency, convertPrice, convertToUSD, getCurrencySymbol } = useCurrency();
     const [newTag, setNewTag] = useState("");
     const [newImage, setNewImage] = useState("");
+    const [newColor, setNewColor] = useState("");
 
     const handleAddTag = () => {
         if (newTag.trim() && !product.tags.includes(newTag.trim())) {

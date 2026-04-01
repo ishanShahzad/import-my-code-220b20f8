@@ -13,9 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Loader from '../../components/common/Loader';
 import GlassBackground from '../../components/common/GlassBackground';
 import GlassPanel from '../../components/common/GlassPanel';
-import {
-  colors, spacing, fontSize, borderRadius, fontWeight, typography, shadows,
-} from '../../styles/theme';
+import ChatBot from '../../components/ChatBot';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TILE_GAP = spacing.sm;

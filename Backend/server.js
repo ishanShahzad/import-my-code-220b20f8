@@ -242,6 +242,7 @@ const chatbotRoutes = require('./routes/chatbotRoutes')
 const smartTagRoutes = require('./routes/smartTagRoutes')
 const aiActionRoutes = require('./routes/aiActionRoutes')
 const subscriptionRoutes = require('./routes/subscriptionRoutes')
+const couponRoutes = require('./routes/couponRoutes')
 const { getOrderDetail } = require('./controllers/orderController')
 const Cart = require('./models/Cart')
 const { sendEmail } = require('./controllers/mailController')
@@ -267,6 +268,7 @@ app.use('/api/chatbot', chatbotRoutes)
 app.use('/api/smart-tags', smartTagRoutes)
 app.use('/api/ai-actions', aiActionRoutes)
 app.use('/api/subscription', subscriptionRoutes)
+app.use('/api/coupons', couponRoutes)
 
 // Run trial expiration check every hour
 const { processTrialExpirations } = require('./controllers/subscriptionController');

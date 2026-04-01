@@ -5,6 +5,7 @@ const Product = require('../models/Product')
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const TaxConfig = require('../models/TaxConfig');
 const { calculateTax } = require('./taxController');
+const { recordCouponUsage } = require('./couponController');
 
 
 exports.placeOrder = async (req, res) => {
@@ -69,8 +70,11 @@ exports.placeOrder = async (req, res) => {
             tax = calculateTax(subtotal, taxConfig);
         }
 
+        // Calculate coupon discount from frontend
+        const couponDiscount = order.orderSummary?.couponDiscount || 0;
+
         // Final total
-        const totalAmount = subtotal + shippingCost + tax;
+        const totalAmount = subtotal + shippingCost + tax - couponDiscount;
         // console.log("cartItems::::", cartItems);
 
 
@@ -109,8 +113,11 @@ exports.placeOrder = async (req, res) => {
                 subtotal: subtotal,
                 shippingCost: shippingCost,
                 tax: tax,
+                couponDiscount: couponDiscount,
                 totalAmount: totalAmount,
             },
+
+            appliedCoupons: order.appliedCoupons || [],
 
             // ✅ Schema expects just string ("stripe" | "cash_on_delivery")
             paymentMethod: order.paymentMethod,
@@ -126,7 +133,15 @@ exports.placeOrder = async (req, res) => {
         if (order.instructions && order.instructions !== '') newOrder.instructions = order.instructions
 
         await newOrder.save();
-        // console.log('new order:::', newOrder);
+
+        // Record coupon usage
+        if (order.appliedCoupons && order.appliedCoupons.length > 0) {
+            for (const couponData of order.appliedCoupons) {
+                if (couponData.couponId) {
+                    await recordCouponUsage(couponData.couponId, userId);
+                }
+            }
+        }
 
 
         // const domainURL = process.env.FRONTEND_URL || 'http://localhost:5173'

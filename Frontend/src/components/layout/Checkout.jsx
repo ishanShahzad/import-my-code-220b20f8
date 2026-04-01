@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Minus, Plus, CreditCard, DollarSign, Truck, MapPin, User, Mail, Phone, Home, Navigation, CreditCardIcon, X, Loader2, ChevronDown, ChevronUp, Zap } from "lucide-react";
+import { CheckCircle, Minus, Plus, CreditCard, DollarSign, Truck, MapPin, User, Mail, Phone, Home, Navigation, CreditCardIcon, X, Loader2, ChevronDown, ChevronUp, Zap, Ticket, Tag, Check } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useGlobal } from "../../contexts/GlobalContext";
 import { useCurrency } from "../../contexts/CurrencyContext";
@@ -33,6 +33,12 @@ export default function Checkout() {
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState(null);
 
+  // Coupon state
+  const [sellerCoupons, setSellerCoupons] = useState({}); // { sellerId: [coupon, ...] }
+  const [couponInputs, setCouponInputs] = useState({}); // { key: 'CODE' }
+  const [appliedCoupons, setAppliedCoupons] = useState({}); // { key: { coupon, applicableProductIds } }
+  const [couponLoading, setCouponLoading] = useState({});
+
 
   const { formatPrice } = useCurrency();
   
@@ -45,6 +51,17 @@ export default function Checkout() {
     fetchTaxConfig();
     fetchSavedShippingInfo();
   }, []);
+
+  // Fetch coupons when cart items change
+  useEffect(() => {
+    if (cartItems?.cart && cartItems.cart.length > 0) {
+      fetchAvailableCoupons();
+    } else {
+      setSellerCoupons({});
+      setAppliedCoupons({});
+      setCouponInputs({});
+    }
+  }, [cartItems?.cart?.length]);
 
   // Fetch shipping methods when cart changes
   useEffect(() => {
@@ -79,6 +96,133 @@ export default function Checkout() {
       console.error('Error fetching saved shipping info:', error);
     }
   };
+
+  const fetchAvailableCoupons = async () => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      if (!token) return;
+      const sellerIds = [...new Set(cartItems.cart.map(item => item.product.seller))];
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/coupons/checkout-coupons`,
+        { sellerIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSellerCoupons(res.data.sellerCoupons || {});
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+    }
+  };
+
+  // Determine where to show coupon inputs for a given seller
+  const getCouponInputConfig = (sellerId, sellerProducts) => {
+    const coupons = sellerCoupons[sellerId];
+    if (!coupons || coupons.length === 0) return null;
+    
+    // Check if ANY coupon from this seller applies to ALL products
+    const hasAllCoupon = coupons.some(c => c.applicableTo === 'all');
+    // Check if coupons target selected products
+    const selectedCoupons = coupons.filter(c => c.applicableTo === 'selected');
+    
+    if (hasAllCoupon && selectedCoupons.length === 0) {
+      // Only "all" coupons — show single input for the seller group
+      return { type: 'group', sellerId };
+    }
+    
+    if (!hasAllCoupon && selectedCoupons.length > 0) {
+      // Only "selected" coupons — determine which products have coupons
+      const productIdsWithCoupons = new Set();
+      selectedCoupons.forEach(c => c.applicableProducts.forEach(pid => productIdsWithCoupons.add(pid)));
+      
+      const productsWithCoupons = sellerProducts.filter(item => productIdsWithCoupons.has(item.product._id));
+      
+      if (productsWithCoupons.length === sellerProducts.length) {
+        // All products have coupons — show group input
+        return { type: 'group', sellerId };
+      }
+      // Show per-product inputs for eligible products
+      return { type: 'per-product', productIds: [...productIdsWithCoupons] };
+    }
+    
+    // Mix of "all" and "selected" coupons — show group input (simplest UX)
+    return { type: 'group', sellerId };
+  };
+
+  const applyCoupon = async (inputKey, productIds) => {
+    const code = couponInputs[inputKey]?.trim();
+    if (!code) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+    setCouponLoading(prev => ({ ...prev, [inputKey]: true }));
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}api/coupons/validate`,
+        { code, productIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.valid) {
+        const coupon = res.data.coupon;
+        // Check min order amount for applicable products
+        const applicableItems = cartItems.cart.filter(item => coupon.applicableProductIds.includes(item.product._id));
+        const applicableSubtotal = applicableItems.reduce((sum, item) => {
+          const price = item.product.discountedPrice || item.product.price;
+          return sum + (price * item.qty);
+        }, 0);
+        
+        if (coupon.minOrderAmount > 0 && applicableSubtotal < coupon.minOrderAmount) {
+          toast.error(`Minimum order amount of ${formatPrice(coupon.minOrderAmount)} required for this coupon`);
+          return;
+        }
+        
+        setAppliedCoupons(prev => ({ ...prev, [inputKey]: coupon }));
+        toast.success(`Coupon ${coupon.code} applied! ${coupon.discountType === 'percentage' ? `${coupon.discountValue}% off` : `${formatPrice(coupon.discountValue)} off`}`);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.msg || 'Invalid coupon code');
+    } finally {
+      setCouponLoading(prev => ({ ...prev, [inputKey]: false }));
+    }
+  };
+
+  const removeCoupon = (inputKey) => {
+    setAppliedCoupons(prev => {
+      const copy = { ...prev };
+      delete copy[inputKey];
+      return copy;
+    });
+    setCouponInputs(prev => ({ ...prev, [inputKey]: '' }));
+    toast.info('Coupon removed');
+  };
+
+  // Calculate coupon discount for a specific product
+  const getProductCouponDiscount = (productId, itemPrice, qty) => {
+    let totalDiscount = 0;
+    Object.values(appliedCoupons).forEach(coupon => {
+      if (coupon.applicableProductIds.includes(productId)) {
+        let discount = 0;
+        if (coupon.discountType === 'percentage') {
+          discount = (itemPrice * qty * coupon.discountValue) / 100;
+        } else {
+          discount = coupon.discountValue; // Fixed discount spread across
+        }
+        if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
+          discount = coupon.maxDiscountAmount;
+        }
+        totalDiscount += discount;
+      }
+    });
+    return totalDiscount;
+  };
+
+  // Total coupon discount
+  const totalCouponDiscount = useMemo(() => {
+    if (!cartItems?.cart || Object.keys(appliedCoupons).length === 0) return 0;
+    let total = 0;
+    cartItems.cart.forEach(item => {
+      const price = item.product.discountedPrice || item.product.price;
+      total += getProductCouponDiscount(item.product._id, price, item.qty);
+    });
+    return total;
+  }, [cartItems, appliedCoupons]);
 
   const handleAutoFill = () => {
     if (!savedShippingInfo) return;
@@ -199,7 +343,7 @@ export default function Checkout() {
     }, 0);
   }, [selectedShippingPerSeller]);
   
-  const totalAmount = subtotal + tax + shippingCost;
+  const totalAmount = subtotal + tax + shippingCost - totalCouponDiscount;
   
   // Group cart items by seller
   const cartItemsBySeller = useMemo(() => {
@@ -343,8 +487,17 @@ export default function Checkout() {
         subtotal,
         shippingCost,
         tax,
+        couponDiscount: totalCouponDiscount,
         totalAmount,
       },
+
+      appliedCoupons: Object.values(appliedCoupons).map(c => ({
+        couponId: c._id,
+        code: c.code,
+        discountType: c.discountType,
+        discountValue: c.discountValue,
+        applicableProductIds: c.applicableProductIds,
+      })),
 
       paymentMethod:
         data.paymentMethod === "stripe"
@@ -549,66 +702,95 @@ export default function Checkout() {
                           </button>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          {cartItems.cart.map((item) => {
-                            const { product, qty } = item;
-                            const { _id, name, price, image, discountedPrice } = product;
+                        <div className="space-y-6">
+                          {Object.entries(cartItemsBySeller).map(([sellerId, sellerItems]) => {
+                            const couponConfig = getCouponInputConfig(sellerId, sellerItems);
+                            const groupKey = `seller-${sellerId}`;
                             
-                            // SPIN WHEEL DISABLED - was getDiscountedPrice(product)
-                            const itemPrice = discountedPrice || price;
-                            // const hasSpinDiscount = false; // SPIN WHEEL DISABLED
-
                             return (
-                              <motion.div
-                                key={item._id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="flex items-center relative justify-between p-3 sm:p-4 glass-inner rounded-xl"
-                              >
-                                <div className="flex items-center  gap-4">
-                                  <AnimatePresence mode="wait">
-                                    {
-                                      qtyUpdateId === item._id && (
-                                        <motion.div
-                                          initial={{ opacity: 0 }}
-                                          animate={{ opacity: 1 }}
-                                          exit={{ opacity: 0 }}
-                                          className="w-full h-full absolute backdrop-blur-lg top-0 left-0 z-2 flex justify-center items-center gap-1 rounded-xl"
-                                          style={{ color: 'hsl(220, 70%, 55%)' }}>
-                                          Processing <span className="animate-spin"> <Loader2 /> </span>
-                                        </motion.div>
-                                      )
-                                    }
-                                  </AnimatePresence>
-                                  <img
-                                    className="h-16 w-16 rounded-lg object-cover"
-                                    src={image}
-                                    alt={name}
+                              <div key={sellerId} className="space-y-3">
+                                {/* Seller items */}
+                                {sellerItems.map((item) => {
+                                  const { product, qty } = item;
+                                  const { _id, name, price, image, discountedPrice } = product;
+                                  const itemPrice = discountedPrice || price;
+                                  const productCouponDiscount = getProductCouponDiscount(_id, itemPrice, qty);
+                                  const productKey = `product-${_id}`;
+                                  const showPerProductInput = couponConfig?.type === 'per-product' && couponConfig.productIds.includes(_id);
+
+                                  return (
+                                    <div key={item._id}>
+                                      <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="flex items-center relative justify-between p-3 sm:p-4 glass-inner rounded-xl"
+                                      >
+                                        <div className="flex items-center gap-4">
+                                          <AnimatePresence mode="wait">
+                                            {qtyUpdateId === item._id && (
+                                              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                                className="w-full h-full absolute backdrop-blur-lg top-0 left-0 z-2 flex justify-center items-center gap-1 rounded-xl"
+                                                style={{ color: 'hsl(220, 70%, 55%)' }}>
+                                                Processing <span className="animate-spin"><Loader2 /></span>
+                                              </motion.div>
+                                            )}
+                                          </AnimatePresence>
+                                          <img className="h-16 w-16 rounded-lg object-cover" src={image} alt={name} />
+                                          <div>
+                                            <h4 className="font-medium text-sm sm:text-base" style={{ color: 'hsl(var(--foreground))' }}>{name}</h4>
+                                            <p>
+                                              <span className="font-bold text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>{formatPrice(itemPrice)}</span>
+                                              {productCouponDiscount > 0 && (
+                                                <span className="ml-2 text-xs font-semibold" style={{ color: 'hsl(150, 60%, 45%)' }}>
+                                                  -{formatPrice(productCouponDiscount)} coupon
+                                                </span>
+                                              )}
+                                            </p>
+                                            <QuantitySelector
+                                              qty={qty}
+                                              onIncrement={() => handleQtyInc(item._id)}
+                                              onDecrement={() => handleQtyDec(item._id)}
+                                            />
+                                          </div>
+                                        </div>
+                                        <button onClick={() => handleRemoveCartItem(_id)} type="button" className="absolute cursor-pointer top-2 right-2">
+                                          <X />
+                                        </button>
+                                      </motion.div>
+
+                                      {/* Per-product coupon input */}
+                                      {showPerProductInput && (
+                                        <CouponInput
+                                          inputKey={productKey}
+                                          couponInputs={couponInputs}
+                                          setCouponInputs={setCouponInputs}
+                                          appliedCoupons={appliedCoupons}
+                                          couponLoading={couponLoading}
+                                          onApply={() => applyCoupon(productKey, [_id])}
+                                          onRemove={() => removeCoupon(productKey)}
+                                          formatPrice={formatPrice}
+                                        />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+
+                                {/* Group-level coupon input for this seller */}
+                                {couponConfig?.type === 'group' && (
+                                  <CouponInput
+                                    inputKey={groupKey}
+                                    couponInputs={couponInputs}
+                                    setCouponInputs={setCouponInputs}
+                                    appliedCoupons={appliedCoupons}
+                                    couponLoading={couponLoading}
+                                    onApply={() => applyCoupon(groupKey, sellerItems.map(i => i.product._id))}
+                                    onRemove={() => removeCoupon(groupKey)}
+                                    formatPrice={formatPrice}
+                                    isGroup
                                   />
-                                  <div>
-                                    <h4 className="font-medium text-sm sm:text-base" style={{ color: 'hsl(var(--foreground))' }}>{name}</h4>
-                                    {/* SPIN WHEEL DISABLED - spin discount badge removed */}
-                                    {/* {hasSpinDiscount && (<p className="text-xs text-green-600 font-semibold">🎉 Spin Discount Applied!</p>)} */}
-                                    <p>
-                                      <span className="font-bold text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>{formatPrice(itemPrice)}</span>
-                                    </p>
-                                    <QuantitySelector
-                                      qty={qty}
-                                      onIncrement={() => handleQtyInc(item._id)}
-                                      onDecrement={() => handleQtyDec(item._id)}
-                                    />
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    handleRemoveCartItem(_id)
-                                  }}
-                                  type="button"
-                                  className="absolute cursor-pointer top-2 right-2">
-                                  <X />
-                                </button>
-                              </motion.div>
+                                )}
+                              </div>
                             );
                           })}
                         </div>
@@ -1184,6 +1366,13 @@ export default function Checkout() {
                   </div>
                 )}
                 
+                {totalCouponDiscount > 0 && (
+                  <div className="flex justify-between text-sm" style={{ color: 'hsl(150, 60%, 45%)' }}>
+                    <span className="flex items-center gap-1"><Ticket size={14} /> Coupon Discount</span>
+                    <span className="font-semibold">-{formatPrice(totalCouponDiscount)}</span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between text-base sm:text-lg font-semibold pt-3" style={{ borderTop: '1px solid hsl(var(--border))', color: 'hsl(var(--foreground))' }}>
                   <span>Total</span>
                   <span style={{ color: 'hsl(220, 70%, 55%)' }}>{formatPrice(totalAmount)}</span>
@@ -1353,3 +1542,56 @@ const PaymentOption = React.forwardRef(({ value, title, description, icon, selec
     </div>
   </label>
 ));
+
+/* ---------- Coupon Input Component ---------- */
+function CouponInput({ inputKey, couponInputs, setCouponInputs, appliedCoupons, couponLoading, onApply, onRemove, formatPrice, isGroup }) {
+  const applied = appliedCoupons[inputKey];
+  const isLoading = couponLoading[inputKey];
+
+  if (applied) {
+    return (
+      <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+        className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl ${isGroup ? 'mt-2' : 'mt-1 ml-4 sm:ml-8'}`}
+        style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+        <div className="flex items-center gap-2">
+          <div className="p-1 rounded-full" style={{ background: 'rgba(16,185,129,0.15)' }}>
+            <Check size={14} style={{ color: 'hsl(150, 60%, 45%)' }} />
+          </div>
+          <div>
+            <span className="text-xs font-bold font-mono tracking-wider" style={{ color: 'hsl(150, 60%, 45%)' }}>
+              {applied.code}
+            </span>
+            <span className="text-xs ml-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              {applied.discountType === 'percentage' ? `${applied.discountValue}% off` : `${formatPrice(applied.discountValue)} off`}
+            </span>
+          </div>
+        </div>
+        <button type="button" onClick={onRemove} className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+          style={{ color: 'hsl(0, 72%, 55%)' }}>
+          <X size={14} />
+        </button>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center gap-2 ${isGroup ? 'mt-2' : 'mt-1 ml-4 sm:ml-8'}`}>
+      <div className="flex-1 relative">
+        <Ticket size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'hsl(var(--muted-foreground))' }} />
+        <input
+          type="text"
+          placeholder="Enter coupon code"
+          value={couponInputs[inputKey] || ''}
+          onChange={(e) => setCouponInputs(prev => ({ ...prev, [inputKey]: e.target.value.toUpperCase() }))}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onApply())}
+          className="glass-input w-full pl-9 pr-3 py-2 text-xs font-mono uppercase tracking-wider"
+        />
+      </div>
+      <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={onApply} disabled={isLoading}
+        className="px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap disabled:opacity-50"
+        style={{ background: 'linear-gradient(135deg, hsl(280, 60%, 55%), hsl(320, 50%, 55%))', color: 'white' }}>
+        {isLoading ? <Loader2 size={14} className="animate-spin" /> : 'Apply'}
+      </motion.button>
+    </div>
+  );
+}

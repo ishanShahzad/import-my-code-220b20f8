@@ -210,6 +210,7 @@ const SellerDashboard = () => {
         if (path.includes('notifications')) return 'Notifications';
         if (path.includes('analytics')) return 'Analytics';
         if (path.includes('subdomain')) return 'Subdomain';
+        if (path.includes('coupons')) return 'Coupons';
         if (path.includes('seller-home')) return 'Dashboard';
         return 'Dashboard';
     };
@@ -589,6 +590,7 @@ const SellerSidebar = ({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOpe
         { id: 'products', label: 'Products', icon: <Package size={18} />, link: '/seller-dashboard/product-management', badge: lowStockProducts },
         { id: 'orders', label: 'Orders', icon: <ShoppingBag size={18} />, link: '/seller-dashboard/order-management', badge: pendingOrders },
         { id: 'shipping', label: 'Shipping', icon: <Truck size={18} />, link: '/seller-dashboard/shipping-configuration' },
+        { id: 'coupons', label: 'Coupons', icon: <Star size={18} />, link: '/seller-dashboard/coupons' },
         { id: 'subdomain', label: 'Subdomain', icon: <LayoutPanelLeft size={18} />, link: '/seller-dashboard/subdomain' },
         { id: 'subscription', label: 'Subscription', icon: <Crown size={18} />, link: '/seller-dashboard/subscription' },
         { id: 'notifications', label: 'Notifications', icon: <Bell size={18} />, link: '/seller-dashboard/notifications' },

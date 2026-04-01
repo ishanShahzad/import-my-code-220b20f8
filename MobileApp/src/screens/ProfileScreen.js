@@ -3,17 +3,19 @@
  * User profile with role-based menu options
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, Modal,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
+import api from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 import GlassBackground from '../components/common/GlassBackground';
 import GlassPanel from '../components/common/GlassPanel';
 import {
-  colors, spacing, fontSize, borderRadius, fontWeight, typography,
+  colors, spacing, fontSize, borderRadius, fontWeight, typography, glass,
 } from '../styles/theme';
 
 const APP_VERSION = '1.0.0';

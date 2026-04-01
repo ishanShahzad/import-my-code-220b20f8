@@ -242,18 +242,19 @@ exports.handleWebhook = async (event) => {
                 const user = await User.findById(sellerId);
                 if (user?.email) {
                     const html = subscriptionEmailTemplate(
-                        '🎉 Subscription Activated!',
+                        '🎉 Tortrose Starter Activated!',
                         `<p>Hello ${user.username || 'Seller'},</p>
-                        <p>Your <strong>Tortrose Seller Plan</strong> is now active!</p>
+                        <p>Your <strong>Tortrose Starter</strong> plan is now active!</p>
                         <div class="highlight">
-                            <strong>Plan:</strong> Starter ($5/month)<br/>
-                            <strong>Free Period:</strong> 90 days (until ${freePeriodEnd.toLocaleDateString()})<br/>
-                            <strong>AI Messages:</strong> 100/day (upgraded from 25)
+                            <strong>Plan:</strong> Tortrose Starter ($5/month)<br/>
+                            <strong>Free Period:</strong> 30 days (until ${freePeriodEnd.toLocaleDateString()})<br/>
+                            <strong>AI Messages:</strong> 100/day (upgraded from 25)<br/>
+                            <strong>Bonus Features:</strong> Active for 6 months (until ${bonusExpiry.toLocaleDateString()})
                         </div>
                         <p>Your store has been reactivated and is now visible to customers.</p>
                         <p style="text-align:center"><a href="${process.env.FRONTEND_URL}/seller-dashboard" class="button">Go to Dashboard</a></p>`
                     );
-                    await sendEmail({ to: user.email, subject: 'Subscription Activated! 🎉', html });
+                    await sendEmail({ to: user.email, subject: 'Tortrose Starter Activated! 🎉', html });
                 }
                 break;
             }

@@ -77,7 +77,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   const discountPercentage = product?.discountedPrice && product.discountedPrice < product.price ? Math.round(((product.price - product.discountedPrice) / product.price) * 100) : 0;
 
   const handleWishlistToggle = () => { if (!currentUser) { navigation.navigate('Login'); return; } isInWishlist ? handleDeleteFromWishlist(product._id) : handleAddToWishlist(product._id); };
-  const handleAddToCartClick = () => { if (!currentUser) { navigation.navigate('Login'); return; } handleAddToCart(product._id); };
+  const handleAddToCartClick = () => { if (!currentUser) { navigation.navigate('Login'); return; } handleAddToCart(product._id, selectedColor); };
 
   const handleSubmitReview = async () => {
     if (!currentUser) { navigation.navigate('Login'); return; }

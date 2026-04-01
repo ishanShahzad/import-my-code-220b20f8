@@ -37,6 +37,7 @@ import SellerSubdomainManagement from '../components/layout/SellerSubdomainManag
 import AdminSubdomainManagement from '../components/layout/AdminSubdomainManagement'
 import ComplaintsManagement from '../components/layout/ComplaintsManagement'
 import SellerSubscription from '../components/layout/SellerSubscription'
+import CouponManagement from '../components/layout/CouponManagement'
 import StorePage from '../pages/StorePage'
 import StoresListing from '../pages/StoresListing'
 import TrustedStoresPage from '../pages/TrustedStoresPage'

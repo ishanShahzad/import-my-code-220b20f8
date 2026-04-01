@@ -69,8 +69,11 @@ exports.placeOrder = async (req, res) => {
             tax = calculateTax(subtotal, taxConfig);
         }
 
+        // Calculate coupon discount from frontend
+        const couponDiscount = order.orderSummary?.couponDiscount || 0;
+
         // Final total
-        const totalAmount = subtotal + shippingCost + tax;
+        const totalAmount = subtotal + shippingCost + tax - couponDiscount;
         // console.log("cartItems::::", cartItems);
 
 

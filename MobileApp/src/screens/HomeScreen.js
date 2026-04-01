@@ -569,6 +569,14 @@ export default function HomeScreen({ navigation }) {
         )}
       />
       {renderFilterModal()}
+
+      {/* AI FAB */}
+      <TouchableOpacity onPress={() => setShowAI(true)} activeOpacity={0.85}
+        style={{ position: 'absolute', bottom: 80, right: 16, width: 52, height: 52, borderRadius: 16, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', elevation: 6, shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, zIndex: 50 }}>
+        <Ionicons name="chatbubble-ellipses" size={22} color={colors.white} />
+      </TouchableOpacity>
+
+      <ChatBot visible={showAI} onClose={() => setShowAI(false)} navigation={navigation} />
       </SafeAreaView>
     </GlassBackground>
   );

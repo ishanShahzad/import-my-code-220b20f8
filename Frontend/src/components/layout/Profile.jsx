@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     User, Mail, Lock, Eye, EyeOff, Edit3, Save, X, Loader as LucideLoader,
-    Camera, User as UserIcon, Shield, Sparkles, CheckCircle, AlertCircle
+    Camera, User as UserIcon, Shield, Sparkles, CheckCircle, AlertCircle,
+    MapPin, Phone, Home
 } from 'lucide-react';
 import Loader from '../common/Loader';
 import { useAuth } from '../../contexts/AuthContext';

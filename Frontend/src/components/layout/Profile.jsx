@@ -48,7 +48,42 @@ const UserProfile = () => {
         finally { setIsWaiting(false); setLoading(false); }
     };
 
-    useEffect(() => { fetchUser(); }, []);
+    useEffect(() => { fetchUser(); fetchShippingInfo(); }, []);
+
+    const fetchShippingInfo = async () => {
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/shipping-info`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const info = res.data.shippingInfo;
+            if (info && info.fullName) {
+                setShippingInfo(info);
+                setShippingForm(info);
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleShippingChange = (e) => {
+        const { name, value } = e.target;
+        setShippingForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveShipping = async (e) => {
+        e.preventDefault();
+        setSavingShipping(true);
+        try {
+            const token = localStorage.getItem('jwtToken');
+            await axios.patch(`${import.meta.env.VITE_API_URL}api/user/shipping-info`,
+                { shippingInfo: shippingForm },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success('Shipping info saved!');
+            setShippingInfo(shippingForm);
+            setIsEditingShipping(false);
+        } catch (e) { toast.error('Failed to save shipping info'); }
+        finally { setSavingShipping(false); }
+    };
 
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];

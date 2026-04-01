@@ -29,6 +29,7 @@ function ProductDetailPage() {
     const [selectedIdx, setSelectedIdx] = useState(0);
     const [loading, setLoading] = useState(true);
     const [rating, setRating] = useState(5);
+    const [selectedColor, setSelectedColor] = useState(null);
     const [imageLoading, setImageLoading] = useState(true);
     const [storeData, setStoreData] = useState(null);
     const commentRef = useRef();

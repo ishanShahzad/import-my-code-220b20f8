@@ -5,13 +5,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform,
+  StyleSheet, KeyboardAvoidingView, Platform, Modal, Alert,
 } from 'react-native';
 import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import api from '../config/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useGlobal } from '../contexts/GlobalContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { Loader, InlineLoader } from '../components/common';
@@ -20,6 +21,7 @@ import GlassPanel from '../components/common/GlassPanel';
 import { colors, spacing, fontSize, borderRadius, shadows, fontWeight, glass } from '../styles/theme';
 
 export default function CheckoutScreen({ navigation }) {
+  const { currentUser } = useAuth();
   const { cartItems, fetchCart } = useGlobal();
   const { formatPrice } = useCurrency();
 
@@ -30,6 +32,9 @@ export default function CheckoutScreen({ navigation }) {
     fullName: '', email: '', phone: '', address: '',
     city: '', state: '', postalCode: '', country: 'Pakistan',
   });
+  const [savedShippingInfo, setSavedShippingInfo] = useState(null);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingLabel, setShippingLabel] = useState('Loading...');
@@ -44,6 +49,19 @@ export default function CheckoutScreen({ navigation }) {
   }, 0) || 0;
 
   const totalAmount = subtotal + shippingCost + tax;
+
+  // Fetch saved shipping info
+  useEffect(() => {
+    const fetchShippingInfo = async () => {
+      try {
+        const res = await api.get('/api/user/shipping-info');
+        if (res.data?.shippingInfo) {
+          setSavedShippingInfo(res.data.shippingInfo);
+        }
+      } catch {}
+    };
+    if (currentUser) fetchShippingInfo();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!cartItems?.cart?.length) return;
@@ -104,11 +122,33 @@ export default function CheckoutScreen({ navigation }) {
     return true;
   };
 
+  const autoFillShipping = () => {
+    if (savedShippingInfo) {
+      setFormData({
+        fullName: savedShippingInfo.fullName || '',
+        email: savedShippingInfo.email || '',
+        phone: savedShippingInfo.phone || '',
+        address: savedShippingInfo.address || '',
+        city: savedShippingInfo.city || '',
+        state: savedShippingInfo.state || '',
+        postalCode: savedShippingInfo.postalCode || '',
+        country: savedShippingInfo.country || 'Pakistan',
+      });
+      Toast.show({ type: 'success', text1: 'Auto-Filled!', text2: 'Shipping info loaded from your profile' });
+    }
+  };
+
+  const hasShippingInfoChanged = () => {
+    if (!savedShippingInfo) return true;
+    return Object.keys(formData).some(key => (formData[key] || '') !== (savedShippingInfo[key] || ''));
+  };
+
   const buildOrder = () => ({
     orderItems: cartItems.cart.map(item => ({
       id: item.product._id, name: item.product.name,
       image: item.product.image || item.product.images?.[0]?.url,
       price: getDiscountedPrice(item.product), quantity: item.qty || item.quantity || 1,
+      selectedColor: item.selectedColor || null,
     })),
     shippingInfo: formData,
     shippingMethod: { name: 'standard', price: shippingCost, estimatedDays: 5 },
@@ -116,6 +156,18 @@ export default function CheckoutScreen({ navigation }) {
     paymentMethod: paymentMethod === 'card' ? 'stripe' : 'cash_on_delivery',
     platform: paymentMethod === 'card' ? 'mobile' : undefined,
   });
+
+  const completeOrder = async (order, shouldSaveInfo) => {
+    if (shouldSaveInfo) {
+      try { await api.patch('/api/user/shipping-info', { shippingInfo: formData }); setSavedShippingInfo(formData); } catch {}
+    }
+    if (paymentMethod !== 'card') {
+      Toast.show({ type: 'success', text1: '🎉 Order Placed!', text2: 'Your order has been placed successfully' });
+      await api.delete('/api/cart/clear');
+      fetchCart();
+      setTimeout(() => { navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }, { name: 'Orders' }] }); }, 1200);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (!validateForm()) return;
@@ -127,11 +179,19 @@ export default function CheckoutScreen({ navigation }) {
         const { url } = res.data;
         if (!url) throw new Error('No Stripe URL returned');
         await WebBrowser.openBrowserAsync(url, { dismissButtonStyle: 'cancel', presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN });
+        // Save shipping info on first order
+        if (!savedShippingInfo?.fullName) {
+          try { await api.patch('/api/user/shipping-info', { shippingInfo: formData }); setSavedShippingInfo(formData); } catch {}
+        }
       } else {
-        Toast.show({ type: 'success', text1: '🎉 Order Placed!', text2: res.data.msg || 'Your order has been placed successfully' });
-        await api.delete('/api/cart/clear');
-        fetchCart();
-        setTimeout(() => { navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }, { name: 'Orders' }] }); }, 1200);
+        // Check if info changed
+        if (savedShippingInfo?.fullName && hasShippingInfoChanged()) {
+          setPendingOrderData({ order, data: res.data });
+          setShowUpdatePrompt(true);
+        } else {
+          // First time or no change - auto-save
+          await completeOrder(order, !savedShippingInfo?.fullName);
+        }
       }
     } catch (error) {
       Toast.show({ type: 'error', text1: 'Order Failed', text2: error.response?.data?.msg || 'Failed to place order.' });
@@ -204,6 +264,12 @@ export default function CheckoutScreen({ navigation }) {
                   <Image source={{ uri: item.product?.image || item.product?.images?.[0]?.url }} style={styles.cartItemImage} contentFit="cover" cachePolicy="memory-disk" transition={150} />
                   <View style={styles.cartItemInfo}>
                     <Text style={styles.cartItemName} numberOfLines={2}>{item.product?.name}</Text>
+                    {item.selectedColor && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                        <Ionicons name="color-palette-outline" size={11} color={colors.primary} />
+                        <Text style={{ fontSize: 11, color: colors.primary }}>{item.selectedColor}</Text>
+                      </View>
+                    )}
                     <Text style={styles.cartItemQty}>Qty: {item.qty || item.quantity || 1}</Text>
                   </View>
                   <Text style={styles.cartItemPrice}>{formatPrice(price)}</Text>
@@ -217,6 +283,12 @@ export default function CheckoutScreen({ navigation }) {
             <View style={styles.sectionHeader}>
               <Ionicons name="location-outline" size={18} color={colors.secondary} />
               <Text style={styles.sectionTitle}>Shipping Information</Text>
+              {savedShippingInfo?.fullName && (
+                <TouchableOpacity onPress={autoFillShipping} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(99,102,241,0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16 }}>
+                  <Ionicons name="flash-outline" size={14} color={colors.primary} />
+                  <Text style={{ fontSize: 12, color: colors.primary, fontWeight: fontWeight.semibold }}>Auto Fill</Text>
+                </TouchableOpacity>
+              )}
             </View>
             {renderInput('fullName', 'Full Name', { icon: 'person-outline' })}
             {renderInput('email', 'Email Address', { icon: 'mail-outline', keyboardType: 'email-address', autoCapitalize: 'none' })}
@@ -293,6 +365,31 @@ export default function CheckoutScreen({ navigation }) {
           </TouchableOpacity>
         </GlassPanel>
       </KeyboardAvoidingView>
+
+      {/* Update Shipping Info Modal */}
+      <Modal visible={showUpdatePrompt} transparent animationType="fade" onRequestClose={() => setShowUpdatePrompt(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: spacing.lg }}>
+          <GlassPanel variant="strong" style={{ padding: spacing.xl, width: '100%', maxWidth: 360, borderRadius: 24 }}>
+            <View style={{ alignItems: 'center', marginBottom: spacing.lg }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(99,102,241,0.12)', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.md }}>
+                <Ionicons name="location" size={28} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: fontSize.lg, fontWeight: fontWeight.bold, color: colors.text, marginBottom: spacing.xs }}>Update Shipping Info?</Text>
+              <Text style={{ fontSize: fontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>Your shipping details have changed. Save them for future orders?</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing.md }}>
+              <TouchableOpacity style={{ flex: 1, paddingVertical: 12, borderRadius: 14, backgroundColor: glass.bgSubtle, alignItems: 'center', borderWidth: 1, borderColor: glass.borderSubtle }}
+                onPress={async () => { setShowUpdatePrompt(false); await completeOrder(pendingOrderData?.order, false); }}>
+                <Text style={{ fontSize: fontSize.sm, fontWeight: fontWeight.semibold, color: colors.text }}>No, Keep</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ flex: 1, paddingVertical: 12, borderRadius: 14, backgroundColor: colors.primary, alignItems: 'center' }}
+                onPress={async () => { setShowUpdatePrompt(false); await completeOrder(pendingOrderData?.order, true); }}>
+                <Text style={{ fontSize: fontSize.sm, fontWeight: fontWeight.bold, color: '#fff' }}>Yes, Update</Text>
+              </TouchableOpacity>
+            </View>
+          </GlassPanel>
+        </View>
+      </Modal>
     </GlassBackground>
   );
 }

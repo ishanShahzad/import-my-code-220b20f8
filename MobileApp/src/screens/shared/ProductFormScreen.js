@@ -41,6 +41,8 @@ export default function ProductFormScreen({ navigation, route }) {
   });
   const [images, setImages] = useState(product?.images || []);
   const [tags, setTags] = useState(product?.tags || []);
+  const [productColors, setProductColors] = useState(product?.colors || []);
+  const [newColor, setNewColor] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -64,7 +66,7 @@ export default function ProductFormScreen({ navigation, route }) {
     if (!validation.isValid) { setErrors(validation.errors); setTouched({ name: true, price: true, stock: true }); return; }
     setLoading(true);
     try {
-      const productData = { name: formData.name.trim(), description: formData.description.trim(), price: parseFloat(formData.price), discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null, stock: parseInt(formData.stock), category: formData.category.trim(), brand: formData.brand.trim(), images };
+      const productData = { name: formData.name.trim(), description: formData.description.trim(), price: parseFloat(formData.price), discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null, stock: parseInt(formData.stock), category: formData.category.trim(), brand: formData.brand.trim(), images, colors: productColors };
       if (isEditMode) { await api.put(`/api/products/edit/${product._id}`, { product: productData }); Alert.alert('Success', 'Product updated', [{ text: 'OK', onPress: () => navigation.goBack() }]); }
       else { await api.post('/api/products/add', { product: productData }); Alert.alert('Success', 'Product created', [{ text: 'OK', onPress: () => navigation.goBack() }]); }
     } catch (e) { Alert.alert('Error', e.response?.data?.message || e.response?.data?.msg || 'Failed to save'); }
@@ -132,6 +134,33 @@ export default function ProductFormScreen({ navigation, route }) {
               <View style={{ flex: 1 }}>{renderInput('category', 'Category', { placeholder: 'e.g., Electronics' })}</View>
               <View style={{ flex: 1 }}>{renderInput('brand', 'Brand', { placeholder: 'e.g., Apple' })}</View>
             </View>
+          </GlassPanel>
+
+          {/* Color Variants */}
+          <GlassPanel variant="card" style={styles.section}>
+            <Text style={styles.sectionTitle}>Color Variants (Optional)</Text>
+            <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>
+              <View style={[styles.inputContainer, { flex: 1 }]}>
+                <TextInput style={styles.input} value={newColor} onChangeText={setNewColor}
+                  placeholder="e.g., Red" placeholderTextColor={colors.textSecondary} />
+              </View>
+              <TouchableOpacity style={{ backgroundColor: colors.primary, borderRadius: borderRadius.lg, paddingHorizontal: spacing.lg, justifyContent: 'center' }}
+                onPress={() => { if (newColor.trim() && !productColors.includes(newColor.trim())) { setProductColors(prev => [...prev, newColor.trim()]); setNewColor(''); } }}>
+                <Ionicons name="add" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+            {productColors.length > 0 && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {productColors.map((c, i) => (
+                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(99,102,241,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, gap: 6 }}>
+                    <Text style={{ fontSize: fontSize.sm, color: colors.primary, fontWeight: fontWeight.medium }}>{c}</Text>
+                    <TouchableOpacity onPress={() => setProductColors(prev => prev.filter((_, idx) => idx !== i))}>
+                      <Ionicons name="close-circle" size={16} color={colors.error} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
           </GlassPanel>
 
           {/* Smart Tags */}

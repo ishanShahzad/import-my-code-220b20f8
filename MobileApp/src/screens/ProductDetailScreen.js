@@ -33,6 +33,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [storeData, setStoreData] = useState(null);
   const flatListRef = useRef(null);
   const bottomBarAnim = useRef(new Animated.Value(0)).current;
@@ -43,7 +44,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   const [submittingReview, setSubmittingReview] = useState(false);
 
   const isInWishlist = product && wishlistItems?.some((item) => item._id === product._id);
-  const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id);
+  const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id && (item.selectedColor || null) === (selectedColor || null));
 
   useEffect(() => {
     fetchProduct();
@@ -76,7 +77,7 @@ export default function ProductDetailScreen({ route, navigation }) {
   const discountPercentage = product?.discountedPrice && product.discountedPrice < product.price ? Math.round(((product.price - product.discountedPrice) / product.price) * 100) : 0;
 
   const handleWishlistToggle = () => { if (!currentUser) { navigation.navigate('Login'); return; } isInWishlist ? handleDeleteFromWishlist(product._id) : handleAddToWishlist(product._id); };
-  const handleAddToCartClick = () => { if (!currentUser) { navigation.navigate('Login'); return; } handleAddToCart(product._id); };
+  const handleAddToCartClick = () => { if (!currentUser) { navigation.navigate('Login'); return; } handleAddToCart(product._id, selectedColor); };
 
   const handleSubmitReview = async () => {
     if (!currentUser) { navigation.navigate('Login'); return; }
@@ -165,6 +166,21 @@ export default function ProductDetailScreen({ route, navigation }) {
             </View>
 
             <Text style={styles.description}>{product.description}</Text>
+
+            {/* Color Variants */}
+            {product.colors?.length > 0 && (
+              <View style={styles.colorSection}>
+                <Text style={styles.colorLabel}>Color: <Text style={{ color: colors.text, fontWeight: fontWeight.semibold }}>{selectedColor || 'Select a color'}</Text></Text>
+                <View style={styles.colorRow}>
+                  {product.colors.map((color, i) => (
+                    <TouchableOpacity key={i} onPress={() => setSelectedColor(color)}
+                      style={[styles.colorChip, selectedColor === color && styles.colorChipActive]}>
+                      <Text style={[styles.colorChipText, selectedColor === color && styles.colorChipTextActive]}>{color}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
 
             {product.tags?.length > 0 && (
               <View style={styles.tagsContainer}>
@@ -295,6 +311,13 @@ const styles = StyleSheet.create({
   saveBadge: { backgroundColor: 'rgba(239,68,68,0.12)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   saveText: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold, color: colors.error },
   description: { fontSize: fontSize.md, color: colors.textSecondary, lineHeight: 22, marginBottom: spacing.md },
+  colorSection: { marginBottom: spacing.lg },
+  colorLabel: { fontSize: fontSize.sm, color: colors.textSecondary, marginBottom: spacing.sm },
+  colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  colorChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: glass.bgSubtle, borderWidth: 1.5, borderColor: glass.borderSubtle },
+  colorChipActive: { borderColor: colors.primary, backgroundColor: 'rgba(99,102,241,0.12)' },
+  colorChipText: { fontSize: fontSize.sm, color: colors.textSecondary, fontWeight: fontWeight.medium },
+  colorChipTextActive: { color: colors.primary },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tag: { backgroundColor: 'rgba(99,102,241,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
   tagText: { fontSize: fontSize.sm, color: colors.primary, fontWeight: fontWeight.medium },

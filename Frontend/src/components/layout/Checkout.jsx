@@ -1357,6 +1357,13 @@ export default function Checkout() {
                   </div>
                 )}
                 
+                {totalCouponDiscount > 0 && (
+                  <div className="flex justify-between text-sm" style={{ color: 'hsl(150, 60%, 45%)' }}>
+                    <span className="flex items-center gap-1"><Ticket size={14} /> Coupon Discount</span>
+                    <span className="font-semibold">-{formatPrice(totalCouponDiscount)}</span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between text-base sm:text-lg font-semibold pt-3" style={{ borderTop: '1px solid hsl(var(--border))', color: 'hsl(var(--foreground))' }}>
                   <span>Total</span>
                   <span style={{ color: 'hsl(220, 70%, 55%)' }}>{formatPrice(totalAmount)}</span>

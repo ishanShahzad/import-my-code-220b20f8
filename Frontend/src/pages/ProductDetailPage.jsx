@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useRef, useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, ShoppingCart, Star, ChevronRight, ChevronLeft, Zap, Sparkles, Share2, RotateCcw, Loader2, Home, Tag, Package } from 'lucide-react';
+import { Heart, ShoppingCart, Star, ChevronRight, ChevronLeft, Zap, Sparkles, Share2, RotateCcw, Loader2, Home, Tag, Package, Ticket, Copy, Check, Calendar } from 'lucide-react';
 import Loader from '../components/common/Loader';
 import StoreInfo from '../components/common/StoreInfo';
 import SEOHead from '../components/common/SEOHead';
@@ -32,6 +32,8 @@ function ProductDetailPage() {
     const [selectedColor, setSelectedColor] = useState(null);
     const [imageLoading, setImageLoading] = useState(true);
     const [storeData, setStoreData] = useState(null);
+    const [availableCoupons, setAvailableCoupons] = useState([]);
+    const [copiedCoupon, setCopiedCoupon] = useState(null);
     const commentRef = useRef();
 
     const isInWishlist = product && wishlistItems?.some((item) => item._id === product._id);
@@ -106,7 +108,23 @@ function ProductDetailPage() {
         }
     };
 
-    useEffect(() => { fetchProduct(); }, [id]);
+    useEffect(() => { fetchProduct(); fetchProductCoupons(); }, [id]);
+
+    const fetchProductCoupons = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/coupons/product/${id}`);
+            setAvailableCoupons(res.data.coupons || []);
+        } catch (err) {
+            console.log('No coupons available');
+        }
+    };
+
+    const copyCouponCode = (code) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCoupon(code);
+        toast.success('Coupon code copied!');
+        setTimeout(() => setCopiedCoupon(null), 2000);
+    };
 
     // Track product view for personalized recommendations
     useEffect(() => {
@@ -483,6 +501,61 @@ function ProductDetailPage() {
                                             >
                                                 {color}
                                             </motion.button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* Available Coupons */}
+                            {availableCoupons.length > 0 && (
+                                <motion.div className="mb-6" variants={fadeIn}>
+                                    <p className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                        <Ticket size={13} style={{ color: 'hsl(280, 60%, 55%)' }} />
+                                        Available Coupons
+                                    </p>
+                                    <div className="space-y-2">
+                                        {availableCoupons.map(coupon => (
+                                            <motion.div key={coupon._id}
+                                                className="glass-inner rounded-xl p-3 flex items-center justify-between gap-3"
+                                                whileHover={{ scale: 1.01 }}>
+                                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                    <div className="p-1.5 rounded-lg shrink-0" style={{ background: 'rgba(168, 85, 247, 0.1)', color: 'hsl(280, 60%, 55%)' }}>
+                                                        <Ticket size={14} />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono font-bold text-xs tracking-wider" style={{ color: 'hsl(280, 60%, 55%)' }}>
+                                                                {coupon.code}
+                                                            </span>
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                                                                style={{ background: 'rgba(16,185,129,0.1)', color: 'hsl(150, 60%, 45%)' }}>
+                                                                {coupon.discountType === 'percentage' ? `${coupon.discountValue}% OFF` : `$${coupon.discountValue} OFF`}
+                                                            </span>
+                                                        </div>
+                                                        {coupon.description && (
+                                                            <p className="text-[10px] mt-0.5 truncate" style={{ color: 'hsl(var(--muted-foreground))' }}>{coupon.description}</p>
+                                                        )}
+                                                        <div className="flex items-center gap-2 mt-1 text-[10px]" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                                            {coupon.minOrderAmount > 0 && (
+                                                                <span>Min: ${coupon.minOrderAmount}</span>
+                                                            )}
+                                                            <span className="flex items-center gap-0.5">
+                                                                <Calendar size={9} />
+                                                                Expires {new Date(coupon.expiryDate).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <motion.button whileTap={{ scale: 0.9 }}
+                                                    onClick={() => copyCouponCode(coupon.code)}
+                                                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold shrink-0 flex items-center gap-1"
+                                                    style={copiedCoupon === coupon.code
+                                                        ? { background: 'rgba(16,185,129,0.15)', color: 'hsl(150, 60%, 45%)' }
+                                                        : { background: 'rgba(168, 85, 247, 0.12)', color: 'hsl(280, 60%, 55%)' }
+                                                    }>
+                                                    {copiedCoupon === coupon.code ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
+                                                </motion.button>
+                                            </motion.div>
                                         ))}
                                     </div>
                                 </motion.div>

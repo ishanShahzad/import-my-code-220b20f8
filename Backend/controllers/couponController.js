@@ -271,6 +271,146 @@ exports.getCheckoutCoupons = async (req, res) => {
     }
 };
 
+// ─── Coupon Analytics for Sellers ───
+exports.getCouponAnalytics = async (req, res) => {
+    try {
+        const sellerId = req.user.id;
+        const Order = require('../models/Order');
+
+        const coupons = await Coupon.find({ seller: sellerId })
+            .populate('applicableProducts', 'name image price')
+            .sort({ usedCount: -1 });
+
+        // Get all orders with this seller's coupons
+        const sellerCouponIds = coupons.map(c => c._id.toString());
+        const ordersWithCoupons = await Order.find({
+            'appliedCoupons.couponId': { $in: sellerCouponIds }
+        });
+
+        // Calculate per-coupon analytics
+        const couponAnalytics = coupons.map(coupon => {
+            const couponOrders = ordersWithCoupons.filter(order =>
+                order.appliedCoupons.some(ac => ac.couponId?.toString() === coupon._id.toString())
+            );
+
+            const totalRevenue = couponOrders.reduce((sum, order) => {
+                const sellerItems = order.orderItems.filter(item => {
+                    if (coupon.applicableTo === 'all') return true;
+                    return coupon.applicableProducts.some(p => p._id.toString() === item.productId.toString());
+                });
+                return sum + sellerItems.reduce((s, i) => s + i.price * i.quantity, 0);
+            }, 0);
+
+            const totalDiscount = couponOrders.reduce((sum, order) => {
+                return sum + (order.orderSummary?.couponDiscount || 0);
+            }, 0);
+
+            const conversionRate = coupon.maxUses
+                ? Math.round((coupon.usedCount / coupon.maxUses) * 100)
+                : null;
+
+            return {
+                _id: coupon._id,
+                code: coupon.code,
+                discountType: coupon.discountType,
+                discountValue: coupon.discountValue,
+                applicableTo: coupon.applicableTo,
+                applicableProducts: coupon.applicableProducts,
+                isActive: coupon.isActive,
+                usedCount: coupon.usedCount,
+                maxUses: coupon.maxUses,
+                expiryDate: coupon.expiryDate,
+                startDate: coupon.startDate,
+                description: coupon.description,
+                totalRevenue: Math.round(totalRevenue * 100) / 100,
+                totalDiscount: Math.round(totalDiscount * 100) / 100,
+                ordersGenerated: couponOrders.length,
+                conversionRate,
+                avgOrderValue: couponOrders.length > 0
+                    ? Math.round((totalRevenue / couponOrders.length) * 100) / 100
+                    : 0,
+                uniqueUsers: coupon.usedBy?.length || 0,
+            };
+        });
+
+        // Summary stats
+        const totalCoupons = coupons.length;
+        const activeCoupons = coupons.filter(c => c.isActive && new Date() <= new Date(c.expiryDate)).length;
+        const totalUses = coupons.reduce((s, c) => s + c.usedCount, 0);
+        const totalRevenueFromCoupons = couponAnalytics.reduce((s, c) => s + c.totalRevenue, 0);
+        const totalDiscountGiven = couponAnalytics.reduce((s, c) => s + c.totalDiscount, 0);
+        const topCoupon = couponAnalytics.length > 0
+            ? couponAnalytics.reduce((best, c) => c.usedCount > best.usedCount ? c : best, couponAnalytics[0])
+            : null;
+
+        res.json({
+            analytics: couponAnalytics,
+            summary: {
+                totalCoupons,
+                activeCoupons,
+                totalUses,
+                totalRevenueFromCoupons: Math.round(totalRevenueFromCoupons * 100) / 100,
+                totalDiscountGiven: Math.round(totalDiscountGiven * 100) / 100,
+                topCouponCode: topCoupon?.code || null,
+            }
+        });
+    } catch (error) {
+        console.error('Coupon analytics error:', error);
+        res.status(500).json({ msg: 'Failed to fetch coupon analytics.' });
+    }
+};
+
+// ─── Get public coupons for a product ───
+exports.getProductCoupons = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const product = await Product.findById(productId).select('seller');
+        if (!product) return res.status(404).json({ msg: 'Product not found.' });
+
+        const now = new Date();
+        const coupons = await Coupon.find({
+            seller: product.seller,
+            isActive: true,
+            startDate: { $lte: now },
+            expiryDate: { $gte: now },
+            $or: [
+                { applicableTo: 'all' },
+                { applicableTo: 'selected', applicableProducts: productId }
+            ]
+        }).select('code discountType discountValue applicableTo description expiryDate minOrderAmount maxDiscountAmount');
+
+        const validCoupons = coupons.filter(c => c.maxUses === null || c.usedCount < c.maxUses);
+
+        res.json({ coupons: validCoupons });
+    } catch (error) {
+        console.error('Get product coupons error:', error);
+        res.status(500).json({ msg: 'Failed to fetch coupons.' });
+    }
+};
+
+// ─── Get public coupons for a store ───
+exports.getStoreCoupons = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+        const now = new Date();
+        const coupons = await Coupon.find({
+            seller: sellerId,
+            isActive: true,
+            startDate: { $lte: now },
+            expiryDate: { $gte: now },
+        })
+            .populate('applicableProducts', 'name image')
+            .select('code discountType discountValue applicableTo applicableProducts description expiryDate minOrderAmount maxDiscountAmount');
+
+        const validCoupons = coupons.filter(c => c.maxUses === null || c.usedCount < c.maxUses);
+
+        res.json({ coupons: validCoupons });
+    } catch (error) {
+        console.error('Get store coupons error:', error);
+        res.status(500).json({ msg: 'Failed to fetch coupons.' });
+    }
+};
+
 // ─── Record coupon usage (called after order is placed) ───
 exports.recordCouponUsage = async (couponId, userId) => {
     try {

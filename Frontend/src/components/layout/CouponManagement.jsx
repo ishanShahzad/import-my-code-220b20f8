@@ -281,6 +281,173 @@ const CouponManagement = () => {
                 </motion.button>
             </div>
 
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6">
+                {[
+                    { id: 'manage', label: 'Manage Coupons', icon: <Ticket size={15} /> },
+                    { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={15} /> },
+                ].map(tab => (
+                    <button key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+                        style={activeTab === tab.id
+                            ? { background: 'linear-gradient(135deg, hsl(280, 60%, 55%), hsl(320, 50%, 55%))', color: 'white', boxShadow: '0 4px 15px -3px hsla(280, 60%, 55%, 0.3)' }
+                            : { background: 'rgba(255,255,255,0.06)', color: 'hsl(var(--muted-foreground))', border: '1px solid var(--glass-border)' }
+                        }>
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === 'analytics' ? (
+                /* ═══════ ANALYTICS TAB ═══════ */
+                analyticsLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'hsl(280, 60%, 55%)' }} />
+                    </div>
+                ) : !analyticsData || analyticsData.analytics?.length === 0 ? (
+                    <div className="glass-panel p-12 text-center">
+                        <BarChart3 size={48} className="mx-auto mb-4 opacity-30" style={{ color: 'hsl(var(--muted-foreground))' }} />
+                        <h3 className="text-lg font-semibold mb-2" style={{ color: 'hsl(var(--foreground))' }}>No Analytics Data Yet</h3>
+                        <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>Create coupons and wait for customers to use them to see analytics.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            {[
+                                { label: 'Total Coupons', value: analyticsData.summary.totalCoupons, icon: <Ticket size={16} />, color: 'hsl(280, 60%, 55%)' },
+                                { label: 'Active', value: analyticsData.summary.activeCoupons, icon: <Check size={16} />, color: 'hsl(150, 60%, 45%)' },
+                                { label: 'Total Uses', value: analyticsData.summary.totalUses, icon: <Users size={16} />, color: 'hsl(220, 70%, 55%)' },
+                                { label: 'Revenue Generated', value: formatPrice(analyticsData.summary.totalRevenueFromCoupons), icon: <TrendingUp size={16} />, color: 'hsl(45, 80%, 45%)' },
+                                { label: 'Total Discounts', value: formatPrice(analyticsData.summary.totalDiscountGiven), icon: <ArrowDownRight size={16} />, color: 'hsl(0, 72%, 55%)' },
+                                { label: 'Top Coupon', value: analyticsData.summary.topCouponCode || 'N/A', icon: <Award size={16} />, color: 'hsl(320, 50%, 55%)' },
+                            ].map((stat, i) => (
+                                <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                                    className="glass-panel p-3 sm:p-4">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="p-1.5 rounded-lg" style={{ background: `${stat.color}15`, color: stat.color }}>{stat.icon}</div>
+                                        <span className="text-[10px] sm:text-xs font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>{stat.label}</span>
+                                    </div>
+                                    <p className="text-sm sm:text-lg font-bold truncate" style={{ color: 'hsl(var(--foreground))' }}>{stat.value}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Coupon Performance Table */}
+                        <div className="glass-panel overflow-hidden">
+                            <div className="p-4 sm:p-5 border-b" style={{ borderColor: 'var(--glass-border)' }}>
+                                <h3 className="text-base font-bold flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
+                                    <BarChart3 size={18} style={{ color: 'hsl(280, 60%, 55%)' }} />
+                                    Coupon Performance
+                                </h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                            {['Coupon', 'Type', 'Uses', 'Orders', 'Revenue', 'Discount Given', 'Avg Order', 'Unique Users', 'Conversion', 'Status'].map(h => (
+                                                <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--muted-foreground))' }}>{h}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {analyticsData.analytics.map((c, i) => {
+                                            const now = new Date();
+                                            const isExpired = now > new Date(c.expiryDate);
+                                            const isExhausted = c.maxUses && c.usedCount >= c.maxUses;
+                                            let statusLabel = 'Active', statusColor = 'hsl(150, 60%, 45%)';
+                                            if (!c.isActive) { statusLabel = 'Inactive'; statusColor = 'hsl(var(--muted-foreground))'; }
+                                            else if (isExpired) { statusLabel = 'Expired'; statusColor = 'hsl(0, 72%, 55%)'; }
+                                            else if (isExhausted) { statusLabel = 'Exhausted'; statusColor = 'hsl(45, 80%, 40%)'; }
+                                            return (
+                                                <tr key={c._id} className="transition-colors" style={{ borderBottom: '1px solid var(--glass-border)' }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = ''}>
+                                                    <td className="px-4 py-3">
+                                                        <span className="font-mono font-bold text-xs tracking-wider" style={{ color: 'hsl(280, 60%, 55%)' }}>{c.code}</span>
+                                                        {c.description && <p className="text-[10px] mt-0.5 truncate max-w-[120px]" style={{ color: 'hsl(var(--muted-foreground))' }}>{c.description}</p>}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-xs">
+                                                        {c.discountType === 'percentage' ? `${c.discountValue}%` : formatPrice(c.discountValue)}
+                                                    </td>
+                                                    <td className="px-4 py-3 font-semibold">{c.usedCount}{c.maxUses ? `/${c.maxUses}` : ''}</td>
+                                                    <td className="px-4 py-3">{c.ordersGenerated}</td>
+                                                    <td className="px-4 py-3 font-semibold" style={{ color: 'hsl(150, 60%, 45%)' }}>{formatPrice(c.totalRevenue)}</td>
+                                                    <td className="px-4 py-3" style={{ color: 'hsl(0, 72%, 55%)' }}>{formatPrice(c.totalDiscount)}</td>
+                                                    <td className="px-4 py-3">{formatPrice(c.avgOrderValue)}</td>
+                                                    <td className="px-4 py-3">{c.uniqueUsers}</td>
+                                                    <td className="px-4 py-3">
+                                                        {c.conversionRate !== null ? (
+                                                            <span className="flex items-center gap-1 text-xs font-medium" style={{ color: c.conversionRate > 50 ? 'hsl(150, 60%, 45%)' : 'hsl(45, 80%, 40%)' }}>
+                                                                {c.conversionRate > 50 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                                                                {c.conversionRate}%
+                                                            </span>
+                                                        ) : <span className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>∞</span>}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                                            style={{ background: `${statusColor}15`, color: statusColor }}>
+                                                            {statusLabel}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Top Performing Coupons */}
+                        <div className="glass-panel p-4 sm:p-5">
+                            <h3 className="text-base font-bold mb-4 flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
+                                <Award size={18} style={{ color: 'hsl(45, 80%, 45%)' }} />
+                                Top Performing Coupons
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {[...analyticsData.analytics]
+                                    .sort((a, b) => b.totalRevenue - a.totalRevenue)
+                                    .slice(0, 6)
+                                    .map((c, i) => (
+                                        <motion.div key={c._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                                            className="glass-inner rounded-xl p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-mono font-bold text-sm tracking-wider" style={{ color: 'hsl(280, 60%, 55%)' }}>{c.code}</span>
+                                                <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+                                                    style={{ background: 'rgba(16,185,129,0.1)', color: 'hsl(150, 60%, 45%)' }}>
+                                                    #{i + 1}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                                <div>
+                                                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Revenue</span>
+                                                    <p className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{formatPrice(c.totalRevenue)}</p>
+                                                </div>
+                                                <div>
+                                                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Uses</span>
+                                                    <p className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{c.usedCount}</p>
+                                                </div>
+                                                <div>
+                                                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Orders</span>
+                                                    <p className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{c.ordersGenerated}</p>
+                                                </div>
+                                                <div>
+                                                    <span style={{ color: 'hsl(var(--muted-foreground))' }}>Users</span>
+                                                    <p className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{c.uniqueUsers}</p>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                            </div>
+                        </div>
+                    </div>
+                )
+            ) : (
+            /* ═══════ MANAGE TAB ═══════ */
+            <>
+
+
             {/* Search */}
             {coupons.length > 0 && (
                 <div className="relative mb-6">

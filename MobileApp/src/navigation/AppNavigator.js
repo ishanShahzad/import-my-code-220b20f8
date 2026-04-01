@@ -399,6 +399,7 @@ export default function AppNavigator() {
       <Stack.Screen name="SellerNotifications" component={GuardedSellerNotifications} options={{ headerShown: false }} />
       <Stack.Screen name="SellerHome" component={GuardedSellerHome} options={{ headerShown: false }} />
       <Stack.Screen name="NotificationSettings" component={GuardedNotificationSettings} options={{ headerShown: false }} />
+      <Stack.Screen name="SellerSubscription" component={GuardedSellerSubscription} options={{ headerShown: false }} />
       <Stack.Screen name="UserDashboard" component={UserDashboardScreen} options={{ headerShown: false }} />
 
       {/* Shared Screens (role-guarded: seller or admin) */}

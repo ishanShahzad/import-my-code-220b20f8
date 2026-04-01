@@ -315,6 +315,7 @@ export default function Checkout() {
           image: item.product.image,
           price: itemPrice,
           quantity: item.qty,
+          selectedColor: item.selectedColor || null,
         };
       }),
 

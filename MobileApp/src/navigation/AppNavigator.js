@@ -393,6 +393,8 @@ export default function AppNavigator() {
       <Stack.Screen name="StoreVerification" component={GuardedStoreVerification} options={{ headerShown: false }} />
       <Stack.Screen name="AdminNotifications" component={GuardedAdminNotifications} options={{ headerShown: false }} />
       <Stack.Screen name="AdminAnalytics" component={GuardedAdminAnalytics} options={{ headerShown: false }} />
+      <Stack.Screen name="AdminSubdomainManagement" component={GuardedAdminSubdomainManagement} options={{ headerShown: false }} />
+      <Stack.Screen name="AdminComplaints" component={GuardedAdminComplaints} options={{ headerShown: false }} />
 
       {/* Seller Dashboard (role-guarded: seller or admin) */}
       <Stack.Screen name="SellerDashboard" component={GuardedSellerDashboard} options={{ headerShown: false }} />
@@ -406,6 +408,7 @@ export default function AppNavigator() {
       <Stack.Screen name="SellerHome" component={GuardedSellerHome} options={{ headerShown: false }} />
       <Stack.Screen name="NotificationSettings" component={GuardedNotificationSettings} options={{ headerShown: false }} />
       <Stack.Screen name="SellerSubscription" component={GuardedSellerSubscription} options={{ headerShown: false }} />
+      <Stack.Screen name="SellerSubdomainManagement" component={GuardedSellerSubdomainManagement} options={{ headerShown: false }} />
       <Stack.Screen name="UserDashboard" component={UserDashboardScreen} options={{ headerShown: false }} />
 
       {/* Shared Screens (role-guarded: seller or admin) */}

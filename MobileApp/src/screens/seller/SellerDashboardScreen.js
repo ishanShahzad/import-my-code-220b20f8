@@ -15,6 +15,7 @@ import Loader from '../../components/common/Loader';
 import { EmptyOrders } from '../../components/common/EmptyState';
 import GlassBackground from '../../components/common/GlassBackground';
 import GlassPanel from '../../components/common/GlassPanel';
+import ChatBot from '../../components/ChatBot';
 import {
   colors, spacing, fontSize, borderRadius, fontWeight, typography,
 } from '../../styles/theme';

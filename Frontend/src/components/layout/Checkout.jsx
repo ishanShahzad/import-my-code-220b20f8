@@ -52,6 +52,17 @@ export default function Checkout() {
     fetchSavedShippingInfo();
   }, []);
 
+  // Fetch coupons when cart items change
+  useEffect(() => {
+    if (cartItems?.cart && cartItems.cart.length > 0) {
+      fetchAvailableCoupons();
+    } else {
+      setSellerCoupons({});
+      setAppliedCoupons({});
+      setCouponInputs({});
+    }
+  }, [cartItems?.cart?.length]);
+
   // Fetch shipping methods when cart changes
   useEffect(() => {
     if (cartItems?.cart && cartItems.cart.length > 0) {

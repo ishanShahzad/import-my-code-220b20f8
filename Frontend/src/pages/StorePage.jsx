@@ -19,6 +19,8 @@ const StorePage = () => {
     const [productsLoading, setProductsLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [trustStatus, setTrustStatus] = useState({ isTrusted: false, trustCount: 0 });
+    const [storeCoupons, setStoreCoupons] = useState([]);
+    const [copiedCoupon, setCopiedCoupon] = useState(null);
 
     useEffect(() => {
         fetchStore();

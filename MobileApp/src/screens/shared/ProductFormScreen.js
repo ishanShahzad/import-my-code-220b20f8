@@ -40,6 +40,7 @@ export default function ProductFormScreen({ navigation, route }) {
     stock: product?.stock?.toString() || '', category: product?.category || '', brand: product?.brand || '',
   });
   const [images, setImages] = useState(product?.images || []);
+  const [tags, setTags] = useState(product?.tags || []);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});

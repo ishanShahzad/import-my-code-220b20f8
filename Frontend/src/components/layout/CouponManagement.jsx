@@ -47,7 +47,23 @@ const CouponManagement = () => {
     useEffect(() => {
         fetchCoupons();
         fetchProducts();
+        fetchAnalytics();
     }, []);
+
+    const fetchAnalytics = async () => {
+        setAnalyticsLoading(true);
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/coupons/analytics`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAnalyticsData(res.data);
+        } catch (err) {
+            console.error('Failed to load coupon analytics:', err);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    };
 
     const fetchCoupons = async () => {
         try {

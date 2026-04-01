@@ -5,13 +5,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform,
+  StyleSheet, KeyboardAvoidingView, Platform, Modal, Alert,
 } from 'react-native';
 import { Image } from 'expo-image';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import api from '../config/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useGlobal } from '../contexts/GlobalContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { Loader, InlineLoader } from '../components/common';
@@ -20,6 +21,7 @@ import GlassPanel from '../components/common/GlassPanel';
 import { colors, spacing, fontSize, borderRadius, shadows, fontWeight, glass } from '../styles/theme';
 
 export default function CheckoutScreen({ navigation }) {
+  const { currentUser } = useAuth();
   const { cartItems, fetchCart } = useGlobal();
   const { formatPrice } = useCurrency();
 
@@ -30,6 +32,9 @@ export default function CheckoutScreen({ navigation }) {
     fullName: '', email: '', phone: '', address: '',
     city: '', state: '', postalCode: '', country: 'Pakistan',
   });
+  const [savedShippingInfo, setSavedShippingInfo] = useState(null);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
   const [shippingCost, setShippingCost] = useState(0);
   const [shippingLabel, setShippingLabel] = useState('Loading...');
@@ -44,6 +49,19 @@ export default function CheckoutScreen({ navigation }) {
   }, 0) || 0;
 
   const totalAmount = subtotal + shippingCost + tax;
+
+  // Fetch saved shipping info
+  useEffect(() => {
+    const fetchShippingInfo = async () => {
+      try {
+        const res = await api.get('/api/user/shipping-info');
+        if (res.data?.shippingInfo) {
+          setSavedShippingInfo(res.data.shippingInfo);
+        }
+      } catch {}
+    };
+    if (currentUser) fetchShippingInfo();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!cartItems?.cart?.length) return;

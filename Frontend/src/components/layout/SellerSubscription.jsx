@@ -152,9 +152,9 @@ const SellerSubscription = () => {
                         <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: isSubscribed ? 'linear-gradient(135deg, hsl(150, 60%, 45%), hsl(170, 50%, 40%))' : 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(250, 60%, 55%))' }}>
                             <Crown size={22} className="text-white" />
                         </div>
-                        <div>
+                         <div>
                             <h2 className="text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>
-                                {isSubscribed ? 'Starter Plan' : isTrial ? 'Free Trial' : 'No Active Plan'}
+                                {isSubscribed ? 'Tortrose Starter' : isTrial ? 'Free Trial' : 'No Active Plan'}
                             </h2>
                             <p className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
                                 {isSubscribed
@@ -166,6 +166,11 @@ const SellerSubscription = () => {
                                         : 'Subscribe to activate your store'
                                 }
                             </p>
+                            {isSubscribed && subscription?.bonusFeaturesActive && subscription?.bonusExpiryDate && (
+                                <p className="text-[11px] mt-1 flex items-center gap-1" style={{ color: 'hsl(270, 60%, 55%)' }}>
+                                    <Award size={11} /> Bonus features active until {new Date(subscription.bonusExpiryDate).toLocaleDateString()}
+                                </p>
+                            )}
                         </div>
                     </div>
                     {isSubscribed && !subscription?.cancelledAt && (

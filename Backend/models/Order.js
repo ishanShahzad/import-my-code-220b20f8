@@ -13,7 +13,7 @@ const orderSchema = mongoose.Schema(
                 image: { type: String },
                 price: { type: Number, required: true },
                 quantity: { type: Number, required: true },
-                // _id: false 
+                selectedColor: { type: String, default: null },
             }
         ],
 

@@ -11,6 +11,10 @@ const cartItemSchema = mongoose.Schema({
         default: 1,
         min: 1
     },
+    selectedColor: {
+        type: String,
+        default: null
+    },
 })
 
 const cartSchema = mongoose.Schema({

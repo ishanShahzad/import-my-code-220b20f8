@@ -31,6 +31,18 @@ const userSchema = mongoose.Schema({
     // Currency preference
     currency: { type: String, enum: ['USD', 'PKR', 'EUR', 'GBP'], default: 'USD' },
 
+    // Saved shipping/address info for auto-fill
+    savedShippingInfo: {
+        fullName: { type: String, default: '' },
+        email: { type: String, default: '' },
+        phone: { type: String, default: '' },
+        address: { type: String, default: '' },
+        city: { type: String, default: '' },
+        state: { type: String, default: '' },
+        postalCode: { type: String, default: '' },
+        country: { type: String, default: 'Pakistan' },
+    },
+
     // Notification preferences
     notificationPrefs: {
         stockAlerts: { type: Boolean, default: true },

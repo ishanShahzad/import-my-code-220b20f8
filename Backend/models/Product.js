@@ -31,6 +31,7 @@ const productSchema = mongoose.Schema(
         numReviews: { type: Number, default: 0 },
         isFeatured: { type: Boolean, default: false }, 
         tags: [String],
+        colors: [{ type: String }], // Optional color variants e.g. ['Red', 'Blue', 'Black']
         seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Track who created the product
         returnPolicy: {
             useStorePolicy: { type: Boolean, default: true }, // true = inherit from store

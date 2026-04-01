@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Minus, Plus, CreditCard, DollarSign, Truck, MapPin, User, Mail, Phone, Home, Navigation, CreditCardIcon, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, Minus, Plus, CreditCard, DollarSign, Truck, MapPin, User, Mail, Phone, Home, Navigation, CreditCardIcon, X, Loader2, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useGlobal } from "../../contexts/GlobalContext";
 import { useCurrency } from "../../contexts/CurrencyContext";
+import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";

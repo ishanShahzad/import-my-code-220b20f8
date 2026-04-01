@@ -216,17 +216,20 @@ exports.handleWebhook = async (event) => {
                 if (!sub) break;
 
                 const now = new Date();
-                const freePeriodEnd = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+                const freePeriodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+                const bonusExpiry = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000); // 6 months
 
                 sub.status = 'free_period';
                 sub.plan = 'starter';
+                sub.planName = 'Tortrose Starter';
                 sub.subscribedAt = now;
                 sub.freePeriodEndDate = freePeriodEnd;
                 sub.stripeSubscriptionId = session.subscription;
-                sub.aiMessageLimit = 100; // Upgraded AI limit
+                sub.aiMessageLimit = 100;
                 sub.blockedAt = null;
                 sub.blockedReason = '';
-
+                sub.bonusFeaturesActive = true;
+                sub.bonusExpiryDate = bonusExpiry;
                 await sub.save();
 
                 // Reactivate store

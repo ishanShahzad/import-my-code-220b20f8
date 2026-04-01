@@ -506,6 +506,61 @@ function ProductDetailPage() {
                                 </motion.div>
                             )}
 
+                            {/* Available Coupons */}
+                            {availableCoupons.length > 0 && (
+                                <motion.div className="mb-6" variants={fadeIn}>
+                                    <p className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                        <Ticket size={13} style={{ color: 'hsl(280, 60%, 55%)' }} />
+                                        Available Coupons
+                                    </p>
+                                    <div className="space-y-2">
+                                        {availableCoupons.map(coupon => (
+                                            <motion.div key={coupon._id}
+                                                className="glass-inner rounded-xl p-3 flex items-center justify-between gap-3"
+                                                whileHover={{ scale: 1.01 }}>
+                                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                    <div className="p-1.5 rounded-lg shrink-0" style={{ background: 'rgba(168, 85, 247, 0.1)', color: 'hsl(280, 60%, 55%)' }}>
+                                                        <Ticket size={14} />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono font-bold text-xs tracking-wider" style={{ color: 'hsl(280, 60%, 55%)' }}>
+                                                                {coupon.code}
+                                                            </span>
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                                                                style={{ background: 'rgba(16,185,129,0.1)', color: 'hsl(150, 60%, 45%)' }}>
+                                                                {coupon.discountType === 'percentage' ? `${coupon.discountValue}% OFF` : `$${coupon.discountValue} OFF`}
+                                                            </span>
+                                                        </div>
+                                                        {coupon.description && (
+                                                            <p className="text-[10px] mt-0.5 truncate" style={{ color: 'hsl(var(--muted-foreground))' }}>{coupon.description}</p>
+                                                        )}
+                                                        <div className="flex items-center gap-2 mt-1 text-[10px]" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                                            {coupon.minOrderAmount > 0 && (
+                                                                <span>Min: ${coupon.minOrderAmount}</span>
+                                                            )}
+                                                            <span className="flex items-center gap-0.5">
+                                                                <Calendar size={9} />
+                                                                Expires {new Date(coupon.expiryDate).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <motion.button whileTap={{ scale: 0.9 }}
+                                                    onClick={() => copyCouponCode(coupon.code)}
+                                                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold shrink-0 flex items-center gap-1"
+                                                    style={copiedCoupon === coupon.code
+                                                        ? { background: 'rgba(16,185,129,0.15)', color: 'hsl(150, 60%, 45%)' }
+                                                        : { background: 'rgba(168, 85, 247, 0.12)', color: 'hsl(280, 60%, 55%)' }
+                                                    }>
+                                                    {copiedCoupon === coupon.code ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
+                                                </motion.button>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
                             <motion.div className="flex gap-3 mb-6" variants={fadeIn}>
                                 <motion.button
                                     disabled={product.stock === 0 || isCartLoading || loadingProductId === id || (product.colors?.length > 0 && !selectedColor)}

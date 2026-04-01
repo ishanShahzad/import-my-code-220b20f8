@@ -277,6 +277,11 @@ function AppRoutes() {
                             <SellerSubscription />
                         </ProtectedRoute>
                     } />
+                    <Route path='/seller-dashboard/coupons' element={
+                        <ProtectedRoute role={'seller'}>
+                            <CouponManagement />
+                        </ProtectedRoute>
+                    } />
                 </Route>
             </Routes>
     )

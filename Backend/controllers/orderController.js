@@ -112,8 +112,11 @@ exports.placeOrder = async (req, res) => {
                 subtotal: subtotal,
                 shippingCost: shippingCost,
                 tax: tax,
+                couponDiscount: couponDiscount,
                 totalAmount: totalAmount,
             },
+
+            appliedCoupons: order.appliedCoupons || [],
 
             // ✅ Schema expects just string ("stripe" | "cash_on_delivery")
             paymentMethod: order.paymentMethod,

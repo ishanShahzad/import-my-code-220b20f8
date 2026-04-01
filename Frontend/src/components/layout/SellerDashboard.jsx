@@ -210,6 +210,7 @@ const SellerDashboard = () => {
         if (path.includes('notifications')) return 'Notifications';
         if (path.includes('analytics')) return 'Analytics';
         if (path.includes('subdomain')) return 'Subdomain';
+        if (path.includes('coupons')) return 'Coupons';
         if (path.includes('seller-home')) return 'Dashboard';
         return 'Dashboard';
     };

@@ -29,12 +29,13 @@ function ProductDetailPage() {
     const [selectedIdx, setSelectedIdx] = useState(0);
     const [loading, setLoading] = useState(true);
     const [rating, setRating] = useState(5);
+    const [selectedColor, setSelectedColor] = useState(null);
     const [imageLoading, setImageLoading] = useState(true);
     const [storeData, setStoreData] = useState(null);
     const commentRef = useRef();
 
     const isInWishlist = product && wishlistItems?.some((item) => item._id === product._id);
-    const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id);
+    const isInCart = product && cartItems?.cart?.some((item) => item.product?._id === product._id && item.selectedColor === selectedColor);
 
     const displayPrice = product.discountedPrice || product.price;
     const originalPrice = product.price;
@@ -460,10 +461,37 @@ function ProductDetailPage() {
                                 </motion.div>
                             )}
 
+                            {/* Color Selector */}
+                            {product.colors && product.colors.length > 0 && (
+                                <motion.div className="mb-6" variants={fadeIn}>
+                                    <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                        Color: <span className="normal-case font-medium" style={{ color: 'hsl(var(--foreground))' }}>{selectedColor || 'Select a color'}</span>
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {product.colors.map((color) => (
+                                            <motion.button
+                                                key={color}
+                                                type="button"
+                                                onClick={() => setSelectedColor(color === selectedColor ? null : color)}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                                                style={selectedColor === color
+                                                    ? { background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', color: 'white', boxShadow: '0 0 15px -3px hsl(220, 70%, 55%, 0.4)' }
+                                                    : { background: 'rgba(255,255,255,0.06)', color: 'hsl(var(--foreground))', border: '1px solid var(--glass-border)' }
+                                                }
+                                            >
+                                                {color}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+
                             <motion.div className="flex gap-3 mb-6" variants={fadeIn}>
                                 <motion.button
-                                    disabled={product.stock === 0 || isCartLoading || loadingProductId === id}
-                                    onClick={() => { handleAddToCart(id) }}
+                                    disabled={product.stock === 0 || isCartLoading || loadingProductId === id || (product.colors?.length > 0 && !selectedColor)}
+                                    onClick={() => { handleAddToCart(id, selectedColor) }}
                                     whileHover={product.stock > 0 ? { scale: 1.02 } : {}}
                                     whileTap={product.stock > 0 ? { scale: 0.98 } : {}}
                                     className="flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all text-sm"

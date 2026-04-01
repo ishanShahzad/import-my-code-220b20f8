@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     User, Mail, Lock, Eye, EyeOff, Edit3, Save, X, Loader as LucideLoader,
-    Camera, User as UserIcon, Shield, Sparkles, CheckCircle, AlertCircle
+    Camera, User as UserIcon, Shield, Sparkles, CheckCircle, AlertCircle,
+    MapPin, Phone, Home
 } from 'lucide-react';
 import Loader from '../common/Loader';
 import { useAuth } from '../../contexts/AuthContext';
@@ -25,6 +26,14 @@ const UserProfile = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [isWaiting, setIsWaiting] = useState(false);
 
+    // Shipping info state
+    const [shippingInfo, setShippingInfo] = useState(null);
+    const [isEditingShipping, setIsEditingShipping] = useState(false);
+    const [shippingForm, setShippingForm] = useState({
+        fullName: '', email: '', phone: '', address: '', city: '', state: '', postalCode: '', country: 'Pakistan'
+    });
+    const [savingShipping, setSavingShipping] = useState(false);
+
     const handleInputChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
 
     const fetchUser = async () => {
@@ -39,7 +48,42 @@ const UserProfile = () => {
         finally { setIsWaiting(false); setLoading(false); }
     };
 
-    useEffect(() => { fetchUser(); }, []);
+    useEffect(() => { fetchUser(); fetchShippingInfo(); }, []);
+
+    const fetchShippingInfo = async () => {
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/shipping-info`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const info = res.data.shippingInfo;
+            if (info && info.fullName) {
+                setShippingInfo(info);
+                setShippingForm(info);
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleShippingChange = (e) => {
+        const { name, value } = e.target;
+        setShippingForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveShipping = async (e) => {
+        e.preventDefault();
+        setSavingShipping(true);
+        try {
+            const token = localStorage.getItem('jwtToken');
+            await axios.patch(`${import.meta.env.VITE_API_URL}api/user/shipping-info`,
+                { shippingInfo: shippingForm },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success('Shipping info saved!');
+            setShippingInfo(shippingForm);
+            setIsEditingShipping(false);
+        } catch (e) { toast.error('Failed to save shipping info'); }
+        finally { setSavingShipping(false); }
+    };
 
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
@@ -343,6 +387,94 @@ const UserProfile = () => {
                                 <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground))' }}>Password is set</p>
                                 <p className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>Last updated recently</p>
                             </div>
+                        </div>
+                    )}
+                </motion.form>
+
+                {/* Shipping Info Card */}
+                <motion.form onSubmit={handleSaveShipping}
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                    className="glass-panel water-shimmer p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl" style={{ background: 'rgba(14, 165, 233, 0.12)', color: 'hsl(200, 80%, 50%)' }}>
+                                <MapPin size={18} />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-semibold" style={{ color: 'hsl(var(--foreground))' }}>Shipping Address</h3>
+                                <p className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>Used for auto-fill at checkout</p>
+                            </div>
+                        </div>
+                        {!isEditingShipping ? (
+                            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} type="button"
+                                onClick={() => setIsEditingShipping(true)}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-white"
+                                style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', boxShadow: '0 0 20px -4px hsl(220, 70%, 55%, 0.3)' }}>
+                                <Edit3 size={14} /> <span className="hidden sm:inline">{shippingInfo ? 'Edit' : 'Add'}</span>
+                            </motion.button>
+                        ) : (
+                            <div className="flex gap-2">
+                                <motion.button whileTap={{ scale: 0.97 }} type="submit" disabled={savingShipping}
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+                                    style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'hsl(150, 60%, 40%)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                                    <Save size={14} /> Save
+                                </motion.button>
+                                <motion.button whileTap={{ scale: 0.97 }} type="button"
+                                    onClick={() => { setIsEditingShipping(false); setShippingForm(shippingInfo || { fullName: '', email: '', phone: '', address: '', city: '', state: '', postalCode: '', country: 'Pakistan' }); }}
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold glass-inner"
+                                    style={{ color: 'hsl(var(--foreground))' }}>
+                                    <X size={14} /> Cancel
+                                </motion.button>
+                            </div>
+                        )}
+                    </div>
+
+                    {isEditingShipping ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {[
+                                { label: 'Full Name', name: 'fullName', icon: <User size={12} /> },
+                                { label: 'Email', name: 'email', icon: <Mail size={12} />, type: 'email' },
+                                { label: 'Phone', name: 'phone', icon: <Phone size={12} />, type: 'tel' },
+                                { label: 'Address', name: 'address', icon: <Home size={12} /> },
+                                { label: 'City', name: 'city' },
+                                { label: 'State', name: 'state' },
+                                { label: 'Postal Code', name: 'postalCode' },
+                                { label: 'Country', name: 'country' },
+                            ].map((field) => (
+                                <div key={field.name}>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-2"
+                                        style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                        {field.icon} {field.label}
+                                    </label>
+                                    <input type={field.type || 'text'} name={field.name}
+                                        value={shippingForm[field.name] || ''} onChange={handleShippingChange}
+                                        className="glass-input" placeholder={`Enter ${field.label.toLowerCase()}`} />
+                                </div>
+                            ))}
+                        </div>
+                    ) : shippingInfo ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {[
+                                { label: 'Full Name', value: shippingInfo.fullName },
+                                { label: 'Email', value: shippingInfo.email },
+                                { label: 'Phone', value: shippingInfo.phone },
+                                { label: 'Address', value: shippingInfo.address },
+                                { label: 'City', value: shippingInfo.city },
+                                { label: 'State', value: shippingInfo.state },
+                                { label: 'Postal Code', value: shippingInfo.postalCode },
+                                { label: 'Country', value: shippingInfo.country },
+                            ].map((field) => (
+                                <div key={field.label}>
+                                    <p className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>{field.label}</p>
+                                    <p className="text-sm font-medium" style={{ color: 'hsl(var(--foreground))' }}>{field.value || '—'}</p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="glass-inner rounded-xl p-4 text-center">
+                            <MapPin size={28} className="mx-auto mb-2 opacity-40" style={{ color: 'hsl(var(--muted-foreground))' }} />
+                            <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>No shipping address saved yet</p>
+                            <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>Add one to auto-fill at checkout</p>
                         </div>
                     )}
                 </motion.form>

@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Minus, Plus, CreditCard, DollarSign, Truck, MapPin, User, Mail, Phone, Home, Navigation, CreditCardIcon, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, Minus, Plus, CreditCard, DollarSign, Truck, MapPin, User, Mail, Phone, Home, Navigation, CreditCardIcon, X, Loader2, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useGlobal } from "../../contexts/GlobalContext";
 import { useCurrency } from "../../contexts/CurrencyContext";
+import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -19,12 +20,18 @@ export default function Checkout() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   
   // Tax and Shipping state
   const [taxConfig, setTaxConfig] = useState(null);
-  const [sellerShippingMethods, setSellerShippingMethods] = useState({}); // { sellerId: { seller, methods } }
-  const [selectedShippingPerSeller, setSelectedShippingPerSeller] = useState({}); // { sellerId: method }
-  const [expandedSellers, setExpandedSellers] = useState({}); // { sellerId: boolean }
+  const [sellerShippingMethods, setSellerShippingMethods] = useState({});
+  const [selectedShippingPerSeller, setSelectedShippingPerSeller] = useState({});
+  const [expandedSellers, setExpandedSellers] = useState({});
+  
+  // Saved shipping info for auto-fill
+  const [savedShippingInfo, setSavedShippingInfo] = useState(null);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
 
   const { formatPrice } = useCurrency();
@@ -36,6 +43,7 @@ export default function Checkout() {
   // Fetch tax configuration on mount
   useEffect(() => {
     fetchTaxConfig();
+    fetchSavedShippingInfo();
   }, []);
 
   // Fetch shipping methods when cart changes
@@ -54,6 +62,35 @@ export default function Checkout() {
     } catch (error) {
       console.error('Error fetching tax config:', error);
     }
+  };
+
+  const fetchSavedShippingInfo = async () => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      if (!token) return;
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}api/user/shipping-info`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const info = res.data.shippingInfo;
+      if (info && info.fullName) {
+        setSavedShippingInfo(info);
+      }
+    } catch (error) {
+      console.error('Error fetching saved shipping info:', error);
+    }
+  };
+
+  const handleAutoFill = () => {
+    if (!savedShippingInfo) return;
+    setValue('fullName', savedShippingInfo.fullName || '');
+    setValue('email', savedShippingInfo.email || '');
+    setValue('phone', savedShippingInfo.phone || '');
+    setValue('address', savedShippingInfo.address || '');
+    setValue('city', savedShippingInfo.city || '');
+    setValue('state', savedShippingInfo.state || '');
+    setValue('postalCode', savedShippingInfo.postalCode || '');
+    setValue('country', savedShippingInfo.country || 'Pakistan');
+    toast.success('Shipping info auto-filled!');
   };
 
   const fetchShippingMethods = async () => {
@@ -109,6 +146,8 @@ export default function Checkout() {
     handleSubmit,
     watch,
     trigger,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: "all",
@@ -276,6 +315,7 @@ export default function Checkout() {
           image: item.product.image,
           price: itemPrice,
           quantity: item.qty,
+          selectedColor: item.selectedColor || null,
         };
       }),
 
@@ -334,36 +374,45 @@ export default function Checkout() {
       console.log(res.data);
       toast.success(res.data.msg)
 
+      // Check if shipping info changed - save it
+      const currentShipping = {
+        fullName: data.fullName, email: data.email, phone: data.phone,
+        address: data.address, city: data.city, state: data.state,
+        postalCode: data.postalCode, country: data.country || 'Pakistan',
+      };
+      const hasChanged = !savedShippingInfo || 
+        Object.keys(currentShipping).some(k => currentShipping[k] !== (savedShippingInfo[k] || ''));
+      
+      if (!savedShippingInfo && currentUser) {
+        // First time - auto-save silently
+        try {
+          await axios.patch(`${import.meta.env.VITE_API_URL}api/user/shipping-info`,
+            { shippingInfo: currentShipping },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setSavedShippingInfo(currentShipping);
+        } catch (e) { console.error(e); }
+      } else if (hasChanged && currentUser) {
+        setPendingOrderData({ order, data: res.data, currentShipping });
+        setShowUpdatePrompt(true);
+      }
+
       if (order.paymentMethod == 'cash_on_delivery') {
-        // Track purchase with GSM for cash on delivery
         if (window.GSM && res.data.order) {
           try {
-            window.GSM.trackPurchase({
-              orderId: res.data.order.orderId,
-              amount: res.data.order.totalAmount,
-              customerEmail: res.data.order.email,
-              currency: 'USD'
-            });
-          } catch (gsmError) {
-            console.error('GSM tracking failed:', gsmError);
-          }
+            window.GSM.trackPurchase({ orderId: res.data.order.orderId, amount: res.data.order.totalAmount, customerEmail: res.data.order.email, currency: 'USD' });
+          } catch (gsmError) { console.error('GSM tracking failed:', gsmError); }
         }
         
         setIsProcessing(false);
         
-        // Redirect to success page after a short delay
+        // If update prompt is showing, don't navigate yet - modal handles it
+        if (hasChanged && currentUser) return;
+        
         setTimeout(async () => {
-
-          // Clear cart in background
-          // Clear cart in background
           axios.delete(`${import.meta.env.VITE_API_URL}api/cart/clear`, {
             headers: { Authorization: `Bearer ${token}` }
-          }).then(() => {
-            fetchCart(); // Refresh cart state
-          }).catch(error => {
-            console.error('Error clearing cart:', error);
-          });
-          
+          }).then(() => fetchCart()).catch(error => console.error('Error clearing cart:', error));
           navigate('/success');
         }, 1500);
         return;
@@ -570,12 +619,22 @@ export default function Checkout() {
                 {/* SHIPPING STEP */}
                 {currentStep === 1 && (
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
-                      <div className="p-2 rounded-full" style={{ background: 'hsla(220, 70%, 55%, 0.12)' }}>
-                        <MapPin className="w-5 h-5" style={{ color: 'hsl(220, 70%, 55%)' }} />
-                      </div>
-                      Shipping Information
-                    </h2>
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
+                        <div className="p-2 rounded-full" style={{ background: 'hsla(220, 70%, 55%, 0.12)' }}>
+                          <MapPin className="w-5 h-5" style={{ color: 'hsl(220, 70%, 55%)' }} />
+                        </div>
+                        Shipping Information
+                      </h2>
+                      {savedShippingInfo && (
+                        <motion.button type="button" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                          onClick={handleAutoFill}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold"
+                          style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', color: 'white', boxShadow: '0 0 15px -3px hsl(220, 70%, 55%, 0.3)' }}>
+                          <Zap size={14} /> Auto Fill
+                        </motion.button>
+                      )}
+                    </div>
 
                     {
                       cartItems?.cart && cartItems.cart.length >= 1 ? (
@@ -1134,6 +1193,62 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+      {/* Update Shipping Info Prompt Modal */}
+      <AnimatePresence>
+        {showUpdatePrompt && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-panel-strong p-6 max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-2" style={{ color: 'hsl(var(--foreground))' }}>Update Shipping Info?</h3>
+              <p className="text-sm mb-6" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                Your shipping details have changed. Would you like to save them for future orders?
+              </p>
+              <div className="flex justify-end gap-3">
+                <motion.button whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setShowUpdatePrompt(false);
+                    // Continue with order flow
+                    if (pendingOrderData?.data) {
+                      const token = localStorage.getItem('jwtToken');
+                      if (pendingOrderData.order?.paymentMethod === 'cash_on_delivery') {
+                        axios.delete(`${import.meta.env.VITE_API_URL}api/cart/clear`, { headers: { Authorization: `Bearer ${token}` } })
+                          .then(() => fetchCart()).catch(() => {});
+                        navigate('/success');
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl glass-inner font-medium text-sm" style={{ color: 'hsl(var(--foreground))' }}>
+                  No, Keep Previous
+                </motion.button>
+                <motion.button whileTap={{ scale: 0.97 }}
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('jwtToken');
+                      await axios.patch(`${import.meta.env.VITE_API_URL}api/user/shipping-info`,
+                        { shippingInfo: pendingOrderData?.currentShipping },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      toast.success('Shipping info updated!');
+                      setSavedShippingInfo(pendingOrderData?.currentShipping);
+                    } catch (e) { console.error(e); }
+                    setShowUpdatePrompt(false);
+                    if (pendingOrderData?.order?.paymentMethod === 'cash_on_delivery') {
+                      const token = localStorage.getItem('jwtToken');
+                      axios.delete(`${import.meta.env.VITE_API_URL}api/cart/clear`, { headers: { Authorization: `Bearer ${token}` } })
+                        .then(() => fetchCart()).catch(() => {});
+                      navigate('/success');
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl text-white font-semibold text-sm"
+                  style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', boxShadow: '0 0 15px -3px hsl(220, 70%, 55%, 0.3)' }}>
+                  Yes, Update
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

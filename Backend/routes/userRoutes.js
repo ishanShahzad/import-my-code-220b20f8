@@ -1,6 +1,6 @@
 
 const express = require('express')
-const { getUsers, toggleBlockUser, toggleAdminUser, deleteUser, deleteOwnAccount, getSingle, updateUser, becomeSeller } = require('../controllers/userController')
+const { getUsers, toggleBlockUser, toggleAdminUser, deleteUser, deleteOwnAccount, getSingle, updateUser, becomeSeller, getShippingInfo, updateShippingInfo } = require('../controllers/userController')
 const verifyToken = require('../middleware/authMiddleware')
 const router = express.Router()
 
@@ -16,5 +16,9 @@ router.delete('/delete-account', verifyToken, deleteOwnAccount)
 
 // Become a seller
 router.post('/become-seller', verifyToken, becomeSeller)
+
+// Shipping info
+router.get('/shipping-info', verifyToken, getShippingInfo)
+router.patch('/shipping-info', verifyToken, updateShippingInfo)
 
 module.exports = router

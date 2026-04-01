@@ -101,7 +101,7 @@ export const GlobalProvider = ({ children }) => {
     // ===================================
     const [loadingProductId, setLoadingProductId] = useState(null)
     
-    const handleAddToCart = async (id) => {
+    const handleAddToCart = async (id, selectedColor = null) => {
         try {
             // Check if user is logged in
             if (!currentUser) {
@@ -112,11 +112,12 @@ export const GlobalProvider = ({ children }) => {
             setIsCartLoading(true)
             setLoadingProductId(id)
             
-            // Check if product is already in cart - if yes, remove it
-            const isInCart = cartItems?.cart?.some(item => item?.product?._id === id) || false;
+            // Check if product is already in cart (same product + same color)
+            const isInCart = cartItems?.cart?.some(item => 
+                item?.product?._id === id && item?.selectedColor === selectedColor
+            ) || false;
             
             if (isInCart) {
-                // Remove from cart
                 await handleRemoveCartItem(id);
                 setIsCartLoading(false);
                 setLoadingProductId(null);
@@ -125,8 +126,8 @@ export const GlobalProvider = ({ children }) => {
             
 
             const token = localStorage.getItem('jwtToken')
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}api/cart/add/${id}`, {
-            },
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}api/cart/add/${id}`, 
+                { selectedColor },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

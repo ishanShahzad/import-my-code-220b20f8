@@ -228,6 +228,11 @@ const OrderDetail = () => {
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-sm sm:text-base font-semibold break-words" style={{ color: 'hsl(var(--foreground))' }}>{item.name}</h3>
                                         <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>Quantity: {item.quantity}</p>
+                                        {item.selectedColor && (
+                                            <p className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                                                Color: <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ background: 'rgba(99, 102, 241, 0.12)', color: 'hsl(220, 70%, 55%)' }}>{item.selectedColor}</span>
+                                            </p>
+                                        )}
                                         <div className="mt-2 sm:hidden">
                                             <p className="text-sm font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{formatPrice(item.price)}</p>
                                             <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>Subtotal: {formatPrice(item.price * item.quantity)}</p>

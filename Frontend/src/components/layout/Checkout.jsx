@@ -374,6 +374,20 @@ export default function Checkout() {
       console.log(res.data);
       toast.success(res.data.msg)
 
+      // Check if shipping info changed - save it
+      const currentShipping = {
+        fullName: data.fullName, email: data.email, phone: data.phone,
+        address: data.address, city: data.city, state: data.state,
+        postalCode: data.postalCode, country: data.country || 'Pakistan',
+      };
+      const hasChanged = !savedShippingInfo || 
+        Object.keys(currentShipping).some(k => currentShipping[k] !== (savedShippingInfo[k] || ''));
+      
+      if (hasChanged && currentUser) {
+        setPendingOrderData({ order, data: res.data, currentShipping });
+        setShowUpdatePrompt(true);
+      }
+
       if (order.paymentMethod == 'cash_on_delivery') {
         // Track purchase with GSM for cash on delivery
         if (window.GSM && res.data.order) {

@@ -389,35 +389,21 @@ export default function Checkout() {
       }
 
       if (order.paymentMethod == 'cash_on_delivery') {
-        // Track purchase with GSM for cash on delivery
         if (window.GSM && res.data.order) {
           try {
-            window.GSM.trackPurchase({
-              orderId: res.data.order.orderId,
-              amount: res.data.order.totalAmount,
-              customerEmail: res.data.order.email,
-              currency: 'USD'
-            });
-          } catch (gsmError) {
-            console.error('GSM tracking failed:', gsmError);
-          }
+            window.GSM.trackPurchase({ orderId: res.data.order.orderId, amount: res.data.order.totalAmount, customerEmail: res.data.order.email, currency: 'USD' });
+          } catch (gsmError) { console.error('GSM tracking failed:', gsmError); }
         }
         
         setIsProcessing(false);
         
-        // Redirect to success page after a short delay
+        // If update prompt is showing, don't navigate yet - modal handles it
+        if (hasChanged && currentUser) return;
+        
         setTimeout(async () => {
-
-          // Clear cart in background
-          // Clear cart in background
           axios.delete(`${import.meta.env.VITE_API_URL}api/cart/clear`, {
             headers: { Authorization: `Bearer ${token}` }
-          }).then(() => {
-            fetchCart(); // Refresh cart state
-          }).catch(error => {
-            console.error('Error clearing cart:', error);
-          });
-          
+          }).then(() => fetchCart()).catch(error => console.error('Error clearing cart:', error));
           navigate('/success');
         }, 1500);
         return;

@@ -41,6 +41,8 @@ export default function ProductFormScreen({ navigation, route }) {
   });
   const [images, setImages] = useState(product?.images || []);
   const [tags, setTags] = useState(product?.tags || []);
+  const [productColors, setProductColors] = useState(product?.colors || []);
+  const [newColor, setNewColor] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});

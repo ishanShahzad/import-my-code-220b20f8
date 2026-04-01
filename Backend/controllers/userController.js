@@ -211,3 +211,29 @@ exports.becomeSeller = async (req, res) => {
         res.status(500).json({ message: 'Server error while creating seller account.' })
     }
 }
+
+// Get saved shipping info
+exports.getShippingInfo = async (req, res) => {
+    const { id: _id } = req.user
+    try {
+        const user = await User.findById(_id).select('savedShippingInfo')
+        res.status(200).json({ msg: 'Shipping info fetched', shippingInfo: user?.savedShippingInfo || {} })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Server error while fetching shipping info' })
+    }
+}
+
+// Save/update shipping info
+exports.updateShippingInfo = async (req, res) => {
+    const { id: _id } = req.user
+    const { shippingInfo } = req.body
+    try {
+        if (!shippingInfo) return res.status(400).json({ msg: 'Shipping info is required' })
+        await User.findByIdAndUpdate(_id, { savedShippingInfo: shippingInfo })
+        res.status(200).json({ msg: 'Shipping info saved successfully' })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Server error while saving shipping info' })
+    }
+}

@@ -17,4 +17,8 @@ router.delete('/delete-account', verifyToken, deleteOwnAccount)
 // Become a seller
 router.post('/become-seller', verifyToken, becomeSeller)
 
+// Shipping info
+router.get('/shipping-info', verifyToken, getShippingInfo)
+router.patch('/shipping-info', verifyToken, updateShippingInfo)
+
 module.exports = router

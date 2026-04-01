@@ -166,7 +166,64 @@ export default function ProfileScreen({ navigation }) {
           ))}
         </GlassPanel>
 
-        {/* Logout */}
+        {/* Saved Shipping Address */}
+        <GlassPanel variant="card" style={{ marginHorizontal: spacing.lg, marginTop: spacing.md, padding: spacing.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Ionicons name="location-outline" size={18} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.md, fontWeight: fontWeight.bold, color: colors.text }}>Shipping Address</Text>
+            </View>
+            <TouchableOpacity onPress={() => { setShippingForm(savedShipping || { fullName: '', email: '', phone: '', address: '', city: '', state: '', postalCode: '', country: 'Pakistan' }); setEditingShipping(true); }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Ionicons name="pencil-outline" size={14} color={colors.primary} />
+              <Text style={{ fontSize: fontSize.sm, color: colors.primary, fontWeight: fontWeight.medium }}>{savedShipping?.fullName ? 'Edit' : 'Add'}</Text>
+            </TouchableOpacity>
+          </View>
+          {savedShipping?.fullName ? (
+            <View style={{ backgroundColor: glass.bgSubtle, borderRadius: 14, padding: spacing.md, borderWidth: 1, borderColor: glass.borderSubtle }}>
+              <Text style={{ fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.text, marginBottom: 4 }}>{savedShipping.fullName}</Text>
+              <Text style={{ fontSize: fontSize.sm, color: colors.textSecondary }}>{savedShipping.address}</Text>
+              <Text style={{ fontSize: fontSize.sm, color: colors.textSecondary }}>{savedShipping.city}, {savedShipping.state} {savedShipping.postalCode}</Text>
+              <Text style={{ fontSize: fontSize.sm, color: colors.textSecondary }}>{savedShipping.country}</Text>
+              <View style={{ flexDirection: 'row', gap: spacing.lg, marginTop: spacing.sm }}>
+                <Text style={{ fontSize: fontSize.xs, color: colors.textSecondary }}>{savedShipping.email}</Text>
+                <Text style={{ fontSize: fontSize.xs, color: colors.textSecondary }}>{savedShipping.phone}</Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={{ fontSize: fontSize.sm, color: colors.textSecondary, textAlign: 'center', paddingVertical: spacing.md }}>No shipping address saved yet. Add one for faster checkout!</Text>
+          )}
+        </GlassPanel>
+
+        {/* Edit Shipping Modal */}
+        <Modal visible={editingShipping} transparent animationType="slide" onRequestClose={() => setEditingShipping(false)}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+            <GlassPanel variant="strong" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: spacing.xl, paddingBottom: spacing.xxxl }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
+                <Text style={{ fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: colors.text }}>Edit Shipping Info</Text>
+                <TouchableOpacity onPress={() => setEditingShipping(false)} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: glass.bgSubtle, justifyContent: 'center', alignItems: 'center' }}>
+                  <Ionicons name="close" size={20} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
+                {['fullName', 'email', 'phone', 'address', 'city', 'state', 'postalCode', 'country'].map(field => (
+                  <View key={field} style={{ marginBottom: spacing.md }}>
+                    <Text style={{ fontSize: fontSize.sm, fontWeight: fontWeight.medium, color: colors.textSecondary, marginBottom: 4, textTransform: 'capitalize' }}>{field.replace(/([A-Z])/g, ' $1')}</Text>
+                    <TextInput style={{ backgroundColor: glass.bgSubtle, borderRadius: 12, borderWidth: 1, borderColor: glass.borderSubtle, padding: spacing.md, fontSize: fontSize.md, color: colors.text }}
+                      value={shippingForm[field]} onChangeText={v => setShippingForm(p => ({ ...p, [field]: v }))}
+                      placeholderTextColor={colors.textSecondary} placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                      keyboardType={field === 'email' ? 'email-address' : field === 'phone' || field === 'postalCode' ? 'phone-pad' : 'default'} />
+                  </View>
+                ))}
+              </ScrollView>
+              <TouchableOpacity style={{ backgroundColor: colors.primary, borderRadius: 16, paddingVertical: 14, alignItems: 'center', marginTop: spacing.md, opacity: savingShipping ? 0.6 : 1 }}
+                onPress={saveShippingInfo} disabled={savingShipping}>
+                <Text style={{ fontSize: fontSize.md, fontWeight: fontWeight.bold, color: '#fff' }}>{savingShipping ? 'Saving...' : 'Save Address'}</Text>
+              </TouchableOpacity>
+            </GlassPanel>
+          </View>
+        </Modal>
+
         <GlassPanel variant="card" style={styles.logoutCard}>
           <TouchableOpacity style={styles.menuRow} onPress={handleLogout} activeOpacity={0.7}>
             <View style={[styles.menuIcon, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>

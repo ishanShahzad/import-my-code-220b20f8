@@ -1024,7 +1024,9 @@ const ProductForm = ({ product, setProduct, onSave, onClose, uploadingImages }) 
                                     </span>
                                 ))}
                             </div>
-                        )}
+                         )}
+                    </div>
+
                     <div className="glass-inner rounded-xl p-4 space-y-3">
                         <div className="flex items-center gap-3">
                             <input type="checkbox" checked={!(product.returnPolicy?.useStorePolicy ?? true)}

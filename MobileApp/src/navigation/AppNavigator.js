@@ -45,6 +45,8 @@ import WishlistScreen from '../screens/WishlistScreen';
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import AdminUserManagementScreen from '../screens/admin/AdminUserManagementScreen';
 import AdminTaxConfigurationScreen from '../screens/admin/AdminTaxConfigurationScreen';
+import AdminSubdomainManagementScreen from '../screens/admin/AdminSubdomainManagementScreen';
+import AdminComplaintsScreen from '../screens/admin/AdminComplaintsScreen';
 
 // Seller Screens
 import SellerDashboardScreen from '../screens/seller/SellerDashboardScreen';
@@ -52,6 +54,7 @@ import SellerStoreSettingsScreen from '../screens/seller/SellerStoreSettingsScre
 import SellerShippingConfigurationScreen from '../screens/seller/SellerShippingConfigurationScreen';
 import SellerAnalyticsScreen from '../screens/seller/SellerAnalyticsScreen';
 import SellerSubscriptionScreen from '../screens/seller/SellerSubscriptionScreen';
+import SellerSubdomainManagementScreen from '../screens/seller/SellerSubdomainManagementScreen';
 
 // Shared Screens
 import ProductManagementScreen from '../screens/shared/ProductManagementScreen';
@@ -128,6 +131,8 @@ const GuardedAdminProductManagement = createRoleGuard(ProductManagementScreen, [
 const GuardedAdminOrderManagement = createRoleGuard(OrderManagementScreen, ['admin']);
 const GuardedAdminNotifications = createRoleGuard(AdminNotificationsScreen, ['admin']);
 const GuardedAdminAnalytics = createRoleGuard(AdminAnalyticsScreen, ['admin']);
+const GuardedAdminSubdomainManagement = createRoleGuard(AdminSubdomainManagementScreen, ['admin']);
+const GuardedAdminComplaints = createRoleGuard(AdminComplaintsScreen, ['admin']);
 
 // Guarded seller screens (seller or admin)
 const GuardedSellerDashboard = createRoleGuard(SellerDashboardScreen, ['seller', 'admin']);
@@ -143,6 +148,7 @@ const GuardedSellerNotifications = createRoleGuard(SellerNotificationsScreen, ['
 const GuardedSellerHome = createRoleGuard(SellerHomeScreen, ['seller', 'admin']);
 const GuardedNotificationSettings = createRoleGuard(NotificationSettingsScreen, ['seller', 'admin']);
 const GuardedSellerSubscription = createRoleGuard(SellerSubscriptionScreen, ['seller', 'admin']);
+const GuardedSellerSubdomainManagement = createRoleGuard(SellerSubdomainManagementScreen, ['seller', 'admin']);
 
 // Helper function to calculate cart item count - exported for testing
 export const calculateCartItemCount = (cartItems) => {
@@ -387,6 +393,8 @@ export default function AppNavigator() {
       <Stack.Screen name="StoreVerification" component={GuardedStoreVerification} options={{ headerShown: false }} />
       <Stack.Screen name="AdminNotifications" component={GuardedAdminNotifications} options={{ headerShown: false }} />
       <Stack.Screen name="AdminAnalytics" component={GuardedAdminAnalytics} options={{ headerShown: false }} />
+      <Stack.Screen name="AdminSubdomainManagement" component={GuardedAdminSubdomainManagement} options={{ headerShown: false }} />
+      <Stack.Screen name="AdminComplaints" component={GuardedAdminComplaints} options={{ headerShown: false }} />
 
       {/* Seller Dashboard (role-guarded: seller or admin) */}
       <Stack.Screen name="SellerDashboard" component={GuardedSellerDashboard} options={{ headerShown: false }} />
@@ -400,6 +408,7 @@ export default function AppNavigator() {
       <Stack.Screen name="SellerHome" component={GuardedSellerHome} options={{ headerShown: false }} />
       <Stack.Screen name="NotificationSettings" component={GuardedNotificationSettings} options={{ headerShown: false }} />
       <Stack.Screen name="SellerSubscription" component={GuardedSellerSubscription} options={{ headerShown: false }} />
+      <Stack.Screen name="SellerSubdomainManagement" component={GuardedSellerSubdomainManagement} options={{ headerShown: false }} />
       <Stack.Screen name="UserDashboard" component={UserDashboardScreen} options={{ headerShown: false }} />
 
       {/* Shared Screens (role-guarded: seller or admin) */}

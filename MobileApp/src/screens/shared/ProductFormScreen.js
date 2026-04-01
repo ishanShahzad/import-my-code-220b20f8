@@ -11,6 +11,7 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import api from '../../config/api';
+import SmartTagGenerator from '../../components/SmartTagGenerator';
 import Loader from '../../components/common/Loader';
 import GlassBackground from '../../components/common/GlassBackground';
 import GlassPanel from '../../components/common/GlassPanel';
@@ -39,6 +40,7 @@ export default function ProductFormScreen({ navigation, route }) {
     stock: product?.stock?.toString() || '', category: product?.category || '', brand: product?.brand || '',
   });
   const [images, setImages] = useState(product?.images || []);
+  const [tags, setTags] = useState(product?.tags || []);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -130,6 +132,17 @@ export default function ProductFormScreen({ navigation, route }) {
               <View style={{ flex: 1 }}>{renderInput('category', 'Category', { placeholder: 'e.g., Electronics' })}</View>
               <View style={{ flex: 1 }}>{renderInput('brand', 'Brand', { placeholder: 'e.g., Apple' })}</View>
             </View>
+          </GlassPanel>
+
+          {/* Smart Tags */}
+          <GlassPanel variant="card" style={styles.section}>
+            <Text style={styles.sectionTitle}>Smart Tags</Text>
+            <SmartTagGenerator
+              productId={isEditMode ? product._id : null}
+              currentTags={tags}
+              onTagsUpdated={setTags}
+              productData={{ name: formData.name, description: formData.description, category: formData.category, brand: formData.brand }}
+            />
           </GlassPanel>
 
           <View style={styles.submitContainer}>

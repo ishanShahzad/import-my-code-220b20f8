@@ -1198,6 +1198,62 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+      {/* Update Shipping Info Prompt Modal */}
+      <AnimatePresence>
+        {showUpdatePrompt && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-panel-strong p-6 max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-2" style={{ color: 'hsl(var(--foreground))' }}>Update Shipping Info?</h3>
+              <p className="text-sm mb-6" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                Your shipping details have changed. Would you like to save them for future orders?
+              </p>
+              <div className="flex justify-end gap-3">
+                <motion.button whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setShowUpdatePrompt(false);
+                    // Continue with order flow
+                    if (pendingOrderData?.data) {
+                      const token = localStorage.getItem('jwtToken');
+                      if (pendingOrderData.order?.paymentMethod === 'cash_on_delivery') {
+                        axios.delete(`${import.meta.env.VITE_API_URL}api/cart/clear`, { headers: { Authorization: `Bearer ${token}` } })
+                          .then(() => fetchCart()).catch(() => {});
+                        navigate('/success');
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl glass-inner font-medium text-sm" style={{ color: 'hsl(var(--foreground))' }}>
+                  No, Keep Previous
+                </motion.button>
+                <motion.button whileTap={{ scale: 0.97 }}
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('jwtToken');
+                      await axios.patch(`${import.meta.env.VITE_API_URL}api/user/shipping-info`,
+                        { shippingInfo: pendingOrderData?.currentShipping },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      toast.success('Shipping info updated!');
+                      setSavedShippingInfo(pendingOrderData?.currentShipping);
+                    } catch (e) { console.error(e); }
+                    setShowUpdatePrompt(false);
+                    if (pendingOrderData?.order?.paymentMethod === 'cash_on_delivery') {
+                      const token = localStorage.getItem('jwtToken');
+                      axios.delete(`${import.meta.env.VITE_API_URL}api/cart/clear`, { headers: { Authorization: `Bearer ${token}` } })
+                        .then(() => fetchCart()).catch(() => {});
+                      navigate('/success');
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl text-white font-semibold text-sm"
+                  style={{ background: 'linear-gradient(135deg, hsl(220, 70%, 55%), hsl(260, 60%, 60%))', boxShadow: '0 0 15px -3px hsl(220, 70%, 55%, 0.3)' }}>
+                  Yes, Update
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

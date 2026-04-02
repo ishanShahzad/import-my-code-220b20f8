@@ -313,11 +313,12 @@ app.use('/api/ai-actions', aiActionRoutes)
 app.use('/api/subscription', subscriptionRoutes)
 app.use('/api/coupons', couponRoutes)
 
-// Run trial expiration check every hour
+// Trial expiration check - only run in non-serverless environments
 const { processTrialExpirations } = require('./controllers/subscriptionController');
-setInterval(processTrialExpirations, 60 * 60 * 1000);
-// Run once on startup after 30 seconds
-setTimeout(processTrialExpirations, 30000);
+if (process.env.VERCEL !== '1' && !process.env.VERCEL) {
+  setInterval(processTrialExpirations, 60 * 60 * 1000);
+  setTimeout(processTrialExpirations, 30000);
+}
 
 // Centralized JSON error responses
 app.use((err, req, res, next) => {

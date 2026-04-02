@@ -43,6 +43,9 @@ if (process.env.clientID && process.env.clientSecret && process.env.GOOGLE_CALLB
     }
   )
 );
+} else {
+  console.warn('⚠️ Google OAuth not configured - missing clientID, clientSecret, or GOOGLE_CALLBACK_URL');
+}
 
 
 // Serialize & deserialize

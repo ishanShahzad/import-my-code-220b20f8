@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit')
 const express = require('express')
 const app = express()
 app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 1))
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null
 const mongoose = require('mongoose')
 const Order = require('./models/Order')
 const Product = require('./models/Product')

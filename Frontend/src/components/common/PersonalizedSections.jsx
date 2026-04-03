@@ -11,6 +11,9 @@ const ProductSlider = ({ products }) => {
   const scrollRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeftStart, setScrollLeftStart] = useState(0)
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current
@@ -34,76 +37,99 @@ const ProductSlider = ({ products }) => {
   const scroll = (direction) => {
     const el = scrollRef.current
     if (!el) return
-    const cardWidth = el.querySelector(':first-child')?.offsetWidth || 220
-    el.scrollBy({ left: direction * (cardWidth * 2 + 16), behavior: 'smooth' })
+    const scrollAmount = el.clientWidth * 0.75
+    el.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' })
   }
 
+  // Mouse drag support
+  const handleMouseDown = (e) => {
+    setIsDragging(true)
+    setStartX(e.pageX - scrollRef.current.offsetLeft)
+    setScrollLeftStart(scrollRef.current.scrollLeft)
+  }
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    e.preventDefault()
+    const x = e.pageX - scrollRef.current.offsetLeft
+    const walk = (x - startX) * 1.5
+    scrollRef.current.scrollLeft = scrollLeftStart - walk
+  }
+  const handleMouseUp = () => setIsDragging(false)
+
   return (
-    <div className="relative group">
-      {/* Left Arrow */}
+    <div className="relative group/slider">
+      {/* Left Arrow - always visible when scrollable */}
       <AnimatePresence>
         {canScrollLeft && (
           <motion.button
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => scroll(-1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+            className="absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-xl cursor-pointer"
             style={{
-              background: 'hsl(var(--background) / 0.9)',
+              background: 'hsl(var(--background))',
               border: '1px solid hsl(var(--border))',
-              border: '1px solid hsl(var(--border))',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
             }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ChevronLeft size={20} style={{ color: 'hsl(var(--foreground))' }} />
+            <ChevronLeft size={18} style={{ color: 'hsl(var(--foreground))' }} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Right Arrow */}
+      {/* Right Arrow - always visible when scrollable */}
       <AnimatePresence>
         {canScrollRight && (
           <motion.button
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => scroll(1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+            className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-xl cursor-pointer"
             style={{
-              background: 'hsl(var(--background) / 0.9)',
+              background: 'hsl(var(--background))',
               border: '1px solid hsl(var(--border))',
-              border: '1px solid hsl(var(--border))',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
             }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ChevronRight size={20} style={{ color: 'hsl(var(--foreground))' }} />
+            <ChevronRight size={18} style={{ color: 'hsl(var(--foreground))' }} />
           </motion.button>
         )}
       </AnimatePresence>
 
       {/* Edge Fade Gradients */}
       {canScrollLeft && (
-        <div className="absolute left-0 top-0 bottom-0 w-12 z-[5] pointer-events-none rounded-l-xl"
-          style={{ background: 'linear-gradient(to right, hsl(var(--background) / 0.8), transparent)' }} />
+        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-16 z-[5] pointer-events-none"
+          style={{ background: 'linear-gradient(to right, hsl(var(--background) / 0.9), transparent)' }} />
       )}
       {canScrollRight && (
-        <div className="absolute right-0 top-0 bottom-0 w-12 z-[5] pointer-events-none rounded-r-xl"
-          style={{ background: 'linear-gradient(to left, hsl(var(--background) / 0.8), transparent)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-16 z-[5] pointer-events-none"
+          style={{ background: 'linear-gradient(to left, hsl(var(--background) / 0.9), transparent)' }} />
       )}
 
       {/* Scrollable Track */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-2 scroll-smooth"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className={`flex gap-3 sm:gap-4 overflow-x-auto pb-2 scroll-smooth px-1 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       >
-        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+        <style>{`.group\\/slider div::-webkit-scrollbar { display: none; }`}</style>
         {products.map((product, idx) => (
           <motion.div
             key={product._id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.04 }}
-            className="shrink-0 w-[180px] sm:w-[200px] md:w-[220px] lg:w-[230px]"
+            transition={{ delay: idx * 0.05, duration: 0.4 }}
+            className="shrink-0 w-[160px] sm:w-[180px] md:w-[200px] lg:w-[210px]"
           >
             <ProductCard {...product} idx={idx} />
           </motion.div>
@@ -156,7 +182,7 @@ const PersonalizedSections = () => {
 
       const viewedIds = JSON.parse(localStorage.getItem('viewedProducts') || '[]')
       
-      const viewed = allProducts.filter(p => viewedIds.includes(p._id)).slice(0, 6)
+      const viewed = allProducts.filter(p => viewedIds.includes(p._id)).slice(0, 10)
       setRecentlyViewed(viewed)
 
       const preferredCategories = [...new Set(viewed.map(p => p.category))]
@@ -167,20 +193,20 @@ const PersonalizedSections = () => {
         picked = allProducts
           .filter(p => preferredCategories.includes(p.category) || preferredBrands.includes(p.brand))
           .filter(p => !viewedIds.includes(p._id))
-          .slice(0, 8)
+          .slice(0, 12)
       }
       if (picked.length < 4) {
         const randomPicks = allProducts
           .filter(p => !picked.find(pp => pp._id === p._id))
           .sort(() => Math.random() - 0.5)
-          .slice(0, 8 - picked.length)
+          .slice(0, 12 - picked.length)
         picked = [...picked, ...randomPicks]
       }
       setPickedForYou(picked)
 
       const trendingProducts = [...allProducts]
         .sort((a, b) => (b.numReviews * b.rating) - (a.numReviews * a.rating))
-        .slice(0, 8)
+        .slice(0, 12)
       setTrending(trendingProducts)
 
       const discounted = allProducts
@@ -190,7 +216,7 @@ const PersonalizedSections = () => {
           const discountB = ((b.price - b.discountedPrice) / b.price) * 100
           return discountB - discountA
         })
-        .slice(0, 8)
+        .slice(0, 12)
       setPriceDrops(discounted)
     } catch (error) {
       console.error('Error fetching personalized data:', error)
@@ -217,8 +243,8 @@ const PersonalizedSections = () => {
           <div key={i} className="glass-panel p-4 rounded-2xl">
             <div className="h-6 w-48 bg-white/10 rounded mb-4" />
             <div className="flex gap-4 overflow-hidden">
-              {[1, 2, 3, 4].map(j => (
-                <div key={j} className="w-48 h-64 bg-white/5 rounded-xl shrink-0" />
+              {[1, 2, 3, 4, 5].map(j => (
+                <div key={j} className="w-44 h-64 bg-white/5 rounded-xl shrink-0" />
               ))}
             </div>
           </div>
@@ -228,7 +254,7 @@ const PersonalizedSections = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {pickedForYou.length > 0 && (
         <section className="glass-panel p-4 sm:p-6 rounded-2xl overflow-hidden">
           <SectionHeader 
@@ -285,7 +311,7 @@ const PersonalizedSections = () => {
             subtitle="Perfect presents for loved ones"
             color="hsl(330, 80%, 60%)"
           />
-          <ProductSlider products={pickedForYou.slice(0, 4).sort(() => Math.random() - 0.5)} />
+          <ProductSlider products={pickedForYou.slice(0, 6).sort(() => Math.random() - 0.5)} />
         </section>
       )}
     </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Sparkles, TrendingUp, DollarSign, Clock, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Sparkles, TrendingUp, DollarSign, Clock, Gift, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, LayoutGrid } from 'lucide-react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCurrency } from '../../contexts/CurrencyContext'
@@ -250,6 +250,7 @@ const PersonalizedSections = () => {
   const [priceDrops, setPriceDrops] = useState([])
   const [recentlyViewed, setRecentlyViewed] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
     fetchPersonalizedData()
@@ -317,84 +318,89 @@ const PersonalizedSections = () => {
     window.trackProductView = trackView
   }, [])
 
-  if (loading) {
-    return (
-      <div className="space-y-8 animate-pulse">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="glass-panel p-4 rounded-2xl">
-            <div className="h-6 w-48 bg-white/10 rounded mb-4" />
-            <div className="flex gap-4 overflow-hidden">
-              {[1, 2, 3, 4, 5].map(j => (
-                <div key={j} className="h-72 w-[188px] shrink-0 rounded-xl bg-white/5" />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
+  const hasSections = pickedForYou.length > 0 || priceDrops.length > 0 || trending.length > 0 || recentlyViewed.length > 0;
+
+  if (loading && !isExpanded) return null;
+  if (!hasSections && !loading) return null;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {pickedForYou.length > 0 && (
-        <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6">
-          <SectionHeader 
-            icon={Sparkles} 
-            title="Picked for You" 
-            subtitle={currentUser ? "Based on your interests" : "Products you might love"}
-            color="hsl(280, 70%, 60%)"
-          />
-          <ProductSlider products={pickedForYou} formatPrice={formatPrice} />
-        </section>
-      )}
+    <div className="space-y-4">
+      {/* Toggle Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setIsExpanded(prev => !prev)}
+        className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl glass-card font-semibold text-sm cursor-pointer transition-all"
+        style={{ color: 'hsl(var(--foreground))' }}
+      >
+        <LayoutGrid size={16} style={{ color: 'hsl(var(--primary))' }} />
+        <span>{isExpanded ? 'Hide Personalized Picks' : 'Show Personalized Picks'}</span>
+        {isExpanded
+          ? <ChevronUp size={16} style={{ color: 'hsl(var(--muted-foreground))' }} />
+          : <ChevronDown size={16} style={{ color: 'hsl(var(--muted-foreground))' }} />
+        }
+      </motion.button>
 
-      {priceDrops.length > 0 && (
-        <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6" style={{ background: 'rgba(239, 68, 68, 0.05)' }}>
-          <SectionHeader 
-            icon={DollarSign} 
-            title="Price Drops" 
-            subtitle="Hot deals on watched items"
-            color="hsl(0, 70%, 55%)"
-          />
-          <ProductSlider products={priceDrops} formatPrice={formatPrice} />
-        </section>
-      )}
-
-      {trending.length > 0 && (
-        <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6">
-          <SectionHeader 
-            icon={TrendingUp} 
-            title="Trending Now" 
-            subtitle="Most popular products"
-            color="hsl(150, 60%, 45%)"
-          />
-          <ProductSlider products={trending} formatPrice={formatPrice} />
-        </section>
-      )}
-
-      {recentlyViewed.length > 0 && (
-        <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6">
-          <SectionHeader 
-            icon={Clock} 
-            title="Recently Viewed" 
-            subtitle="Continue where you left off"
-            color="hsl(200, 80%, 55%)"
-          />
-          <ProductSlider products={recentlyViewed} formatPrice={formatPrice} />
-        </section>
-      )}
-
-      {pickedForYou.length > 4 && (
-        <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6" style={{ background: 'rgba(236, 72, 153, 0.05)' }}>
-          <SectionHeader 
-            icon={Gift} 
-            title="Gift Ideas" 
-            subtitle="Perfect presents for loved ones"
-            color="hsl(330, 80%, 60%)"
-          />
-          <ProductSlider products={pickedForYou.slice(0, 6).sort(() => Math.random() - 0.5)} formatPrice={formatPrice} />
-        </section>
-      )}
+      {/* Sections */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            {loading ? (
+              <div className="space-y-8 animate-pulse">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="glass-panel p-4 rounded-2xl">
+                    <div className="h-6 w-48 bg-white/10 rounded mb-4" />
+                    <div className="flex gap-4 overflow-hidden">
+                      {[1, 2, 3, 4, 5].map(j => (
+                        <div key={j} className="h-72 w-[188px] shrink-0 rounded-xl bg-white/5" />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-6 sm:space-y-8">
+                {pickedForYou.length > 0 && (
+                  <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6">
+                    <SectionHeader icon={Sparkles} title="Picked for You" subtitle={currentUser ? "Based on your interests" : "Products you might love"} color="hsl(280, 70%, 60%)" />
+                    <ProductSlider products={pickedForYou} formatPrice={formatPrice} />
+                  </section>
+                )}
+                {priceDrops.length > 0 && (
+                  <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6" style={{ background: 'rgba(239, 68, 68, 0.05)' }}>
+                    <SectionHeader icon={DollarSign} title="Price Drops" subtitle="Hot deals on watched items" color="hsl(0, 70%, 55%)" />
+                    <ProductSlider products={priceDrops} formatPrice={formatPrice} />
+                  </section>
+                )}
+                {trending.length > 0 && (
+                  <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6">
+                    <SectionHeader icon={TrendingUp} title="Trending Now" subtitle="Most popular products" color="hsl(150, 60%, 45%)" />
+                    <ProductSlider products={trending} formatPrice={formatPrice} />
+                  </section>
+                )}
+                {recentlyViewed.length > 0 && (
+                  <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6">
+                    <SectionHeader icon={Clock} title="Recently Viewed" subtitle="Continue where you left off" color="hsl(200, 80%, 55%)" />
+                    <ProductSlider products={recentlyViewed} formatPrice={formatPrice} />
+                  </section>
+                )}
+                {pickedForYou.length > 4 && (
+                  <section className="glass-panel overflow-hidden rounded-2xl p-4 sm:p-6" style={{ background: 'rgba(236, 72, 153, 0.05)' }}>
+                    <SectionHeader icon={Gift} title="Gift Ideas" subtitle="Perfect presents for loved ones" color="hsl(330, 80%, 60%)" />
+                    <ProductSlider products={pickedForYou.slice(0, 6).sort(() => Math.random() - 0.5)} formatPrice={formatPrice} />
+                  </section>
+                )}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

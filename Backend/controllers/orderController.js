@@ -6,6 +6,8 @@ const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STR
 const TaxConfig = require('../models/TaxConfig');
 const { calculateTax } = require('./taxController');
 const { recordCouponUsage } = require('./couponController');
+const { sendEmail } = require('./mailController');
+const { orderConfirmationEmail, orderStatusUpdateEmail } = require('../utils/emailTemplates');
 
 
 exports.placeOrder = async (req, res) => {
@@ -134,6 +136,14 @@ exports.placeOrder = async (req, res) => {
         if (order.instructions && order.instructions !== '') newOrder.instructions = order.instructions
 
         await newOrder.save();
+
+        // Send order confirmation email
+        try {
+            const emailData = orderConfirmationEmail(newOrder);
+            await sendEmail({ to: newOrder.shippingInfo.email, ...emailData });
+        } catch (emailErr) {
+            console.error('Failed to send order confirmation email:', emailErr.message);
+        }
 
         // Record coupon usage
         if (userId && order.appliedCoupons && order.appliedCoupons.length > 0) {
@@ -430,6 +440,15 @@ exports.updateStatus = async (req, res) => {
 
         await order.save()
 
+        // Send status update email
+        try {
+            const updatedOrder = await Order.findById(_id);
+            const emailData = orderStatusUpdateEmail(updatedOrder, newStatus);
+            await sendEmail({ to: updatedOrder.shippingInfo.email, ...emailData });
+        } catch (emailErr) {
+            console.error('Failed to send status update email:', emailErr.message);
+        }
+
         res.status(200).json({ msg: 'Updated status successfully' })
     } catch (error) {
         console.error(error.message);
@@ -521,6 +540,31 @@ exports.getOrderDetail = async (req, res) => {
     }
 }
 
+// Guest order tracking by email + orderId
+exports.trackGuestOrder = async (req, res) => {
+    const { email, orderId } = req.query;
+    
+    if (!email || !orderId) {
+        return res.status(400).json({ msg: 'Email and Order ID are required' });
+    }
+
+    try {
+        const order = await Order.findOne({
+            orderId: orderId,
+            'shippingInfo.email': email.toLowerCase().trim()
+        });
+
+        if (!order) {
+            return res.status(404).json({ msg: 'Order not found. Please check your email and order ID.' });
+        }
+
+        res.status(200).json({ msg: 'Order found', order });
+    } catch (error) {
+        console.error('Error tracking guest order:', error);
+        res.status(500).json({ msg: 'Server error while tracking order' });
+    }
+};
+
 
 exports.cancelOrder = async (req, res) => {
     const { id: _id } = req.params
@@ -534,7 +578,16 @@ exports.cancelOrder = async (req, res) => {
         
         const order = await Order.findByIdAndUpdate(_id, { $set: { orderStatus: 'cancelled' } })
         if (!order) return res.status(404).json({ msg: 'Order not found' })
-        console.log(order);
+        
+        // Send cancellation email
+        try {
+            const cancelledOrder = await Order.findById(_id);
+            const emailData = orderStatusUpdateEmail(cancelledOrder, 'cancelled');
+            await sendEmail({ to: cancelledOrder.shippingInfo.email, ...emailData });
+        } catch (emailErr) {
+            console.error('Failed to send cancellation email:', emailErr.message);
+        }
+        
         res.status(200).json({ msg: 'Order cancelled successfully.', order: order })
     } catch (error) {
         console.error(error);

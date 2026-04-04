@@ -3,6 +3,7 @@ const OTP = require("../models/OTP");
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { sendEmail } = require('./mailController')
+const { welcomeEmail } = require('../utils/emailTemplates');
 
 
 // Step 1: Send OTP to email
@@ -208,6 +209,14 @@ exports.verifyOTPAndRegister = async (req, res) => {
         }
 
         const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+        // Send welcome email
+        try {
+            const emailData = welcomeEmail(newUser.username);
+            await sendEmail({ to: newUser.email, ...emailData });
+        } catch (emailErr) {
+            console.error('Failed to send welcome email:', emailErr.message);
+        }
         
         res.status(200).json({ 
             msg: 'Email verified! Sign up successful.', 

@@ -48,6 +48,7 @@ import PrivacyPolicy from '../pages/PrivacyPolicy'
 import AboutPage from '../pages/AboutPage'
 import ContactPage from '../pages/ContactPage'
 import FAQPage from '../pages/FAQPage'
+import TrackOrderPage from '../pages/TrackOrderPage'
 
 function AppRoutes() {
     const navigate = useNavigate()
@@ -81,6 +82,7 @@ function AppRoutes() {
                     <Route path='/about' element={<AboutPage />} />
                     <Route path='/contact' element={<ContactPage />} />
                     <Route path='/faq' element={<FAQPage />} />
+                    <Route path='/track-order' element={<TrackOrderPage />} />
 
                     {/* Checkout - accessible to everyone (guest & logged in) */}
                     <Route path={'/checkout'} element={<Checkout />} />

@@ -553,7 +553,16 @@ exports.cancelOrder = async (req, res) => {
         
         const order = await Order.findByIdAndUpdate(_id, { $set: { orderStatus: 'cancelled' } })
         if (!order) return res.status(404).json({ msg: 'Order not found' })
-        console.log(order);
+        
+        // Send cancellation email
+        try {
+            const cancelledOrder = await Order.findById(_id);
+            const emailData = orderStatusUpdateEmail(cancelledOrder, 'cancelled');
+            await sendEmail({ to: cancelledOrder.shippingInfo.email, ...emailData });
+        } catch (emailErr) {
+            console.error('Failed to send cancellation email:', emailErr.message);
+        }
+        
         res.status(200).json({ msg: 'Order cancelled successfully.', order: order })
     } catch (error) {
         console.error(error);

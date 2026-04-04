@@ -1,5 +1,7 @@
 
 const User = require('../models/User')
+const { sendEmail } = require('./mailController')
+const { sellerAccountCreatedEmail } = require('../utils/emailTemplates')
 
 exports.getUsers = async (req, res) => {
     const { role: userRole, id: _id } = req.user

@@ -317,7 +317,7 @@ input, select, textarea {
     border-radius: 50%;
     filter: blur(90px);
     pointer-events: none;
-    animation: orb-drift 20s ease-in-out infinite;
+    animation: orb-drift 30s ease-in-out infinite;
     will-change: transform;
     contain: strict;
     transform: translateZ(0);

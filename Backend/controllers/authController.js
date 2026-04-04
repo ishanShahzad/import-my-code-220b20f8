@@ -3,6 +3,7 @@ const OTP = require("../models/OTP");
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { sendEmail } = require('./mailController')
+const { welcomeEmail } = require('../utils/emailTemplates');
 
 
 // Step 1: Send OTP to email

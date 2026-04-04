@@ -138,12 +138,26 @@ exports.placeOrder = async (req, res) => {
 
         await newOrder.save();
 
-        // Send order confirmation email
+        // Send order confirmation email to buyer
         try {
             const emailData = orderConfirmationEmail(newOrder);
             await sendEmail({ to: newOrder.shippingInfo.email, ...emailData });
         } catch (emailErr) {
             console.error('Failed to send order confirmation email:', emailErr.message);
+        }
+
+        // Send new order notification to each seller
+        try {
+            const sellerIds = [...new Set(orderItems.map(p => p.seller?.toString()).filter(Boolean))];
+            for (const sellerId of sellerIds) {
+                const seller = await User.findById(sellerId);
+                if (seller?.email) {
+                    const sellerEmailData = newOrderSellerEmail(newOrder, seller.username);
+                    await sendEmail({ to: seller.email, ...sellerEmailData });
+                }
+            }
+        } catch (emailErr) {
+            console.error('Failed to send seller notification email:', emailErr.message);
         }
 
         // Record coupon usage

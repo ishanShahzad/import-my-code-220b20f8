@@ -79,7 +79,8 @@ exports.placeOrder = async (req, res) => {
 
 
         const newOrder = new Order({
-            user: userId,
+            ...(userId ? { user: userId } : {}),
+            guestEmail: !userId ? order.shippingInfo.email : null,
             orderId: `ORD-${Date.now()}`,
 
             orderItems: order.orderItems.map((item) => ({

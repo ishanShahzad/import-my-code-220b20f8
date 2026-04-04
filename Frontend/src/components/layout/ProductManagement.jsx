@@ -1,17 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Filter, Package, Tag, CheckSquare, Square, Trash2 } from "lucide-react";
+import { Plus, Search, Filter, Package, Tag, CheckSquare, Square, Trash2, Store, AlertTriangle } from "lucide-react";
 import Loader from '../common/Loader'
 import ProductCard from "./ProductCard";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import BulkDiscountModal from "./BulkDiscountModal";
+import axios from "axios";
 
 const ProductManagement = () => {
     const { products, loading, categories, searchTerm, setSearchTerm, selectedCategory, setSelectedCategory, deleteConfirm, setDeleteConfirm, handleEditProduct, handleCreateProduct, handleDeleteProduct, fetchProducts } = useOutletContext();
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [selectMode, setSelectMode] = useState(false);
+    const [hasStore, setHasStore] = useState(true);
+    const [storeLoading, setStoreLoading] = useState(true);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkStore = async () => {
+            try {
+                const token = localStorage.getItem('jwtToken');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}api/store/my-store`, { headers: { Authorization: `Bearer ${token}` } });
+                setHasStore(!!res.data?.store);
+            } catch { setHasStore(false); }
+            finally { setStoreLoading(false); }
+        };
+        checkStore();
+    }, []);
 
     const handleToggleSelectMode = () => { setSelectMode(!selectMode); setSelectedProducts([]); };
     const handleSelectProduct = (product) => { setSelectedProducts(prev => prev.find(p => p._id === product._id) ? prev.filter(p => p._id !== product._id) : [...prev, product]); };

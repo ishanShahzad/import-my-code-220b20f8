@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest --runInBand --detectOpenHandles",
     "test:watch": "jest --watch",
-    "start": "node server.js"
+    "start": "node server.js",
+    "heroku-postbuild": "echo 'Backend build complete'"
   },
   "jest": {
     "testEnvironment": "node",

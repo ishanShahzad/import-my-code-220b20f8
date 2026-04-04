@@ -82,11 +82,8 @@ function AppRoutes() {
                     <Route path='/contact' element={<ContactPage />} />
                     <Route path='/faq' element={<FAQPage />} />
 
-                    {/* PROTECTED ROUTES - Checkout requires login */}
-                    <Route path={'/checkout'} element={
-                        <ProtectedRoute >
-                            <Checkout />
-                        </ProtectedRoute>} />
+                    {/* Checkout - accessible to everyone (guest & logged in) */}
+                    <Route path={'/checkout'} element={<Checkout />} />
 
 
 

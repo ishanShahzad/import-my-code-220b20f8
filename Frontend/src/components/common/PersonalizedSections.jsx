@@ -221,7 +221,7 @@ const ProductSlider = ({ products, formatPrice }) => {
 }
 
 const CollapsibleSection = ({ icon: Icon, title, subtitle, color, bgStyle, children }) => {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   return (
     <section className="glass-panel overflow-hidden rounded-2xl" style={bgStyle}>
       <button

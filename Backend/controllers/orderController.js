@@ -12,7 +12,7 @@ exports.placeOrder = async (req, res) => {
     const { order } = req.body;
     // console.log(order);
 
-    const { id: userId } = req.user;
+    const userId = req.user?.id || null;
 
     try {
         if (

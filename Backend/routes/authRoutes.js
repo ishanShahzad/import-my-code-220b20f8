@@ -7,6 +7,10 @@ const router = express.Router()
 router.post('/send-otp', sendOTP)
 router.post('/verify-otp', verifyOTPAndRegister)
 
+// Seller registration
+router.post('/seller/send-otp', sendSellerOTP)
+router.post('/seller/verify-otp', verifySellerOTPAndRegister)
+
 // Old registration (keep for backward compatibility)
 router.post('/registerr', registerr)
 router.post('/login', login)
